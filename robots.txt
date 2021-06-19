@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /home/
+Allow: /archives/
+Allow: /tags/
+
+Disallow: /js/
+Disallow: /css/
+Disallow: /fonts/
+
+Sitemap: https://gcdd1993.github.io/sitemap.xml

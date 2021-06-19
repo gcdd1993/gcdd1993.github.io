@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css" integrity="sha256-2H3fkXt6FEmrReK448mDVGKb3WW2ZZw35gI7vqHOE4Y=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css" integrity="sha256-no0c5ccDODBwp+9hSmV5VvPpKwHCpbVzXHexIkupM6U=" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js" integrity="sha256-a5YRB27CcBwBFcT5EF/f3E4vzIqyHrSR878nseNYw64=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;gcdd1993.github.io&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Gemini&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:true,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:false,&quot;lazyload&quot;:true,&quot;pangu&quot;:true,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:true,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
+<meta name="description" content="前言针对Ubuntu 16.04，汇总常用服务的搭建指南。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="运维笔记（部署篇）">
+<meta property="og:url" content="https://gcdd1993.github.io/p/8505/index.html">
+<meta property="og:site_name" content="IT Learner">
+<meta property="og:description" content="前言针对Ubuntu 16.04，汇总常用服务的搭建指南。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-04-16T07:43:58.000Z">
+<meta property="article:modified_time" content="2021-06-19T15:18:16.381Z">
+<meta property="article:author" content="Gcdd1993">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="运维">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://gcdd1993.github.io/p/8505/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;https:&#x2F;&#x2F;gcdd1993.github.io&#x2F;p&#x2F;8505&#x2F;&quot;,&quot;path&quot;:&quot;p&#x2F;8505&#x2F;&quot;,&quot;title&quot;:&quot;运维笔记（部署篇）&quot;}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
+<title>运维笔记（部署篇） | IT Learner</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="IT Learner" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">IT Learner</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="list fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-commonweal"><a href="/404.html" rel="section"><i class="heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">2.</span> <span class="nav-text">系统初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Postgresql"><span class="nav-number">3.</span> <span class="nav-text">Postgresql</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Postgresql"><span class="nav-number">3.1.</span> <span class="nav-text">安装Postgresql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E7%94%A8%E6%88%B7Postgres%E7%9A%84%E5%AF%86%E7%A0%81"><span class="nav-number">3.3.</span> <span class="nav-text">修改默认用户Postgres的密码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E9%9B%86%E7%BE%A4%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-number">3.4.</span> <span class="nav-text">搭建集群（可选）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#master%E8%8A%82%E7%82%B9%EF%BC%9A"><span class="nav-number">3.4.1.</span> <span class="nav-text">master节点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#slave%E8%8A%82%E7%82%B9%EF%BC%9A"><span class="nav-number">3.4.2.</span> <span class="nav-text">slave节点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E9%9B%86%E7%BE%A4"><span class="nav-number">3.4.3.</span> <span class="nav-text">测试集群</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">3.5.</span> <span class="nav-text">常用命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis"><span class="nav-number">4.</span> <span class="nav-text">Redis</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Redis%EF%BC%88%E5%8D%95%E6%9C%BA%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">安装Redis（单机）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Redis%EF%BC%88%E9%9B%86%E7%BE%A4%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">安装Redis（集群）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-Redis-Server"><span class="nav-number">4.2.1.</span> <span class="nav-text">安装 Redis-Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5"><span class="nav-number">4.2.2.</span> <span class="nav-text">测试主从同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-Sentinel%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-number">4.2.3.</span> <span class="nav-text">配置 Sentinel（可选）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95Sentinel%E7%9B%91%E6%8E%A7%E3%80%81%E9%80%9A%E7%9F%A5%E3%80%81%E8%87%AA%E5%8A%A8%E6%95%85%E9%9A%9C%E8%BD%AC%E7%A7%BB"><span class="nav-number">4.2.4.</span> <span class="nav-text">测试Sentinel监控、通知、自动故障转移</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%BF%9E%E6%8E%A5Sentinel"><span class="nav-number">4.2.5.</span> <span class="nav-text">客户端连接Sentinel</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-1"><span class="nav-number">4.3.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98"><span class="nav-number">4.4.</span> <span class="nav-text">常见问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Consul"><span class="nav-number">5.</span> <span class="nav-text">Consul</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Consul%EF%BC%88%E5%8D%95%E6%9C%BA%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">安装Consul（单机）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Consul%EF%BC%88%E9%9B%86%E7%BE%A4%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">安装Consul（集群）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-2"><span class="nav-number">5.3.</span> <span class="nav-text">常用命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Nginx"><span class="nav-number">6.</span> <span class="nav-text">Nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Nginx"><span class="nav-number">6.1.</span> <span class="nav-text">安装Nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4-3"><span class="nav-number">6.2.</span> <span class="nav-text">常用命令</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cassandra%E9%9B%86%E7%BE%A4"><span class="nav-number">7.</span> <span class="nav-text">Cassandra集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Cassandra"><span class="nav-number">7.1.</span> <span class="nav-text">安装Cassandra</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-1"><span class="nav-number">7.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%81%E7%A7%BB%E9%85%8D%E7%BD%AE%E5%AF%BC%E6%95%B0%E6%8D%AE%E7%9B%98%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-number">7.3.</span> <span class="nav-text">迁移配置导数据盘（可选）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Zookeeper%E9%9B%86%E7%BE%A4"><span class="nav-number">8.</span> <span class="nav-text">Zookeeper集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Zookeeper"><span class="nav-number">8.1.</span> <span class="nav-text">安装Zookeeper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-2"><span class="nav-number">8.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ZK-UI%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-number">8.3.</span> <span class="nav-text">安装ZK-UI（可选）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka%E9%9B%86%E7%BE%A4"><span class="nav-number">9.</span> <span class="nav-text">Kafka集群</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Kafka"><span class="nav-number">9.1.</span> <span class="nav-text">安装Kafka</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-3"><span class="nav-number">9.2.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%BASystemd%E6%9C%8D%E5%8A%A1"><span class="nav-number">9.3.</span> <span class="nav-text">注册为Systemd服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95Kafka%E7%9A%84%E4%BD%BF%E7%94%A8%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-number">9.4.</span> <span class="nav-text">测试Kafka的使用（可选）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2Kafka-manager"><span class="nav-number">9.5.</span> <span class="nav-text">部署Kafka-manager</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mysql"><span class="nav-number">10.</span> <span class="nav-text">Mysql</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Mysql"><span class="nav-number">10.1.</span> <span class="nav-text">安装Mysql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEMysql"><span class="nav-number">10.2.</span> <span class="nav-text">配置Mysql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">10.3.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Gcdd1993"
+      src="/asserts/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Gcdd1993</p>
+  <div class="site-description" itemprop="description">study hard, improve every day！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/gcdd1993" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;gcdd1993" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:mobile17602526128@gmail.com" title="E-Mail → mailto:mobile17602526128@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/gcdd1993" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gcdd1993.github.io/p/8505/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/asserts/images/avatar.jpg">
+      <meta itemprop="name" content="Gcdd1993">
+      <meta itemprop="description" content="study hard, improve every day！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="IT Learner">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          运维笔记（部署篇）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-04-16 15:43:58" itemprop="dateCreated datePublished" datetime="2019-04-16T15:43:58+08:00">2019-04-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-06-19 23:18:16" itemprop="dateModified" datetime="2021-06-19T23:18:16+08:00">2021-06-19</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E4%BD%9C/" itemprop="url" rel="index"><span itemprop="name">工作</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span class="firestore-visitors-count"></span>
+    </span>
+      </div>
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>19k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>18 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>针对<code>Ubuntu 16.04</code>，汇总常用服务的搭建指南。</p>
+<span id="more"></span>
+
+<h1 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h1><blockquote>
+<p>新买的ECS需要执行系统初始化</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br><span class="line"></span><br><span class="line">$ cat /etc/hosts <span class="comment"># 修改hosts，一般将本机需要使用的外部内网服务设置映射为名称</span></span><br><span class="line">172.16.0.192    kftest-config01</span><br><span class="line"></span><br><span class="line">$ cat /etc/hostname <span class="comment"># 修改hostname，便于辨认</span></span><br><span class="line">pg_1</span><br><span class="line"></span><br><span class="line">$ reboot <span class="comment"># 修改hostname需要重启生效</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载数据盘，例如阿里云数据盘 https://help.aliyun.com/document_detail/25446.html</span></span><br><span class="line">$ sudo fdisk -l <span class="comment"># 查看实例上的数据盘</span></span><br><span class="line">Disk /dev/vdb: 1000 GiB, 1073741824000 bytes, 2097152000 sectors</span><br><span class="line">$ sudo fdisk -u /dev/vdb</span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): n</span><br><span class="line">... 一路enter</span><br><span class="line">Command (m <span class="keyword">for</span> <span class="built_in">help</span>): w</span><br><span class="line"><span class="comment">## 更多参考 https://help.aliyun.com/document_detail/108501.html</span></span><br><span class="line">$ sudo fdisk -lu /dev/vdb</span><br><span class="line">Device     Boot Start        End    Sectors  Size Id Type</span><br><span class="line">/dev/vdb1        2048 2097151999 2097149952 1000G 83 Linux</span><br><span class="line">$ sudo mkfs.ext4 /dev/vdb1 <span class="comment"># 在新分区上创建一个文件系统</span></span><br><span class="line"></span><br><span class="line">$ cp /etc/fstab /etc/fstab.bak <span class="comment"># 备份 etc/fstab</span></span><br><span class="line">$ <span class="built_in">echo</span> /dev/vdb1 /data ext4 defaults 0 0 &gt;&gt; /etc/fstab <span class="comment"># 向 /etc/fstab 写入新分区信息</span></span><br><span class="line"></span><br><span class="line">$ sudo mkdir /data</span><br><span class="line">$ sudo mount /dev/vdb1 /data <span class="comment"># 挂载文件系统</span></span><br><span class="line"></span><br><span class="line">$ df -h</span><br><span class="line">/dev/vdb1       985G   72M  935G   1% /data</span><br></pre></td></tr></table></figure>
+
+<h1 id="Postgresql"><a href="#Postgresql" class="headerlink" title="Postgresql"></a>Postgresql</h1><h2 id="安装Postgresql"><a href="#安装Postgresql" class="headerlink" title="安装Postgresql"></a>安装Postgresql</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">&quot;deb http://apt.postgresql.org/pub/repos/apt/ <span class="subst">$(lsb_release -cs)</span>-pgdg main&quot;</span> | sudo tee /etc/apt/sources.list.d/pgdg.list</span><br><span class="line">$ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -</span><br><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install postgresql-9.6 <span class="comment"># 自行选择合适版本</span></span><br><span class="line"><span class="comment">## 更多参考 https://www.postgresql.org/download/linux/ubuntu/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vim /etc/postgresql/9.6/main/postgresql.conf</span><br><span class="line">listen_addresses = <span class="string">&#x27;*&#x27;</span></span><br><span class="line">max_connections = 1000</span><br><span class="line">logging_collector = on</span><br><span class="line"><span class="comment">## 更多参考 https://www.postgresql.org/docs/current/static/runtime-config.html</span></span><br><span class="line"> </span><br><span class="line">$ sudo vim /etc/postgresql/9.6/main/pg_hba.conf</span><br><span class="line">host    all             all             0.0.0.0/0             md5</span><br><span class="line"><span class="comment">## 更多参考 https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html</span></span><br><span class="line">   </span><br><span class="line">$ sudo service postgresql restart</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改默认用户Postgres的密码"><a href="#修改默认用户Postgres的密码" class="headerlink" title="修改默认用户Postgres的密码"></a>修改默认用户Postgres的密码</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -u postgres psql</span><br><span class="line"><span class="comment"># ALTER USER postgres WITH PASSWORD &#x27;postgres&#x27;;</span></span><br><span class="line"><span class="comment"># \q</span></span><br><span class="line">$ <span class="built_in">exit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="搭建集群（可选）"><a href="#搭建集群（可选）" class="headerlink" title="搭建集群（可选）"></a>搭建集群（可选）</h2><table>
+<thead>
+<tr>
+<th align="center">主机</th>
+<th align="center">ip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Master节点</td>
+<td align="center">10.10.10.10</td>
+</tr>
+<tr>
+<td align="center">Slave节点</td>
+<td align="center">10.10.10.9</td>
+</tr>
+</tbody></table>
+<p>Master节点和Slave节点分别按照上述步骤安装完成<code>postgres</code>后，开始搭建集群。</p>
+<h3 id="master节点："><a href="#master节点：" class="headerlink" title="master节点："></a>master节点：</h3><ol>
+<li>修改配置</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vi /etc/postgresql/9.6/main/postgresql.conf</span><br><span class="line">listen_addresses = &#x27;*&#x27;</span><br><span class="line">wal_level = hot_standby</span><br><span class="line">archive_mode = on</span><br><span class="line">archive_command = &#x27;test ! -f /var/lib/postgresql/9.6/archive/%f &amp;&amp; cp %p /var/lib/postgresql/9.6/archive/%f&#x27;</span><br><span class="line">max_wal_senders = 16</span><br><span class="line">wal_keep_segments = 100</span><br><span class="line">hot_standby = on</span><br><span class="line">logging_collector = on</span><br><span class="line">## 更多参考 https://www.postgresql.org/docs/current/static/runtime-config.html</span><br><span class="line"></span><br><span class="line">$ sudo vi /etc/postgresql/9.6/main/pg_hba.conf</span><br><span class="line">host    all             all             10.0.0.0/8              md5</span><br><span class="line">host    replication     repuser         10.0.0.0/8              md5</span><br><span class="line">## 更多参考 https://www.postgresql.org/docs/current/static/auth-pg-hba-conf.html</span><br><span class="line">  </span><br><span class="line">$ sudo -upostgres mkdir /var/lib/postgresql/9.6/archive</span><br><span class="line">$ sudo chmod 0700 /var/lib/postgresql/9.6/archive</span><br><span class="line">  </span><br><span class="line">$ sudo service postgresql restart</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>创建工作账户 repuser</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -upostgres createuser --replication repuser</span><br><span class="line">$ sudo -upostgres psql</span><br><span class="line">postgres=<span class="comment"># \password repuser</span></span><br><span class="line">&lt;password&gt;</span><br><span class="line"><span class="comment">## 更多参考 https://www.postgresql.org/docs/current/static/user-manag.html</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="slave节点："><a href="#slave节点：" class="headerlink" title="slave节点："></a>slave节点：</h3><ol>
+<li>先停止服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service postgresql stop</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>由master节点导入数据（postgres 免密码登录 repuser role）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -upostgres vi /var/lib/postgresql/.pgpass</span><br><span class="line">10.10.10.10:5432:*:repuser:&lt;password&gt;</span><br><span class="line">127.0.0.1:5432:*:repuser:&lt;password&gt;</span><br><span class="line"> </span><br><span class="line">$ sudo chmod 0600 /var/lib/postgresql/.pgpass</span><br><span class="line">$ sudo mv /var/lib/postgresql/9.6/main /var/lib/postgresql/9.6/main.bak</span><br><span class="line">$ sudo -upostgres pg_basebackup -D /var/lib/postgresql/9.6/main -F p -X stream -v -R -h 10.10.10.10 -p 5432 -U repuser</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改配置</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vi /var/lib/postgresql/9.6/main/recovery.conf</span><br><span class="line">standby_mode = <span class="string">&#x27;on&#x27;</span></span><br><span class="line">primary_conninfo = <span class="string">&#x27;user=repuser host=10.10.10.10 port=5432&#x27;</span></span><br><span class="line">trigger_file = <span class="string">&#x27;failover.now&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 更多参考 https://www.postgresql.org/docs/current/static/recovery-config.html</span></span><br><span class="line">  </span><br><span class="line">$ sudo vi /etc/postgresql/9.6/main/postgresql.conf</span><br><span class="line">hot_standby = on</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>重启并检查服务</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service postgresql start</span><br><span class="line">  </span><br><span class="line">$ sudo service postgresql status</span><br><span class="line">...</span><br><span class="line">Active: active (exited)</span><br><span class="line"></span><br><span class="line">$ sudo -upostgres psql</span><br><span class="line">psql (9.6.12)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试集群"><a href="#测试集群" class="headerlink" title="测试集群"></a>测试集群</h3><p>在master节点进行增删改操作，对照看slave节点是否能够从master节点复制操作</p>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service postgresql start</span><br><span class="line">$ sudo service postgresql status</span><br><span class="line">$ sudo service postgresql restart</span><br></pre></td></tr></table></figure>
+
+<p>👉 <a href="https://gcdd1993.github.io/%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/PG%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">PG数据库常用命令</a></p>
+<h1 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h1><h2 id="安装Redis（单机）"><a href="#安装Redis（单机）" class="headerlink" title="安装Redis（单机）"></a>安装Redis（单机）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install redis-server</span><br><span class="line">$ sudo vim /etc/redis/redis.conf</span><br><span class="line"><span class="comment"># bind 127.0.0.1</span></span><br><span class="line">$ sudo systemctl restart redis-server</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装Redis（集群）"><a href="#安装Redis（集群）" class="headerlink" title="安装Redis（集群）"></a>安装Redis（集群）</h2><table>
+<thead>
+<tr>
+<th align="center">主机</th>
+<th align="center">ip</th>
+<th align="center">redis-server</th>
+<th align="center">sentinel</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">node01</td>
+<td align="center">10.10.10.5</td>
+<td align="center">主</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">node02</td>
+<td align="center">10.10.10.4</td>
+<td align="center">从</td>
+<td align="center">√</td>
+</tr>
+<tr>
+<td align="center">node03</td>
+<td align="center">10.10.10.6</td>
+<td align="center">从</td>
+<td align="center">√</td>
+</tr>
+</tbody></table>
+<h3 id="安装-Redis-Server"><a href="#安装-Redis-Server" class="headerlink" title="安装 Redis-Server"></a>安装 Redis-Server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">node01:</span><br><span class="line">$ sudo apt-get install redis-server</span><br><span class="line">$ sudo vi /etc/redis/redis.conf</span><br><span class="line"><span class="built_in">bind</span>: 10.10.10.5</span><br><span class="line"></span><br><span class="line">$ sudo service redis-server restart</span><br><span class="line"></span><br><span class="line">node02:</span><br><span class="line">$ sudo apt-get install redis-server</span><br><span class="line">$ sudo vi /etc/redis/redis.conf</span><br><span class="line"><span class="built_in">bind</span>: 10.10.10.4</span><br><span class="line">slaveof 10.10.10.5</span><br><span class="line"> </span><br><span class="line">$ sudo service redis-server restart</span><br><span class="line"></span><br><span class="line">node03 同node02</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试主从同步"><a href="#测试主从同步" class="headerlink" title="测试主从同步"></a>测试主从同步</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">node01:</span><br><span class="line">$ redis-cli -h 10.10.10.5 -p 6379</span><br><span class="line">10.10.10.5:6379&gt;info</span><br><span class="line">....</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:2</span><br><span class="line">slave0:ip=10.10.10.4,port=6379,state=online,offset=99,lag=0</span><br><span class="line">slave1:ip=10.10.10.6,port=6379,state=online,offset=99,lag=1</span><br><span class="line">master_repl_offset:99</span><br><span class="line">....</span><br><span class="line">10.10.10.5:6379&gt;<span class="built_in">set</span> testkey testvalue</span><br><span class="line">OK</span><br><span class="line">10.10.10.5:6379&gt;get testkey</span><br><span class="line"><span class="string">&quot;testvalue&quot;</span></span><br><span class="line">  </span><br><span class="line">node02:</span><br><span class="line">$ redis-cli -h 10.10.10.4 -p 6379</span><br><span class="line">10.9.8.203:6379&gt;info</span><br><span class="line">...</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:slave</span><br><span class="line">master_host:10.10.10.5</span><br><span class="line">master_port:6379</span><br><span class="line">master_link_status:up</span><br><span class="line">...</span><br><span class="line">10.10.10.4:6379&gt;get testkey</span><br><span class="line"><span class="string">&quot;testvalue&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-Sentinel（可选）"><a href="#配置-Sentinel（可选）" class="headerlink" title="配置 Sentinel（可选）"></a>配置 Sentinel（可选）</h3><blockquote>
+<p>一个稳健的 <code>Redis Sentinel</code> 集群，应该使用至少 <strong>三个</strong> <code>Sentinel</code> 实例，并且保证将这些实例放到 <strong>不同的机器</strong> 上，甚至不同的 <strong>物理区域</strong>。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">$ sudo wget http://download.redis.io/redis-stable/sentinel.conf -O /etc/redis/sentinel.conf</span><br><span class="line">$ sudo chown redis:redis /etc/redis/sentinel.conf</span><br><span class="line">$ sudo vi /etc/redis/sentinel.conf</span><br><span class="line">sentinel monitor mymaster 10.10.10.5 6379 2</span><br><span class="line">sentinel down-after-milliseconds mymaster 60000</span><br><span class="line">sentinel parallel-syncs mymaster 1</span><br><span class="line">sentinel failover-timeout mymaster 180000</span><br><span class="line"></span><br><span class="line"><span class="comment">## 自启动配置</span></span><br><span class="line">$ sudo vi /etc/redis/sentinel.service</span><br><span class="line">[Unit]</span><br><span class="line">Documentation=http://redis.io/topics/sentinel</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/usr/bin/redis-server /etc/redis/sentinel.conf --sentinel</span><br><span class="line">User=redis</span><br><span class="line">Group=redis</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line">  </span><br><span class="line">$ sudo ln -s /etc/redis/sentinel.service /lib/systemd/system/sentinel.service</span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> sentinel.service</span><br><span class="line">$ sudo service sentinel start</span><br><span class="line"></span><br><span class="line">node02 node03 sentinel 配置同node01，所有节点配置完成，再继续下一步</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>配置好<code>sentinel</code>之后，<code>redis.conf</code>和<code>sentinel.conf</code>都由<code>sentinel</code>接管；<code>sentinel</code>监控主节点发生改变的话，会更改对应的配置文件<code>sentinel.conf</code>和<code>redis.conf</code>。</p>
+</blockquote>
+<h3 id="测试Sentinel监控、通知、自动故障转移"><a href="#测试Sentinel监控、通知、自动故障转移" class="headerlink" title="测试Sentinel监控、通知、自动故障转移"></a>测试Sentinel监控、通知、自动故障转移</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有节点哨兵配置</span></span><br><span class="line">node01,node02,node03:</span><br><span class="line">$ redis-cli -h 10.10.10.5 -p 26379</span><br><span class="line">10.10.10.5:26379&gt; info</span><br><span class="line"><span class="comment"># Server</span></span><br><span class="line">redis_version:3.0.6</span><br><span class="line">...</span><br><span class="line">config_file:/etc/redis/sentinel.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># Sentinel</span></span><br><span class="line">sentinel_masters:1</span><br><span class="line">sentinel_tilt:0</span><br><span class="line">sentinel_running_scripts:0</span><br><span class="line">sentinel_scripts_queue_length:0</span><br><span class="line">master0:name=mymaster,status=ok,address=10.10.10.5:6379,slaves=2,sentinels=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在从节点查看哨兵详情，关注主节点</span></span><br><span class="line">$ redis-cli -h 10.10.10.4 -p 26379</span><br><span class="line">10.10.10.5:26379&gt; sentinel master mymaster</span><br><span class="line"> 1) <span class="string">&quot;name&quot;</span></span><br><span class="line"> 2) <span class="string">&quot;mymaster&quot;</span></span><br><span class="line"> 3) <span class="string">&quot;ip&quot;</span></span><br><span class="line"> 4) <span class="string">&quot;10.10.10.5&quot;</span></span><br><span class="line"> 5) <span class="string">&quot;port&quot;</span></span><br><span class="line"> 6) <span class="string">&quot;6379&quot;</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止主节点所在redis-server</span></span><br><span class="line">node01:</span><br><span class="line">$ systemctl stop redis-server.service</span><br><span class="line"><span class="comment"># 查看从节点的哨兵详情，一般来说，过1分钟~2分钟，会自动选举出新的主节点，例如node03被推举为主节点</span></span><br><span class="line">node02:</span><br><span class="line">$ redis-cli -h 10.10.10.4 -p 26379</span><br><span class="line">10.10.10.4:26379&gt; info</span><br><span class="line">...</span><br><span class="line"><span class="comment"># Sentinel</span></span><br><span class="line">sentinel_masters:1</span><br><span class="line">sentinel_tilt:0</span><br><span class="line">sentinel_running_scripts:0</span><br><span class="line">sentinel_scripts_queue_length:0</span><br><span class="line">master0:name=mymaster,status=ok,address=10.10.10.6:6379,slaves=2,sentinels=3</span><br><span class="line"></span><br><span class="line">$ redis-cli -h 10.10.10.6 -p 6379</span><br><span class="line">10.10.10.6:6379&gt; info</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:1</span><br><span class="line">slave0:ip=10.10.10.4,port=6379,state=online,offset=19874,lag=0</span><br><span class="line">master_repl_offset:19874</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动刚才被停止的原主节点redis-server，将作为从节点加入到redis集群</span></span><br><span class="line">node01:</span><br><span class="line">$ systemctl start redis-server</span><br><span class="line">$ redis-cli -h 10.10.10.5 -p 6379</span><br><span class="line">10.10.10.5:6379&gt; info</span><br><span class="line">...</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:slave</span><br><span class="line">master_host:10.10.10.6</span><br><span class="line">master_port:6379</span><br><span class="line">master_link_status:up</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">$ redis-cli -h 10.10.10.5 -p 26379</span><br><span class="line">10.10.10.5:26379&gt; info</span><br><span class="line">...</span><br><span class="line"><span class="comment"># Sentinel</span></span><br><span class="line">sentinel_masters:1</span><br><span class="line">sentinel_tilt:0</span><br><span class="line">sentinel_running_scripts:0</span><br><span class="line">sentinel_scripts_queue_length:0</span><br><span class="line">master0:name=mymaster,status=ok,address=10.10.10.6:6379,slaves=2,sentinels=3</span><br></pre></td></tr></table></figure>
+
+<h3 id="客户端连接Sentinel"><a href="#客户端连接Sentinel" class="headerlink" title="客户端连接Sentinel"></a>客户端连接Sentinel</h3><p>配置完sentinel，客户端连接方式就改变了，拿<a target="_blank" rel="noopener" href="https://github.com/redisson/redisson/wiki/2.-%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95#27-%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F">Redisson</a>举例，需要增加以下配置，并删除单机模式下<code>spring.redis.host</code>配置，端口号改成哨兵的端口号</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">spring.redis.sentinel.master=mymaster</span><br><span class="line">spring.redis.sentinel.nodes=10.10.10.4:26379,10.10.10.5:26379,10.10.10.6:26379</span><br></pre></td></tr></table></figure>
+
+<p>引入的jar是</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compile <span class="string">&quot;org.redisson:redisson-spring-boot-starter:3.9.1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置类所在位置：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">org.springframework.boot.autoconfigure.data.redis.RedisProperties.Sentinel</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令-1"><a href="#常用命令-1" class="headerlink" title="常用命令"></a>常用命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start redis</span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> redis</span><br><span class="line">$ sudo systemctl restart</span><br><span class="line">$ sudo systemctl stop redis</span><br></pre></td></tr></table></figure>
+
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><ol>
+<li>有时可能会遇到关闭或重启不了，这时候可以使用<code>redis-cli</code>提供的命令行来强制关闭</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ redis-cli -h 10.10.10.5 -p 6379</span><br><span class="line">10.10.10.5:6379&gt; shutdown nosave</span><br><span class="line"><span class="comment">## 更多参考 https://redis.io/commands/SHUTDOWN</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>Redis is configured to save RDB snapshots, but is currently not able to persist on disk.</li>
+</ol>
+<blockquote>
+<p>Redis被配置为保存数据库快照，但它目前不能持久化到硬盘。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/sysctl.conf</span><br><span class="line"><span class="comment">## 添加一行</span></span><br><span class="line">vm.overcommit_memory=1</span><br><span class="line">$ sudo sysctl -p /etc/sysctl.conf</span><br><span class="line"><span class="comment">## 重启所有节点redis-server和sentinel</span></span><br></pre></td></tr></table></figure>
+
+<p>如果改好后，还不行，就需要查看下Redis的dump文件配置是不是被更改了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ redis-cli -h 10.10.10.5</span><br><span class="line">10.10.10.5:6379&gt; CONFIG GET dbfilename</span><br><span class="line">1) <span class="string">&quot;dbfilename&quot;</span></span><br><span class="line">2) <span class="string">&quot;.rdb&quot;</span> <span class="comment">## 默认是dump.rdb</span></span><br><span class="line">10.10.10.5:6379&gt; CONFIG GET dir</span><br><span class="line">1) <span class="string">&quot;dir&quot;</span></span><br><span class="line">2) <span class="string">&quot;/var/spool/cron&quot;</span> <span class="comment">## 默认是dump.rdb</span></span><br></pre></td></tr></table></figure>
+
+<p>以上配置，如果不是自己更改的，则可怀疑是被黑客篡改了</p>
+<ol>
+<li>检查Redis端口是否在公网开放，如果是，立马关闭</li>
+<li>设置Redis访问密码</li>
+<li>恢复Redis默认配置</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/redis/redis.conf</span><br><span class="line">dbfilename <span class="string">&quot;dump.rdb&quot;</span></span><br><span class="line">dir <span class="string">&quot;/var/lib/redis&quot;</span></span><br><span class="line">$ service redis-server restart</span><br><span class="line"></span><br><span class="line">node01 node02 node03均按此修改并重启</span><br><span class="line"><span class="comment">## 了解更多 https://serverfault.com/questions/800295/redis-spontaneously-failed-failed-opening-rdb-for-saving-permission-denied</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Consul"><a href="#Consul" class="headerlink" title="Consul"></a>Consul</h1><h2 id="安装Consul（单机）"><a href="#安装Consul（单机）" class="headerlink" title="安装Consul（单机）"></a>安装Consul（单机）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir -p /data/consul/&#123;current/&#123;bin,etc&#125;,data&#125;</span><br><span class="line">$ sudo wget https://releases.hashicorp.com/consul/1.5.3/consul_1.5.3_linux_amd64.zip -O /data/consul/consul_1.5.3_linux_amd64.zip</span><br><span class="line">$ sudo apt-get install unzip</span><br><span class="line">$ sudo unzip /data/consul/consul_1.5.3_linux_amd64.zip -d /data/consul/current/bin</span><br><span class="line">$ sudo vi /data/consul/current/etc/consul.json</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;bootstrap&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;datacenter&quot;</span>: <span class="string">&quot;test-datacenter&quot;</span>,</span><br><span class="line">    <span class="string">&quot;data_dir&quot;</span>: <span class="string">&quot;/data/consul/data&quot;</span>,</span><br><span class="line">    <span class="string">&quot;log_level&quot;</span>: <span class="string">&quot;INFO&quot;</span>,</span><br><span class="line">    <span class="string">&quot;server&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;client_addr&quot;</span>: <span class="string">&quot;0.0.0.0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ui&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;start_join&quot;</span>: [<span class="string">&quot;ip:8301&quot;</span>],</span><br><span class="line">    <span class="string">&quot;enable_syslog&quot;</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">## 更多参考：https://www.consul.io/docs/agent/options.html#configuration_files</span></span><br><span class="line"></span><br><span class="line">$ sudo ln -s /data/consul/current/etc /data/consul/etc</span><br><span class="line"></span><br><span class="line">$ sudo vi /etc/systemd/system/consul.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=consul service</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/data/consul/current/bin/consul agent -<span class="built_in">bind</span>=&#123;ip&#125; -config-dir /data/consul/etc/consul.json</span><br><span class="line">User=root</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> consul.service</span><br><span class="line">$ sudo systemctl start consul.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装Consul（集群）"><a href="#安装Consul（集群）" class="headerlink" title="安装Consul（集群）"></a>安装Consul（集群）</h2><table>
+<thead>
+<tr>
+<th align="center">主机</th>
+<th align="center">ip</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">node01</td>
+<td align="center">10.10.10.5</td>
+</tr>
+<tr>
+<td align="center">node02</td>
+<td align="center">10.10.10.4</td>
+</tr>
+<tr>
+<td align="center">node03</td>
+<td align="center">10.10.10.6</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">node01 node02 node03</span><br><span class="line">$ sudo mkdir -p /data/consul/&#123;current/&#123;bin,etc&#125;,data&#125;</span><br><span class="line">$ sudo wget https://releases.hashicorp.com/consul/1.5.3/consul_1.5.3_linux_amd64.zip -O /data/consul/consul_1.5.3_linux_amd64.zip</span><br><span class="line">$ sudo apt-get install unzip</span><br><span class="line">$ sudo unzip /data/consul/consul_1.5.3_linux_amd64.zip -d /data/consul/current/bin</span><br><span class="line">$ sudo vi /data/consul/current/etc/consul.json</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;datacenter&quot;</span>: <span class="string">&quot;roc-datacenter&quot;</span>,</span><br><span class="line">    <span class="string">&quot;data_dir&quot;</span>: <span class="string">&quot;/data/consul/data&quot;</span>,</span><br><span class="line">    <span class="string">&quot;log_level&quot;</span>: <span class="string">&quot;INFO&quot;</span>,</span><br><span class="line">    <span class="string">&quot;server&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;bootstrap_expect&quot;</span>: 3,</span><br><span class="line">    <span class="string">&quot;client_addr&quot;</span>: <span class="string">&quot;10.10.10.4&quot;</span>,</span><br><span class="line">    <span class="string">&quot;ui&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="string">&quot;start_join&quot;</span>: [<span class="string">&quot;10.10.10.4:8301&quot;</span>,<span class="string">&quot;10.10.10.5:8301&quot;</span>,<span class="string">&quot;10.10.10.6:8301&quot;</span>],</span><br><span class="line">    <span class="string">&quot;enable_syslog&quot;</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">## 更多参考：https://www.consul.io/docs/agent/options.html#configuration_files</span></span><br><span class="line"></span><br><span class="line">$ sudo ln -s /data/consul/current/etc /data/consul/etc</span><br><span class="line"></span><br><span class="line">$ sudo vi /etc/systemd/system/consul.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=consul service</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/data/consul/current/bin/consul agent -config-dir /data/consul/etc/consul.json</span><br><span class="line">User=root</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> consul.service</span><br><span class="line">$ sudo systemctl start consul.service</span><br></pre></td></tr></table></figure>
+
+<p>需要开放的端口：8300, 8301, 8500，如果网络不通，则子节点将无法join到主节点，可能会出现</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">failed to sync remote state: No cluster leader</span><br></pre></td></tr></table></figure>
+
+<p>无法选举出leader，其实是节点之间无法通信，如果通信正常，启动之时所有节点会自动推举出leader。</p>
+<h2 id="常用命令-2"><a href="#常用命令-2" class="headerlink" title="常用命令"></a>常用命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl start consul.service</span><br><span class="line">$ sudo systemctl stop consul.service</span><br><span class="line">$ sudo systemctl restart consul.service</span><br><span class="line"></span><br><span class="line"><span class="comment">## 更多参考：https://www.consul.io/docs/commands/index.html</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Nginx"><a href="#Nginx" class="headerlink" title="Nginx"></a>Nginx</h1><h2 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> -e <span class="string">&quot;deb http://nginx.org/packages/ubuntu/ <span class="subst">$(lsb_release -cs)</span> nginx\ndeb-src http://nginx.org/packages/ubuntu/ <span class="subst">$(lsb_release -cs)</span> nginx&quot;</span> | sudo tee /etc/apt/sources.list.d/nginx.list</span><br><span class="line">$ wget -O- http://nginx.org/keys/nginx_signing.key | sudo apt-key add -</span><br><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install nginx</span><br><span class="line"><span class="comment">## 更多参考：http://nginx.org/en/linux_packages.html#stable</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令-3"><a href="#常用命令-3" class="headerlink" title="常用命令"></a>常用命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service nginx start</span><br><span class="line">$ sudo service nginx stop</span><br><span class="line">$ sudo service nginx restart</span><br><span class="line"></span><br><span class="line">$ sudo service nginx reload <span class="comment"># 重新加载配置</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Cassandra集群"><a href="#Cassandra集群" class="headerlink" title="Cassandra集群"></a>Cassandra集群</h1><table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cassandra-1</td>
+<td>192.168.0.1</td>
+</tr>
+<tr>
+<td>cassandra-2</td>
+<td>192.168.0.2</td>
+</tr>
+</tbody></table>
+<h2 id="安装Cassandra"><a href="#安装Cassandra" class="headerlink" title="安装Cassandra"></a>安装Cassandra</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">echo</span> <span class="string">&quot;deb http://www.apache.org/dist/cassandra/debian 39x main&quot;</span> | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list</span><br><span class="line">$ curl https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -</span><br><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt -y install cassandra</span><br><span class="line">$ sudo apt install openjdk-8-jdk-headless</span><br><span class="line"><span class="comment">## 更多参考：http://cassandra.apache.org/download/#installation-from-debian-packages</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修改配置文件-1"><a href="#修改配置文件-1" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vi /etc/cassandra/cassandra.yaml</span><br><span class="line"></span><br><span class="line">seed_provider:</span><br><span class="line">          - seeds: <span class="string">&quot;192.168.0.1,192.168.0.2&quot;</span></span><br><span class="line"> </span><br><span class="line">concurrent_writes: 64</span><br><span class="line">concurrent_counter_writes: 64</span><br><span class="line">concurrent_counter_writes: 64</span><br><span class="line">concurrent_materialized_view_writes: 64</span><br><span class="line">compaction_throughput_mb_per_sec: 128</span><br><span class="line">file_cache_size_in_mb: 1024</span><br><span class="line">buffer_pool_use_heap_if_exhausted: <span class="literal">true</span></span><br><span class="line">disk_optimization_strategy: spinning</span><br><span class="line"><span class="comment">#listen_address: localhost</span></span><br><span class="line">listen_interface: eth0</span><br><span class="line"><span class="comment">#rpc_address: localhost</span></span><br><span class="line">rpc_interface: eth0</span><br><span class="line">enable_user_defined_functions: <span class="literal">true</span></span><br><span class="line">auto_bootstrap: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 优化cassandra jvm配置</span></span><br><span class="line">$ sudo vi /etc/cassandra/jvm.options</span><br><span class="line"><span class="comment">#-XX:+UseParNewGC</span></span><br><span class="line"><span class="comment">#-XX:+UseConcMarkSweepGC</span></span><br><span class="line"><span class="comment">#-XX:+CMSParallelRemarkEnabled</span></span><br><span class="line"><span class="comment">#-XX:SurvivorRatio=8</span></span><br><span class="line"><span class="comment">#-XX:MaxTenuringThreshold=1</span></span><br><span class="line"><span class="comment">#-XX:CMSInitiatingOccupancyFraction=75</span></span><br><span class="line"><span class="comment">#-XX:+UseCMSInitiatingOccupancyOnly</span></span><br><span class="line"><span class="comment">#-XX:CMSWaitDuration=10000</span></span><br><span class="line"><span class="comment">#-XX:+CMSParallelInitialMarkEnabled</span></span><br><span class="line"><span class="comment">#-XX:+CMSEdenChunksRecordAlways</span></span><br><span class="line"></span><br><span class="line">-XX:+UseG1GC</span><br><span class="line">-XX:G1RSetUpdatingPauseTimePercent=5</span><br><span class="line">-XX:MaxGCPauseMillis=500</span><br><span class="line">-XX:InitiatingHeapOccupancyPercent=70</span><br><span class="line">-XX:ParallelGCThreads=16</span><br><span class="line">-XX:ConcGCThreads=16</span><br><span class="line"></span><br><span class="line">$ sudo vi /etc/cassandra/cassandra-env.sh</span><br><span class="line"></span><br><span class="line"><span class="comment">## 配置为主机内网地址</span></span><br><span class="line">JVM_OPTS=<span class="string">&quot;<span class="variable">$JVM_OPTS</span> -Djava.rmi.server.hostname=192.168.0.1&quot;</span></span><br><span class="line"><span class="comment">#if [ &quot;x$LOCAL_JMX&quot; = &quot;x&quot; ]; then</span></span><br><span class="line"><span class="comment">#      LOCAL_JMX=yes</span></span><br><span class="line"><span class="comment">#  fi</span></span><br><span class="line">  <span class="keyword">if</span> [ <span class="string">&quot;x<span class="variable">$LOCAL_JMX</span>&quot;</span> = <span class="string">&quot;x&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">      LOCAL_JMX=no</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#JVM_OPTS=&quot;$JVM_OPTS -Dcom.sun.management.jmxremote.authenticate=true&quot;</span></span><br><span class="line">JVM_OPTS=<span class="string">&quot;<span class="variable">$JVM_OPTS</span> -Dcom.sun.management.jmxremote.authenticate=false&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#JVM_OPTS=&quot;$JVM_OPTS -Dcom.sun.management.jmxremote.password.file=/etc/cassandra/jmxremote.password&quot;</span></span><br><span class="line"></span><br><span class="line">$ sudo systemctl stop cassandra</span><br></pre></td></tr></table></figure>
+
+<h2 id="迁移配置导数据盘（可选）"><a href="#迁移配置导数据盘（可选）" class="headerlink" title="迁移配置导数据盘（可选）"></a>迁移配置导数据盘（可选）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mv /var/lib/cassandra /data/cassandra</span><br><span class="line">$ sudo ln -s /data/cassandra /var/lib/cassandra</span><br><span class="line"></span><br><span class="line">$ sudo systemctl start cassandra</span><br></pre></td></tr></table></figure>
+
+<p>集群内其余机器，重复上述步骤，修改对应IP</p>
+<h1 id="Zookeeper集群"><a href="#Zookeeper集群" class="headerlink" title="Zookeeper集群"></a>Zookeeper集群</h1><table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zk-01</td>
+<td>192.168.0.1</td>
+</tr>
+<tr>
+<td>zk-02</td>
+<td>192.168.0.2</td>
+</tr>
+<tr>
+<td>zk-03</td>
+<td>192.168.0.3</td>
+</tr>
+</tbody></table>
+<h2 id="安装Zookeeper"><a href="#安装Zookeeper" class="headerlink" title="安装Zookeeper"></a>安装Zookeeper</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt install zookeeperd</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改配置文件-2"><a href="#修改配置文件-2" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vim /etc/zookeeper/conf/zoo.cfg</span><br><span class="line">server.1=192.168.0.1:2888:3888</span><br><span class="line">server.2=192.168.0.2:2888:3888</span><br><span class="line">server.3=192.168.0.3:2888:3888</span><br><span class="line">$ sudo vim /etc/zookeeper/conf/myid</span><br><span class="line">1</span><br><span class="line"><span class="comment"># 每台主机id各不相同，比如zk-01=1,zk-02=2,zk-03=3</span></span><br><span class="line">$ sudo systemctl restart zookeeper</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装ZK-UI（可选）"><a href="#安装ZK-UI（可选）" class="headerlink" title="安装ZK-UI（可选）"></a>安装<a target="_blank" rel="noopener" href="https://github.com/DeemOpen/zkui">ZK-UI</a>（可选）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装zkui</span></span><br><span class="line">$ <span class="built_in">cd</span> /data &amp;&amp; wget https://github.com/zifangsky/zkui/releases/download/v2.0/zkui-2.0.zip</span><br><span class="line">$ sudo unzip zkui-2.0.zip</span><br><span class="line">$ sudo vi /data/zkui/config.cfg</span><br><span class="line">  </span><br><span class="line">zkServer=192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181</span><br><span class="line">userSet = &#123;<span class="string">&quot;users&quot;</span>: [&#123; <span class="string">&quot;username&quot;</span>:<span class="string">&quot;&lt;username&gt;&quot;</span> , <span class="string">&quot;password&quot;</span>:<span class="string">&quot;&lt;password&gt;&quot;</span>,<span class="string">&quot;role&quot;</span>: <span class="string">&quot;ADMIN&quot;</span> &#125;,&#123; <span class="string">&quot;username&quot;</span>:<span class="string">&quot;appconfig&quot;</span> , <span class="string">&quot;password&quot;</span>:<span class="string">&quot;appconfig&quot;</span>,<span class="string">&quot;role&quot;</span>: <span class="string">&quot;USER&quot;</span> &#125;]&#125;</span><br><span class="line">  </span><br><span class="line">$ <span class="built_in">cd</span> /data/zkui &amp;&amp; sudo bash start.sh</span><br></pre></td></tr></table></figure>
+
+<p>集群内其余机器，重复上述步骤</p>
+<h1 id="Kafka集群"><a href="#Kafka集群" class="headerlink" title="Kafka集群"></a>Kafka集群</h1><table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>zk-01</td>
+<td>192.168.0.1</td>
+</tr>
+<tr>
+<td>zk-02</td>
+<td>192.168.0.2</td>
+</tr>
+<tr>
+<td>zk-03</td>
+<td>192.168.0.3</td>
+</tr>
+</tbody></table>
+<h2 id="安装Kafka"><a href="#安装Kafka" class="headerlink" title="安装Kafka"></a>安装Kafka</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir /data/kafka &amp;&amp; <span class="built_in">cd</span> ~</span><br><span class="line">$ wget <span class="string">&quot;http://www-eu.apache.org/dist/kafka/1.0.1/kafka_2.12-1.0.1.tgz&quot;</span></span><br><span class="line">$ curl http://kafka.apache.org/KEYS | gpg --import</span><br><span class="line">$ wget https://dist.apache.org/repos/dist/release/kafka/1.0.1/kafka_2.12-1.0.1.tgz.asc</span><br><span class="line">$ gpg --verify kafka_2.12-1.0.1.tgz.asc kafka_2.12-1.0.1.tgz</span><br><span class="line">$ sudo tar -xvzf kafka_2.12-1.0.1.tgz --directory /data/kafka --strip-components 1</span><br><span class="line">$ sudo rm -rf kafka_2.12-1.0.1.tgz kafka_2.12-1.0.1.tgz.asc</span><br><span class="line"><span class="comment">## 更多参考 https://tecadmin.net/install-apache-kafka-ubuntu/</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修改配置文件-3"><a href="#修改配置文件-3" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mkdir /data/kafka-logs</span><br><span class="line">$ sudo cp /data/kafka/config/server.properties&#123;,.bak&#125;</span><br><span class="line">$ sudo vim /data/kafka/config/server.properties</span><br><span class="line"> </span><br><span class="line">broker.id=0    <span class="comment"># 每台主机各不相同</span></span><br><span class="line">listeners=PLAINTEXT://0.0.0.0:9092</span><br><span class="line">advertised.listeners=PLAINTEXT://&lt;ip&gt;:9092</span><br><span class="line">delete.topic.enable = <span class="literal">true</span></span><br><span class="line">leader.imbalance.check.interval.seconds=5  <span class="comment"># leader不平衡检查间隔</span></span><br><span class="line">leader.imbalance.per.broker.percentage=1</span><br><span class="line">log.dirs=/data/kafka-logs</span><br><span class="line">offsets.topic.replication.factor=3</span><br><span class="line">log.retention.hours=72</span><br><span class="line">log.segment.bytes=1073741824</span><br><span class="line">zookeeper.connect=192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181</span><br><span class="line">  </span><br><span class="line">$ sudo vim /data/kafka/bin/kafka-server-start.sh</span><br><span class="line"><span class="built_in">export</span> JMX_PORT=12345    <span class="comment"># 暴露jmx端口，留待监控使用</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="注册为Systemd服务"><a href="#注册为Systemd服务" class="headerlink" title="注册为Systemd服务"></a>注册为Systemd服务</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">$ sudo adduser --system --no-create-home --disabled-password --disabled-login kafka</span><br><span class="line">$ sudo chown -R kafka:nogroup /data/kafka</span><br><span class="line">$ sudo chown -R kafka:nogroup /data/kafka-logs</span><br><span class="line">  </span><br><span class="line">$ sudo vim /etc/systemd/system/kafka.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=High-available, distributed message broker</span><br><span class="line">After=network.target</span><br><span class="line">[Service]</span><br><span class="line">User=kafka</span><br><span class="line">ExecStart=/data/kafka/bin/kafka-server-start.sh /data/kafka/config/server.properties</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment">## 启用服务</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> kafka.service</span><br><span class="line">$ sudo systemctl start kafka.service</span><br><span class="line"></span><br><span class="line"><span class="comment">## 更多参考 https://kafka.apache.org/quickstart</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="测试Kafka的使用（可选）"><a href="#测试Kafka的使用（可选）" class="headerlink" title="测试Kafka的使用（可选）"></a>测试Kafka的使用（可选）</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ /data/kafka/bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic <span class="built_in">test</span></span><br><span class="line">$ /data/kafka/bin/kafka-topics.sh --list --zookeeper localhost:2181</span><br><span class="line">  </span><br><span class="line">$ /data/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic <span class="built_in">test</span></span><br><span class="line">&gt; Hello World</span><br><span class="line">  </span><br><span class="line"><span class="comment"># 另外一个terminal</span></span><br><span class="line">$ /data/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic <span class="built_in">test</span> --from-beginning</span><br><span class="line">Hello World</span><br></pre></td></tr></table></figure>
+
+<h2 id="部署Kafka-manager"><a href="#部署Kafka-manager" class="headerlink" title="部署Kafka-manager"></a>部署<a target="_blank" rel="noopener" href="https://github.com/yahoo/kafka-manager">Kafka-manager</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /data &amp; sudo wget https://github.com/yahoo/kafka-manager/archive/1.3.3.17.zip</span><br><span class="line">$ sudo unzip kafka-manager-1.3.3.17.zip</span><br><span class="line">$ sudo mv kafka-manager-1.3.3.17 kafka-manager</span><br><span class="line">$ sudo chown -R kafka:nogroup /data/kafka-manager</span><br><span class="line">$ sudo vim /data/kafka-manager/conf/application.conf</span><br><span class="line">kafka-manager.zkhosts=<span class="string">&quot;192.168.0.1:2181,192.168.0.2:2181,192.168.0.3:2181&quot;</span></span><br><span class="line">basicAuthentication.enabled=<span class="literal">true</span></span><br><span class="line">basicAuthentication.username=<span class="string">&quot;&lt;username&gt;&quot;</span></span><br><span class="line">basicAuthentication.password=<span class="string">&quot;&lt;password&gt;&quot;</span></span><br><span class="line">  </span><br><span class="line">$ sudo vim /etc/systemd/system/kafka-manager.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=High-available, distributed message broker manager</span><br><span class="line">After=network.target</span><br><span class="line">[Service]</span><br><span class="line">User=kafka</span><br><span class="line">ExecStart=/data/kafka-manager/bin/kafka-manager</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"><span class="comment">## 启用服务</span></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> kafka-manager.service</span><br><span class="line">$ sudo systemctl start kafka-manager.service</span><br></pre></td></tr></table></figure>
+
+<h1 id="Mysql"><a href="#Mysql" class="headerlink" title="Mysql"></a>Mysql</h1><h2 id="安装Mysql"><a href="#安装Mysql" class="headerlink" title="安装Mysql"></a>安装Mysql</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install mysql-server</span><br></pre></td></tr></table></figure>
+
+<div class="note warning"><p>在安装过程中，系统将提示您创建root密码。请务必记住root密码</p>
+</div>
+
+<h2 id="配置Mysql"><a href="#配置Mysql" class="headerlink" title="配置Mysql"></a>配置Mysql</h2><p>运行安全脚本</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mysql_secure_installation</span><br></pre></td></tr></table></figure>
+
+<p>值得一提的是，<code>Disallow root login remotely?</code>，如果你需要使用root账号进行远程连接，请选择No</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>接下来测试下是否安装成功了</p>
+<ol>
+<li>运行状态</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ systemctl status mysql.service</span><br><span class="line">● mysql.service - MySQL Community Server</span><br><span class="line">   Loaded: loaded (/lib/systemd/system/mysql.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2019-07-18 23:38:43 PDT; 11min ago</span><br><span class="line"> Main PID: 2948 (mysqld)</span><br><span class="line">    Tasks: 28</span><br><span class="line">   Memory: 142.6M</span><br><span class="line">      CPU: 545ms</span><br><span class="line">   CGroup: /system.slice/mysql.service</span><br><span class="line">           └─2948 /usr/sbin/mysqld</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>登录查看版本</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ mysqladmin -p -u root version</span><br><span class="line">mysqladmin  Ver 8.42 Distrib 5.7.26, <span class="keyword">for</span> Linux on x86_64</span><br><span class="line">Copyright (c) 2000, 2019, Oracle and/or its affiliates. All rights reserved.</span><br><span class="line"></span><br><span class="line">Oracle is a registered trademark of Oracle Corporation and/or its</span><br><span class="line">affiliates. Other names may be trademarks of their respective</span><br><span class="line">owners.</span><br><span class="line"></span><br><span class="line">Server version		5.7.26-0ubuntu0.16.04.1</span><br><span class="line">Protocol version	10</span><br><span class="line">Connection		Localhost via UNIX socket</span><br><span class="line">UNIX socket		/var/run/mysqld/mysqld.sock</span><br><span class="line">Uptime:			12 min 18 sec</span><br><span class="line"></span><br><span class="line">Threads: 1  Questions: 36  Slow queries: 0  Opens: 121  Flush tables: 1  Open tables: 40  Queries per second avg: 0.048</span><br></pre></td></tr></table></figure>
+
+<p>到这里，Mysql安装完成！</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2016/03/systemd-tutorial-commands.html">Systemd 入门教程：命令篇</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\p\12805\" rel="bookmark">Ubuntu切换为阿里镜像源</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\p\46186\" rel="bookmark">Ubuntu禁用root账号，开启Ubuntu密钥登录</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\p\58700\" rel="bookmark">记一次生产事故--磁盘被占满</a></div>
+    </li>
+  </ul>
+
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4/" rel="tag"># 运维</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/p/10700/" rel="prev" title="Java安全笔记">
+                  <i class="fa fa-chevron-left"></i> Java安全笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/p/58700/" rel="next" title="记一次生产事故--磁盘被占满">
+                  记一次生产事故--磁盘被占满 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Gcdd1993</span>
+</div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">276k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:11</span>
+  </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@next-theme/pjax@0.5.0/pjax.min.js" integrity="sha256-3NkoLDrmHLTYj7csHIZSr0MHAFTXth7Ua/DDt4MRUAg=" crossorigin="anonymous"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/lozad.js/1.9.0/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script><script src="/js/pjax.js"></script>
+
+  
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script class="next-config" data-name="nprogress" type="application/json">{&quot;enable&quot;:true,&quot;spinner&quot;:true}</script>
+  <script src="/js/third-party/nprogress.js"></script>
+
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.6.3/firebase-app.js" integrity="sha256-TcuvUUV2YPD07buRa6IPu1ADulu6kj1g5BSU3cqdCRo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/firebase@8.6.3/firebase-firestore.js" integrity="sha256-noZMc+mnoIXmuv5hOXyiPIDY2KnxDjmSRXYmDBDxMR8=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="firestore" type="application/json">{&quot;enable&quot;:true,&quot;collection&quot;:&quot;articles&quot;,&quot;apiKey&quot;:&quot;AIzaSyAfMDrxNlB7HKRLS1kUNXu3OX5Y8qhtedk&quot;,&quot;projectId&quot;:&quot;blog-237903&quot;}</script>
+  <script src="/js/third-party/statistics/firestore.js"></script>
+
+
+
+
+</body>
+</html>
