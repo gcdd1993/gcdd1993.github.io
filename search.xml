@@ -95,6 +95,48 @@
       </tags>
   </entry>
   <entry>
+    <title>Dubbo使用Kryo序列化协议的思考</title>
+    <url>/p/13982/</url>
+    <content><![CDATA[<p>本文是使用<code>Dubbo</code>过程中的一些思考，不足以作为参考，只为留存记录。</p>
+<span id="more"></span>
+
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>Dubbo</code>官方推荐使用<code>kryo</code>或者<code>fst</code>作为<code>RPC</code>序列化协议，原因是这两款序列化协议，性能显著优于其他序列化协议。虽然高效，但其实<code>Dubbo</code>对这两款的支持却不是那么理想，导致使用过程中出现了一些问题</p>
+<h1 id="多服务下kryo序列化问题"><a href="#多服务下kryo序列化问题" class="headerlink" title="多服务下kryo序列化问题"></a>多服务下<code>kryo</code>序列化问题</h1><h2 id="Q1、无法使用kryo类索引红利"><a href="#Q1、无法使用kryo类索引红利" class="headerlink" title="Q1、无法使用kryo类索引红利"></a>Q1、无法使用<code>kryo</code>类索引红利</h2><blockquote>
+<p>在多模块协作的系统中，无法保证服务提供方和消费方<code>DTO</code>数量以及注册顺序的一致，可能A作为服务提供方，提供了<code>DTO</code>，而B作为消费方，可能同时消费A、C的服务，同时自身也对外提供服务，在使用<code>Kryo</code>序列化时，需要同时注册A、B、C服务的<code>DTO</code>。</p>
+</blockquote>
+<p>例如A系统的<code>SerializationOptimizer</code>实现</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ASerializationOptimizerImpl</span> <span class="keyword">implements</span> <span class="title">SerializationOptimizer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Collection&lt;Class&lt;?&gt;&gt; getSerializableClasses() &#123;</span><br><span class="line">        <span class="keyword">return</span> A1.class;</span><br><span class="line">        <span class="keyword">return</span> A2.class;</span><br><span class="line">        <span class="keyword">return</span> A3.class;</span><br><span class="line">        <span class="keyword">return</span> A4.class;</span><br><span class="line">        <span class="keyword">return</span> C1.class;</span><br><span class="line">        <span class="keyword">return</span> C2.class;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>B系统的<code>SerializationOptimizer</code>实现</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BSerializationOptimizerImpl</span> <span class="keyword">implements</span> <span class="title">SerializationOptimizer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Collection&lt;Class&lt;?&gt;&gt; getSerializableClasses() &#123;</span><br><span class="line">        <span class="keyword">return</span> A1.class;</span><br><span class="line">        <span class="keyword">return</span> A2.class;</span><br><span class="line">        <span class="keyword">return</span> A3.class;</span><br><span class="line">        <span class="keyword">return</span> A4.class;</span><br><span class="line">        <span class="keyword">return</span> B1.class;</span><br><span class="line">        <span class="keyword">return</span> B2.class;</span><br><span class="line">        <span class="keyword">return</span> C1.class;</span><br><span class="line">        <span class="keyword">return</span> C2.class;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里需要说明的是，<code>kryo</code>之所以高效，不仅仅是因为其二进制序列化，更由于其可以预先为待序列化的类指定索引，在<code>RPC</code>传输过程中，只需要使用索引代替全类名，在类使用非常频繁的情况下，可以节省大量字节，从而大大提升传输效率。</p>
+<p>而<code>Dubbo</code>似乎也意识到了这个问题，所以将一些使用频繁的类进行了预处理，见<code>org.apache.dubbo.common.serialize.kryo.utils.AbstractKryoFactory#create</code></p>
+<p>但是其中很重要的一处</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">SerializableClassRegistry.getRegisteredClasses().forEach((clazz, ser) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (ser == <span class="keyword">null</span>) &#123;</span><br><span class="line">        kryo.register(clazz);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        kryo.register(clazz, (Serializer) ser);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>使用的是<code>kryo.register(clazz)</code>，无法指定<code>kryo class index</code>，这里我分析了一下，可能是为了兼容老的序列化协议，比如<code>json</code>等，而且<code>SerializableClassRegistry</code>是很早就有的接口，并没有考虑到类索引的问题。</p>
+<p>所以这里要注册的话，只能将项目内所有类都写到同一个<code>jar</code>中，然后写一个统一的<code>SerializationOptimizer</code>实现。</p>
+<p>这在微服务系统中是无法实现的，因为每个服务必然会提供自己的<code>dto.jar</code>和<code>dubbo-service.jar</code>，而且服务之间也不可能依赖其他所有的服务，所以这一条无法满足。</p>
+<p>这样一来，类的注册顺序不能保证，类的数量也无法保证，所以<code>Dubbo</code>的<code>kryo</code>序列化只能说在一定程度上提升了效率，但是并没有完全发挥出<code>kryo</code>的性能优势。</p>
+<h2 id="Q2、社区不活跃"><a href="#Q2、社区不活跃" class="headerlink" title="Q2、社区不活跃"></a>Q2、社区不活跃</h2><blockquote>
+<p>虽然阿里重启了<code>Dubbo</code>，并且加入了<code>Apache</code>进行孵化，但是社区相较于<code>Spring Cloud</code>，还是不够活跃，而且阿里的开源产品，多多少少带了点阿里内部的味道，不如<code>Spring Cloud</code>通用和考虑周全。一些功能我们不需要（比如<code>dubbo</code>注册时的一堆参数，很多都是需要阿里的一套开发体系才能使用到），我们需要的又迟迟不添加（<code>kryo</code>的<code>ClassId</code>支持）。</p>
+</blockquote>
+<p>所以目前项目已经全面切换到<code>Spring Cloud Kubernetes</code>，有时间也会总结一下<code>Dubbo</code>切换到<code>Spring Cloud</code>的经验，以及在云原生时代<code>Spring Cloud</code>所做出的努力。</p>
+<h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
+<li><a href="https://github.com/apache/dubbo/issues/7015">Dubbo Issue</a></li>
+<li><a href="https://dubbo.apache.org/zh/docs/v2.7/user/serialization/">Kryo 和 FST 序列化</a></li>
+<li><a href="https://github.com/EsotericSoftware/kryo">Kryo序列化协议</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>Dubbo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>FastDFS 单机部署指南</title>
     <url>/p/56864/</url>
     <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>FastDFS是一个开源的分布式文件系统，<a href="https://www.oschina.net/p/fastdfs">官方介绍</a>有详细的介绍，不多赘述。本文主要是FastDFS的搭建及采坑指南。</p>
@@ -221,6 +263,67 @@
       </categories>
       <tags>
         <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Gradle 配置片段</title>
+    <url>/p/9306/</url>
+    <content><![CDATA[<p>本文介绍<code>Gradle</code>常用配置，本人很早就开始使用<code>Gradle</code>代替<code>Maven</code>作为项目构建工具，<code>Gradle</code>相较于<code>Maven</code>繁琐的XML配置来说，确实更为先进，依托于<code>Groovy</code>脚本的强大，也更加灵活。</p>
+<span id="more"></span>
+
+<h1 id="1、Jetbrains-IDEA设置Gradle不自动创建模块"><a href="#1、Jetbrains-IDEA设置Gradle不自动创建模块" class="headerlink" title="1、Jetbrains IDEA设置Gradle不自动创建模块"></a>1、<code>Jetbrains IDEA</code>设置<code>Gradle</code>不自动创建模块</h1><blockquote>
+<p>在IDEA某个版本之后，创建或导入Gradle项目的时候，无法再取消勾选<code>Create separate module per source set</code>，多少有点强加的意思，因为自动为每个资源文件夹创建一个目录，模块多了以后，会出现意料之外的错误，比如某个依赖无法加载等问题</p>
+</blockquote>
+<p><img data-src="https://i.loli.net/2021/06/20/B7wOGUqHK62mQ9C.png"></p>
+<p>编辑<code>.idea/gradle.xml</code>，加上一行<code>&lt;option name=&quot;resolveModulePerSourceSet&quot; value=&quot;false&quot; /&gt;</code>就行</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">version</span>=<span class="string">&quot;4&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">component</span> <span class="attr">name</span>=<span class="string">&quot;GradleMigrationSettings&quot;</span> <span class="attr">migrationVersion</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">component</span> <span class="attr">name</span>=<span class="string">&quot;GradleSettings&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;linkedExternalProjectsSettings&quot;</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">GradleProjectSettings</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;delegatedBuild&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;testRunner&quot;</span> <span class="attr">value</span>=<span class="string">&quot;GRADLE&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;distributionType&quot;</span> <span class="attr">value</span>=<span class="string">&quot;LOCAL&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;externalProjectPath&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$PROJECT_DIR$&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;gradleHome&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$PROJECT_DIR$/../../../../DevTools/Gradle/gradle-6.8.3&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;gradleJvm&quot;</span> <span class="attr">value</span>=<span class="string">&quot;#JAVA_HOME&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;resolveModulePerSourceSet&quot;</span> <span class="attr">value</span>=<span class="string">&quot;false&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">GradleProjectSettings</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">component</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后重新导入<code>Gradle</code>项目</p>
+<h1 id="2、使用阿里云Maven仓库加速依赖下载"><a href="#2、使用阿里云Maven仓库加速依赖下载" class="headerlink" title="2、使用阿里云Maven仓库加速依赖下载"></a>2、使用阿里云<code>Maven</code>仓库加速依赖下载</h1><blockquote>
+<p><code>Gradle 6.8.3</code>即以上适用</p>
+</blockquote>
+<p>编辑<code>settings.gradle</code></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">pluginManagement &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenLocal()</span><br><span class="line">        repositories &#123;</span><br><span class="line">            maven &#123; url <span class="string">&#x27;https://maven.aliyun.com/repository/google&#x27;</span> &#125;</span><br><span class="line">            maven &#123; url <span class="string">&#x27;https://maven.aliyun.com/repository/gradle-plugin&#x27;</span> &#125;</span><br><span class="line">            maven &#123; url <span class="string">&#x27;https://maven.aliyun.com/repository/public/&#x27;</span> &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mavenCentral()</span><br><span class="line">        gradlePluginPortal()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">dependencyResolutionManagement &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        mavenLocal()</span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/central&quot;</span>) &#125; <span class="comment">// central</span></span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/public&quot;</span>) &#125; <span class="comment">// jcenter &amp; public</span></span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/google&quot;</span>) &#125; <span class="comment">// google</span></span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/spring&quot;</span>) &#125; <span class="comment">// spring</span></span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/spring-plugin&quot;</span>) &#125; <span class="comment">// spring plugin</span></span><br><span class="line">        maven &#123; url = uri(<span class="string">&quot;https://maven.aliyun.com/repository/grails-core&quot;</span>) &#125; <span class="comment">// spring plugin</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">rootProject.name = <span class="string">&#x27;my-prject&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="3、maven-publish-gradle"><a href="#3、maven-publish-gradle" class="headerlink" title="3、maven-publish.gradle"></a>3、<code>maven-publish.gradle</code></h1><figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="comment">// jar添加以下插件</span></span><br><span class="line"><span class="comment">//plugins &#123;</span></span><br><span class="line"><span class="comment">//    id &#x27;java-library&#x27;</span></span><br><span class="line"><span class="comment">//    id &#x27;maven-publish&#x27;</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br><span class="line"><span class="comment">// bom添加以下插件</span></span><br><span class="line"><span class="comment">//plugins &#123;</span></span><br><span class="line"><span class="comment">//    id &#x27;java-platform&#x27;</span></span><br><span class="line"><span class="comment">//    id &#x27;maven-publish&#x27;</span></span><br><span class="line"><span class="comment">//&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> artifactory = <span class="string">&#x27;https://packages.aliyun.com/maven/repository/&#x27;</span></span><br><span class="line"><span class="keyword">def</span> releasePath = <span class="string">&quot;xxx&quot;</span></span><br><span class="line"><span class="keyword">def</span> snapshotsPath = <span class="string">&quot;xxx&quot;</span></span><br><span class="line"><span class="keyword">def</span> mavenName = <span class="string">&#x27;my-project&#x27;</span></span><br><span class="line">afterEvaluate &#123; Project project -&gt;</span><br><span class="line">    <span class="keyword">if</span> (project.plugins.hasPlugin(<span class="string">&quot;maven-publish&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (project.plugins.hasPlugin(<span class="string">&quot;java&quot;</span>)) &#123;</span><br><span class="line">            java &#123;</span><br><span class="line">                withSourcesJar()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        publishing &#123;</span><br><span class="line">            repositories &#123;</span><br><span class="line">                maven &#123;</span><br><span class="line">                    name <span class="string">&quot;$&#123;mavenName&#125;&quot;</span></span><br><span class="line">                    url = <span class="string">&quot;$&#123;artifactory&#125;$&#123;(version.endsWith(&#x27;SNAPSHOT&#x27;) ? snapshotsPath : releasePath)&#125;&quot;</span></span><br><span class="line">                    credentials &#123;</span><br><span class="line">                        username <span class="string">&quot;$&#123;maven_username&#125;&quot;</span></span><br><span class="line">                        password <span class="string">&quot;$&#123;maven_password&#125;&quot;</span></span><br><span class="line">                    &#125;</span><br><span class="line">                    authentication &#123;</span><br><span class="line">                        basic(BasicAuthentication)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            publications &#123;</span><br><span class="line">                omac(MavenPublication) &#123;</span><br><span class="line">                    from components.java</span><br><span class="line">                    versionMapping &#123;</span><br><span class="line">                        usage(<span class="string">&#x27;java-api&#x27;</span>) &#123;</span><br><span class="line">                            fromResolutionOf(<span class="string">&#x27;runtimeClasspath&#x27;</span>)</span><br><span class="line">                        &#125;</span><br><span class="line">                        usage(<span class="string">&#x27;java-runtime&#x27;</span>) &#123;</span><br><span class="line">                            fromResolutionResult()</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>build.gradle</code>引入即可</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">apply <span class="attr">from:</span> <span class="string">&quot;$&#123;rootDir&#125;/gradle/maven-publish.gradle&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="4、docker-gradle"><a href="#4、docker-gradle" class="headerlink" title="4、docker.gradle"></a>4、<code>docker.gradle</code></h1><figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">afterEvaluate &#123;</span><br><span class="line">    <span class="keyword">if</span> (pluginManager.hasPlugin(<span class="string">&quot;application&quot;</span>)) &#123;</span><br><span class="line">        task archiveDeps(<span class="attr">type:</span> Tar) &#123; task -&gt;</span><br><span class="line">            <span class="keyword">def</span> dependencies = task.project.configurations.runtimeClasspath.fileCollection &#123; <span class="literal">true</span> &#125;</span><br><span class="line">            from dependencies.sort()</span><br><span class="line">            compression = Compression.GZIP</span><br><span class="line">            archiveFileName = <span class="string">&quot;dep-libs.tar.gz&quot;</span></span><br><span class="line">            from jar.archiveFile</span><br><span class="line">            destinationDirectory = file(<span class="string">&quot;$buildDir/docker&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        task copyDeps(<span class="attr">type:</span> Copy) &#123;</span><br><span class="line">            dependsOn(archiveDeps)</span><br><span class="line">            from tarTree(resources.gzip(<span class="string">&quot;$buildDir/docker/dep-libs.tar.gz&quot;</span>))</span><br><span class="line">            into <span class="string">&quot;$buildDir/docker/libs/&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        task copyApp(<span class="attr">type:</span> Copy) &#123;</span><br><span class="line">            dependsOn(jar, startScripts)</span><br><span class="line">            from <span class="string">&quot;$buildDir/scripts/&quot;</span></span><br><span class="line">            from jar.outputs</span><br><span class="line">            into <span class="string">&quot;$buildDir/docker/&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        task prepare() &#123;</span><br><span class="line">            dependsOn(copyApp, copyDeps)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加插件<code>application</code></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&quot;application&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>并配合以下<code>Dockerfile</code></p>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="comment"># First stage: complete build environment</span></span><br><span class="line"><span class="keyword">FROM</span> registry.cn-shanghai.aliyuncs.com/halmawork/gradle:<span class="number">6.8</span>.<span class="number">3</span>-jdk11-openj9 AS builder</span><br><span class="line"></span><br><span class="line"><span class="keyword">ARG</span> MAVEN_USERNAME</span><br><span class="line"><span class="keyword">ARG</span> MAVEN_PASSWORD</span><br><span class="line"><span class="keyword">ARG</span> MODULE</span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">echo</span> <span class="string">&quot;org.gradle.daemon=false&quot;</span> &gt;&gt; ~/.gradle/gradle.properties \</span></span><br><span class="line"><span class="bash">    &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;org.gradle.parallel=true&quot;</span> &gt;&gt; ~/.gradle/gradle.properties \</span></span><br><span class="line"><span class="bash">    &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;maven_username=<span class="variable">$MAVEN_USERNAME</span>&quot;</span> &gt;&gt; ~/.gradle/gradle.properties \</span></span><br><span class="line"><span class="bash">    &amp;&amp; <span class="built_in">echo</span> <span class="string">&quot;maven_password=<span class="variable">$MAVEN_PASSWORD</span>&quot;</span> &gt;&gt; ~/.gradle/gradle.properties</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /builder</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> . /builder</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># package jar</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> gradle :<span class="variable">$MODULE</span>:clean :<span class="variable">$MODULE</span>:prepare</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Second stage: minimal runtime environment</span></span><br><span class="line"><span class="keyword">FROM</span> adoptopenjdk/openjdk11:jre</span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> MODULE <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> TZ=Asia/Shanghai</span><br><span class="line"></span><br><span class="line"><span class="keyword">LABEL</span><span class="bash"> name=<span class="variable">$MODULE</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> ln -fs /usr/share/zoneinfo/<span class="variable">$TZ</span> /etc/localtime \</span></span><br><span class="line"><span class="bash">    &amp;&amp; dpkg-reconfigure -f noninteractive tzdata</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> /app</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=builder /builder/build/docker/libs/*.jar /app/lib/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=builder /builder/build/docker/<span class="variable">$MODULE</span> /app/bin/run</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> --from=builder /builder/build/docker/<span class="variable">$MODULE</span>-*.jar /app/lib/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8080</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">&quot;/app/bin/run&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>打包<code>docker</code>镜像</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker build -f gradle/Dockerfile -t gcdd1993/demo:latest-snapshot .</span><br></pre></td></tr></table></figure>
+
+<h1 id="5、支持kotlin"><a href="#5、支持kotlin" class="headerlink" title="5、支持kotlin"></a>5、支持<code>kotlin</code></h1><p><code>gradle.properties</code></p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">kotlin_version</span>=<span class="string">1.5.10</span></span><br></pre></td></tr></table></figure>
+
+<p><code>build.gradle</code></p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&quot;org.jetbrains.kotlin.jvm&quot;</span> version <span class="string">&quot;$&#123;kotlin_version&#125;&quot;</span> apply <span class="literal">false</span> <span class="comment">// jvm 插件</span></span><br><span class="line">    id <span class="string">&quot;org.jetbrains.kotlin.plugin.spring&quot;</span> version <span class="string">&quot;$&#123;kotlin_version&#125;&quot;</span> apply <span class="literal">false</span> <span class="comment">// spring 插件，allopen 插件</span></span><br><span class="line">    id <span class="string">&quot;org.jetbrains.kotlin.kapt&quot;</span> version <span class="string">&quot;$&#123;kotlin_version&#125;&quot;</span> apply <span class="literal">false</span> <span class="comment">// kapt，代替annotationProcessor</span></span><br><span class="line">    id <span class="string">&quot;org.jetbrains.kotlin.plugin.noarg&quot;</span> version <span class="string">&quot;$&#123;kotlin_version&#125;&quot;</span> apply <span class="literal">false</span> <span class="comment">// 用于自定义注解生成no arg constructor</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;org.jetbrains.kotlin.jvm&quot;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;org.jetbrains.kotlin.plugin.spring&quot;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;org.jetbrains.kotlin.kapt&quot;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;org.jetbrains.kotlin.plugin.noarg&quot;</span></span><br><span class="line"></span><br><span class="line">compileKotlin &#123;</span><br><span class="line">    kotlinOptions &#123;</span><br><span class="line">        freeCompilerArgs = [<span class="string">&quot;-Xjsr305=warn&quot;</span>]</span><br><span class="line">        jvmTarget = <span class="string">&quot;11&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">noArg &#123;</span><br><span class="line">    annotation(<span class="string">&quot;io.github.gcdd1993.NoArg&quot;</span>) <span class="comment">// 该注解注释的class，会生成NoArg Constructor</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="6、限制项目JDK版本"><a href="#6、限制项目JDK版本" class="headerlink" title="6、限制项目JDK版本"></a>6、限制项目<code>JDK</code>版本</h1><blockquote>
+<p>对于多人协同时，很有用，避免因为<code>JDK</code>版本不一导致的各种问题</p>
+</blockquote>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> javaVersion = System.getProperty(<span class="string">&quot;java.version&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> (!javaVersion.startsWith(<span class="string">&quot;11&quot;</span>)) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Incompatible JRE version: &quot;</span> + javaVersion + <span class="string">&quot;. Use JRE 11 instead.&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="7、为项目编译jar文件添加项目编译信息"><a href="#7、为项目编译jar文件添加项目编译信息" class="headerlink" title="7、为项目编译jar文件添加项目编译信息"></a>7、为项目编译<code>jar</code>文件添加项目编译信息</h1><figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&quot;org.springframework.boot&quot;</span> version <span class="string">&quot;$&#123;spring_boot_version&#125;&quot;</span> apply <span class="literal">false</span></span><br><span class="line">    id <span class="string">&quot;com.gorylenko.gradle-git-properties&quot;</span> version <span class="string">&quot;2.2.4&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;io.spring.dependency-management&quot;</span></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&quot;org.springframework.boot&quot;</span></span><br><span class="line"></span><br><span class="line">jar &#123;</span><br><span class="line">    enabled = <span class="literal">true</span></span><br><span class="line">    manifest &#123;</span><br><span class="line">        attributes(</span><br><span class="line">            <span class="string">&quot;Implementation-Title&quot;</span>: project.name,</span><br><span class="line">            <span class="string">&quot;Implementation-Version&quot;</span>: project.version,</span><br><span class="line">            <span class="string">&quot;Built-By&quot;</span>: System.properties[<span class="string">&quot;user.name&quot;</span>],</span><br><span class="line">            <span class="string">&quot;Build-Timestamp&quot;</span>: <span class="keyword">new</span> SimpleDateFormat(<span class="string">&quot;yyyy-MM-dd&#x27;T&#x27;HH:mm:ss.SSSZ&quot;</span>).format(<span class="keyword">new</span> Date()),</span><br><span class="line">            <span class="string">&quot;Created-By&quot;</span>: <span class="string">&quot;Gradle $&#123;gradle.gradleVersion&#125;&quot;</span>,</span><br><span class="line">            <span class="string">&quot;Build-Jdk&quot;</span>: <span class="string">&quot;$&#123;System.properties[&quot;</span>java.version<span class="string">&quot;]&#125; ($&#123;System.properties[&quot;</span>java.vendor<span class="string">&quot;]&#125; $&#123;System.properties[&quot;</span>java.vm.version<span class="string">&quot;]&#125;)&quot;</span>,</span><br><span class="line">            <span class="string">&quot;Build-OS&quot;</span>: <span class="string">&quot;$&#123;System.properties[&quot;</span>os.name<span class="string">&quot;]&#125; $&#123;System.properties[&quot;</span>os.arch<span class="string">&quot;]&#125; $&#123;System.properties[&quot;</span>os.version<span class="string">&quot;]&#125;&quot;</span></span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">springBoot &#123;</span><br><span class="line">    buildInfo()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果是<code>Spring Boot</code>项目，还可以通过以下方法，在程序启动时，打印出编译信息</p>
+<figure class="highlight kotlin"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 在应用启动时，打印应用基本信息</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> gcdd1993</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/2/20</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 1.0.0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AppInfoPreviewAutoConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> log = LoggerFactory.getLogger(javaClass)</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired(required = false)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> gitProperties: GitProperties? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired(required = false)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> buildProperties: BuildProperties? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(<span class="meta-string">&quot;\$&#123;spring.application.name&#125;&quot;</span>)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">val</span> name: String? = <span class="literal">null</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@EventListener(ApplicationStartedEvent::class)</span></span><br><span class="line">    <span class="function"><span class="keyword">fun</span> <span class="title">onBootUp</span><span class="params">(event: <span class="type">ApplicationStartedEvent</span>?)</span></span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;&#123;&#125; Started.&quot;</span>, name)</span><br><span class="line">        <span class="keyword">if</span> (buildProperties != <span class="literal">null</span>) &#123;</span><br><span class="line">            log.info(<span class="string">&quot;build.name : &#123;&#125;&quot;</span>, buildProperties.name)</span><br><span class="line">            log.info(<span class="string">&quot;build.artifact : &#123;&#125;&quot;</span>, buildProperties.artifact)</span><br><span class="line">            log.info(<span class="string">&quot;build.group : &#123;&#125;&quot;</span>, buildProperties.group)</span><br><span class="line">            log.info(<span class="string">&quot;build.version : &#123;&#125;&quot;</span>, buildProperties.version)</span><br><span class="line">            log.info(<span class="string">&quot;build.time : &#123;&#125;&quot;</span>, buildProperties.time.atZone(ZoneId.systemDefault()).toLocalDateTime())</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            log.warn(<span class="string">&quot;cannot find any build properties file from this project. please reference: https://stackoverflow.com/questions/47283048/how-to-capture-build-info-using-gradle-and-spring-boot.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (gitProperties != <span class="literal">null</span>) &#123;</span><br><span class="line">            log.info(<span class="string">&quot;commit.branch : &#123;&#125;&quot;</span>, gitProperties.branch)</span><br><span class="line">            log.info(<span class="string">&quot;commit.commit.id : &#123;&#125;&quot;</span>, gitProperties.commitId)</span><br><span class="line">            log.info(<span class="string">&quot;commit.commit.time : &#123;&#125;&quot;</span>, gitProperties.commitTime.atZone(ZoneId.systemDefault()).toLocalDateTime())</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            log.warn(<span class="string">&quot;cannot find any git properties file from this project. please add gradle plugin: https://plugins.gradle.org/plugin/com.gorylenko.gradle-git-properties.&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>未完待续。。。</p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>Gradle</tag>
       </tags>
   </entry>
   <entry>
@@ -567,64 +670,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java设计模式（三）简单工厂模式</title>
-    <url>/p/21710/</url>
-    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
-<li>定义:由一个工厂对象决定创建出哪一种产品类的实例</li>
-<li>类型:创建型，但不属于GOF23种设计模式</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
-<li>工厂类负责创建的对象比较少</li>
-<li>客户端(应用层)只知道传入工厂类的参数，对于如何创建对象(逻辑)不关心</li>
-</ul>
-<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>只需要传入一个正确的参数，就可以获取你所需要的对象，而无须知道其创建细节</p>
-<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>工厂类的<strong>职责相对过重</strong>，增加新的产品，需要修改工厂类的判断逻辑，<strong>违背开闭原则</strong></p>
-<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>创建一个抽象产品类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>产品实现类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建产品对应的简单工厂，通过产品类型来创建产品，应用方无需知道创建产品的细节</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(String type)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;java&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;python&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>测试类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory videoFactory = <span class="keyword">new</span> VideoFactory();</span><br><span class="line">        Video video = videoFactory.getVideo(<span class="string">&quot;Java&quot;</span>);</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>控制台输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br></pre></td></tr></table></figure>
-
-<p>如果增加产品，我们不仅需要修改产品对应的产品类，还需要修改工厂类，违反了开闭原则。</p>
-<p>我们可以通过反射来优化下我们的工厂类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(Class&lt;? extends Video&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.newInstance();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样一来，添加产品的时候不用再修改我们的工厂类，而是直接添加产品即可。</p>
-<p>最终的UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
-<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="JDK源码"><a href="#JDK源码" class="headerlink" title="JDK源码"></a><code>JDK</code>源码</h2><p>在JDK中，使用简单工厂模式的例子如<code>java.util.Calendar</code>，一组<code>getInstance</code>的重载方法，提供了创建<code>Calendar</code>产品的简单工厂方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(Locale aLocale)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>核心方法为</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Calendar <span class="title">createCalendar</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源码较长，不贴了，有兴趣的可以去看下源码。</p>
-<p><code>Calendar</code>的UML类图如下</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
-<h2 id="Logback源码"><a href="#Logback源码" class="headerlink" title="Logback源码"></a><code>Logback</code>源码</h2><p><code>logback</code>类中的简单工厂模式主要体现在<code>ch.qos.logback.classic.LoggerContext#getLogger(String)</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;name argument cannot be null&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断log类型返回root节点的logger</span></span><br><span class="line">    <span class="keyword">if</span> (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) &#123;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    Logger logger = root;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果缓存中已经存在的指定的logger，直接返回childLogger</span></span><br><span class="line">    Logger childLogger = (Logger) loggerCache.get(name);</span><br><span class="line">    <span class="comment">// if we have the child， then let us return it without wasting time</span></span><br><span class="line">    <span class="keyword">if</span> (childLogger != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> childLogger;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下是创建logger的逻辑</span></span><br><span class="line">    String childName;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = LoggerNameUtil.getSeparatorIndexOf(name， i);</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            childName = name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            childName = name.substring(<span class="number">0</span>， h);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// move i left of the last point</span></span><br><span class="line">        i = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (logger) &#123;</span><br><span class="line">            childLogger = logger.getChildByName(childName);</span><br><span class="line">            <span class="keyword">if</span> (childLogger == <span class="keyword">null</span>) &#123;</span><br><span class="line">                childLogger = logger.createChildByName(childName);</span><br><span class="line">                loggerCache.put(childName， childLogger);</span><br><span class="line">                incSize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        logger = childLogger;</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> childLogger;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>是一个典型的简单工厂方法</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java设计模式（二）设计模式原则</title>
     <url>/p/64818/</url>
     <content><![CDATA[<p>学习Java设计模式之前，有必要先了解设计模式原则。<span id="more"></span></p>
@@ -804,6 +849,64 @@
       </tags>
   </entry>
   <entry>
+    <title>Java设计模式（三）简单工厂模式</title>
+    <url>/p/21710/</url>
+    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
+<li>定义:由一个工厂对象决定创建出哪一种产品类的实例</li>
+<li>类型:创建型，但不属于GOF23种设计模式</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
+<li>工厂类负责创建的对象比较少</li>
+<li>客户端(应用层)只知道传入工厂类的参数，对于如何创建对象(逻辑)不关心</li>
+</ul>
+<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>只需要传入一个正确的参数，就可以获取你所需要的对象，而无须知道其创建细节</p>
+<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>工厂类的<strong>职责相对过重</strong>，增加新的产品，需要修改工厂类的判断逻辑，<strong>违背开闭原则</strong></p>
+<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>创建一个抽象产品类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>产品实现类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建产品对应的简单工厂，通过产品类型来创建产品，应用方无需知道创建产品的细节</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(String type)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;java&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;python&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory videoFactory = <span class="keyword">new</span> VideoFactory();</span><br><span class="line">        Video video = videoFactory.getVideo(<span class="string">&quot;Java&quot;</span>);</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制台输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br></pre></td></tr></table></figure>
+
+<p>如果增加产品，我们不仅需要修改产品对应的产品类，还需要修改工厂类，违反了开闭原则。</p>
+<p>我们可以通过反射来优化下我们的工厂类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(Class&lt;? extends Video&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.newInstance();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，添加产品的时候不用再修改我们的工厂类，而是直接添加产品即可。</p>
+<p>最终的UML类图</p>
+<p><img data-src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
+<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="JDK源码"><a href="#JDK源码" class="headerlink" title="JDK源码"></a><code>JDK</code>源码</h2><p>在JDK中，使用简单工厂模式的例子如<code>java.util.Calendar</code>，一组<code>getInstance</code>的重载方法，提供了创建<code>Calendar</code>产品的简单工厂方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(Locale aLocale)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>核心方法为</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Calendar <span class="title">createCalendar</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源码较长，不贴了，有兴趣的可以去看下源码。</p>
+<p><code>Calendar</code>的UML类图如下</p>
+<p><img data-src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
+<h2 id="Logback源码"><a href="#Logback源码" class="headerlink" title="Logback源码"></a><code>Logback</code>源码</h2><p><code>logback</code>类中的简单工厂模式主要体现在<code>ch.qos.logback.classic.LoggerContext#getLogger(String)</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;name argument cannot be null&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断log类型返回root节点的logger</span></span><br><span class="line">    <span class="keyword">if</span> (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) &#123;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    Logger logger = root;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果缓存中已经存在的指定的logger，直接返回childLogger</span></span><br><span class="line">    Logger childLogger = (Logger) loggerCache.get(name);</span><br><span class="line">    <span class="comment">// if we have the child， then let us return it without wasting time</span></span><br><span class="line">    <span class="keyword">if</span> (childLogger != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> childLogger;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下是创建logger的逻辑</span></span><br><span class="line">    String childName;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = LoggerNameUtil.getSeparatorIndexOf(name， i);</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            childName = name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            childName = name.substring(<span class="number">0</span>， h);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// move i left of the last point</span></span><br><span class="line">        i = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (logger) &#123;</span><br><span class="line">            childLogger = logger.getChildByName(childName);</span><br><span class="line">            <span class="keyword">if</span> (childLogger == <span class="keyword">null</span>) &#123;</span><br><span class="line">                childLogger = logger.createChildByName(childName);</span><br><span class="line">                loggerCache.put(childName， childLogger);</span><br><span class="line">                incSize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        logger = childLogger;</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> childLogger;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是一个典型的简单工厂方法</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java设计模式（四）工厂方法模式</title>
     <url>/p/30626/</url>
     <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
@@ -884,63 +987,52 @@
       </tags>
   </entry>
   <entry>
-    <title>MacOs科学上网</title>
-    <url>/p/709/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
-<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
+    <title>Kubernetes部署csi-driver</title>
+    <url>/p/20900/</url>
+    <content><![CDATA[<p>本文介绍在<code>k8s</code>集群中部署<code>nfs-csi-driver</code></p>
 <span id="more"></span>
 
-<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
-<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
-</blockquote>
-<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
-<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
-<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
-<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
-<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
-</blockquote>
-<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
-<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
-<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
-<li>点击Proxies</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
-<ol start="2">
-<li>点击Add，添加代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
-<ol start="3">
-<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
-<ol start="4">
-<li>测试</li>
-</ol>
-<p>打开ITerm2测试下，在终端输入</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
+<h1 id="环境依赖"><a href="#环境依赖" class="headerlink" title="环境依赖"></a>环境依赖</h1><ul>
+<li>Docker</li>
+<li>Kubernetes（本文是基于Rancher的RKE集群）</li>
+</ul>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><code>csi-driver</code>是非常丰富的，新搭建的集群，推荐使用阿里云的<code>NAS</code>作为存储后端（<code>NAS</code>对比云盘，扩展性高、费用低、容错好），使用阿里云提供的<a href="https://github.com/kubernetes-sigs/alibaba-cloud-csi-driver/blob/master/docs/nas.md">NAS CSI Plugin</a>进行<code>csi-driver</code>的安装。</p>
+<p>对于有云盘的<code>ECS</code>或者本地服务器来说，可以使用<code>NFS</code>作为存储后端，k8s官方提供了<a href="https://github.com/kubernetes-csi/csi-driver-nfs">nfs-csi-driver</a></p>
+<p>如果是阿里的<code>ECS</code>，还可以使用阿里提供的<a href="https://github.com/kubernetes-sigs/alibaba-cloud-csi-driver/blob/master/docs/disk.md">disk-csi-driver</a>，使用云盘作为存储后端（有<strong>单机故障</strong>的风险）</p>
+<h1 id="部署nfs-csi-driver"><a href="#部署nfs-csi-driver" class="headerlink" title="部署nfs-csi-driver"></a>部署<code>nfs-csi-driver</code></h1><h2 id="1、安装nfs-server"><a href="#1、安装nfs-server" class="headerlink" title="1、安装nfs-server"></a>1、安装<code>nfs-server</code></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 选择一台主机，安装nfs-server</span></span><br><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt install nfs-kernel-server</span><br><span class="line">$ mkdir -p /data/nfs</span><br><span class="line">$ sudo vim /etc/fstab</span><br><span class="line">172.16.1.23:/data/nfs /data/nfs    nfs defaults,timeo=900,retrans=5,_netdev    0 0</span><br><span class="line">$ sudo vim /etc/exports</span><br><span class="line">/data/nfs    172.16.1.23/12(rw,sync,all_squash,anonuid=1001,anongid=1001,no_subtree_check) <span class="comment"># 这里设置anonuid和anongid，是为了便于部署bitnami提供的helm charts</span></span><br><span class="line">$ sudo exportfs -ra</span><br><span class="line"><span class="comment"># bitnami提供的helm-chart的fsGroup默认是1001，如果1001的用户被占用，可以修改用户的uid和gid，将1001空出来给bitnami使用</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 其他主机，配置nfs-client</span></span><br><span class="line">$ apt install nfs-common</span><br><span class="line">$ sudo mount -t nfs -o vers=4 172.16.1.23:/data/nfs /data/nfs</span><br><span class="line"></span><br><span class="line">$ sudo vim /etc/fstab</span><br><span class="line">172.16.1.23:/data/nfs /data/nfs    nfs defaults,timeo=900,retrans=5,_netdev    0 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试nfs访问</span></span><br><span class="line"><span class="comment"># 在任意一台机器上创建、修改、删除文件，在其他机器上会对应列出修改</span></span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
-<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
-<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
-<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
-<ol>
-<li>在Rules标签中点击Add，新建一个规则</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
-<ol start="2">
-<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
-<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
-<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
-<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
+<h2 id="2、安装nfs-csi-driver"><a href="#2、安装nfs-csi-driver" class="headerlink" title="2、安装nfs-csi-driver"></a>2、安装<code>nfs-csi-driver</code></h2><p>这里有个小插曲，由于国内的网络环境，无法下载谷歌的docker镜像，所以只能一个个的把它们转到dockerhub上</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker pull k8s.gcr.io/sig-storage/livenessprobe:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker tag k8s.gcr.io/sig-storage/livenessprobe:v2.1.0 qq1398371419/gcr.sig-storage.livenessprobe:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker push qq1398371419/gcr.sig-storage.livenessprobe:v2.1.0</span><br><span class="line"></span><br><span class="line">docker pull k8s.gcr.io/sig-storage/csi-provisioner:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker tag k8s.gcr.io/sig-storage/csi-provisioner:v2.1.0 qq1398371419/gcr.sig-storage.csi-provisioner:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker push qq1398371419/gcr.sig-storage.csi-provisioner:v2.1.0</span><br><span class="line">    </span><br><span class="line">docker pull k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker tag k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.1.0 qq1398371419/gcr.sig-storage.csi-node-driver-registrar:v2.1.0 \</span><br><span class="line">    &amp;&amp; docker push qq1398371419/gcr.sig-storage.csi-node-driver-registrar:v2.1.0</span><br></pre></td></tr></table></figure>
+
+<p>安装<code>nfs-csi-driver</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -skSL https://gitee.com/qq1398371419/csi-driver-nfs/raw/master/deploy/install-driver.sh | bash -s master --</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2021/06/20/lLBaReX3HkDdiur.png" alt="Image"></p>
+<h2 id="3、安装StorageClass"><a href="#3、安装StorageClass" class="headerlink" title="3、安装StorageClass"></a>3、安装<code>StorageClass</code></h2><p><code>nfs-sc.yaml</code></p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-csi</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">nfs.csi.k8s.io</span></span><br><span class="line"><span class="attr">parameters:</span></span><br><span class="line">  <span class="attr">server:</span> <span class="number">172.16</span><span class="number">.1</span><span class="number">.23</span> <span class="comment"># 这里改成自己的内网IP</span></span><br><span class="line">  <span class="attr">share:</span> <span class="string">/data/nfs</span> <span class="comment"># 这里改成自己的nfs共享目录</span></span><br><span class="line"><span class="attr">reclaimPolicy:</span> <span class="string">Retain</span></span><br><span class="line"><span class="attr">volumeBindingMode:</span> <span class="string">Immediate</span></span><br><span class="line"><span class="attr">mountOptions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hard</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">nfsvers=4.1</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ kubectl create -f nfs-sc.yaml</span><br></pre></td></tr></table></figure>
+
+<h2 id="4、测试部署Redis"><a href="#4、测试部署Redis" class="headerlink" title="4、测试部署Redis"></a>4、测试部署<code>Redis</code></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim redis-test.yaml</span><br><span class="line">---</span><br><span class="line">master:</span><br><span class="line">  persistence:</span><br><span class="line">    storageClass: nfs-csi</span><br><span class="line">  service:</span><br><span class="line">    nodePort: 30001</span><br><span class="line">    <span class="built_in">type</span>: NodePort</span><br><span class="line">replica:</span><br><span class="line">  persistence:</span><br><span class="line">    storageClass: nfs-csi</span><br><span class="line">auth:</span><br><span class="line">  enabled: <span class="literal">false</span></span><br><span class="line">$ helm repo add bitnami https://charts.bitnami.com/bitnami</span><br><span class="line">$ helm install my-release bitnami/redis -f redis-test.yaml</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2021/06/20/dDX954OPA3nBKmi.png" alt="image-20210620031253181"></p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><blockquote>
+<p>前面提到的设置anonuid和anongid，是因为部署<code>bitnami</code>提供的<code>helm charts</code>遇到了无法写入文件的问题，之所以设置为1001，因为bitnami默认的uid是1001</p>
+</blockquote>
+<p><img data-src="https://i.loli.net/2021/06/20/ybG6rDFjchtZHla.png" alt="Image"></p>
+<p>容器对于mount的路径的访问权限问题，可以参考<a href="https://www.cnblogs.com/sammyliu/p/10129670.html">https://www.cnblogs.com/sammyliu/p/10129670.html</a></p>
+<h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
+<li><a href="https://kubernetes-csi.github.io/docs/drivers.html">Kubernetes CSI Developer Documentation</a></li>
+<li><a href="https://github.com/kubernetes-sigs/alibaba-cloud-csi-driver">alibaba-cloud-csi-driver</a></li>
+<li><a href="https://github.com/kubernetes-csi">Kubernetes CSI</a></li>
 </ul>
 ]]></content>
       <categories>
-        <category>随笔</category>
+        <category>工作</category>
       </categories>
       <tags>
-        <tag>科学上网</tag>
+        <tag>Kubernetes</tag>
+        <tag>Docker</tag>
       </tags>
   </entry>
   <entry>
@@ -1040,37 +1132,63 @@
       </tags>
   </entry>
   <entry>
-    <title>PG数据库常用操作</title>
-    <url>/p/59866/</url>
-    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
-<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
-<li>备份数据</li>
+    <title>MacOs科学上网</title>
+    <url>/p/709/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
+<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
+<span id="more"></span>
+
+<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
+<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
+</blockquote>
+<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
+<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
+<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
+<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
+<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
+</blockquote>
+<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
+<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
+<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
+<li>点击Proxies</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
+<ol start="2">
+<li>点击Add，添加代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
+<ol start="3">
+<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
+<ol start="4">
+<li>测试</li>
+</ol>
+<p>打开ITerm2测试下，在终端输入</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
+<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
+<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
+<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
+<ol>
+<li>在Rules标签中点击Add，新建一个规则</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
+<ol start="2">
+<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
+<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
+<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
+<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>正式迁移</li>
-</ul>
-<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
-<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
-
-<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
-
-<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
-
 ]]></content>
       <categories>
-        <category>学习</category>
+        <category>随笔</category>
       </categories>
       <tags>
-        <tag>数据库</tag>
+        <tag>科学上网</tag>
       </tags>
   </entry>
   <entry>
@@ -1133,6 +1251,40 @@
       </categories>
       <tags>
         <tag>Nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PG数据库常用操作</title>
+    <url>/p/59866/</url>
+    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
+<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
+<li>备份数据</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>正式迁移</li>
+</ul>
+<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
+<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
+
+<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
+
+<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -2071,6 +2223,37 @@
       </tags>
   </entry>
   <entry>
+    <title>Ubuntu 安装MongoDB</title>
+    <url>/p/49357/</url>
+    <content><![CDATA[<p>Ubuntu16.04安装MongoDB指南</p>
+<span id="more"></span>
+
+<h1 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
+
+<h1 id="安装mongodb"><a href="#安装mongodb" class="headerlink" title="安装mongodb"></a>安装mongodb</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install mongodb</span><br></pre></td></tr></table></figure>
+
+<p>mongodb默认是监听在127.0.0.1端口的，要开启外网连接，需要修改mongodb配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/mongodb.conf</span><br></pre></td></tr></table></figure>
+
+<p><code>bind_ip = 127.0.0.1</code> 修改为<code>bind_ip = 0.0.0.0</code></p>
+<h1 id="连接mongodb"><a href="#连接mongodb" class="headerlink" title="连接mongodb"></a>连接mongodb</h1><p>使用工具<a href="https://robomongo.org/">robo 3t</a>，添加连接信息</p>
+<p><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
+<h1 id="启用密码访问"><a href="#启用密码访问" class="headerlink" title="启用密码访问"></a>启用密码访问</h1><p>mongodb默认是不开启密码登录的，如果要开启，修改mongodb配置文件：</p>
+<p>取消<code>#auth = true</code>前面的注释，并重启mongodb<code>service mongodb restart</code></p>
+<p>添加用户信息:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">use test_db;</span><br><span class="line">db.createUser(&#123;user:<span class="string">&#x27;cool&#x27;</span>, <span class="built_in">pwd</span>:<span class="string">&#x27;cool&#x27;</span>, roles: [ &#123; role: <span class="string">&quot;readWrite&quot;</span>, db: <span class="string">&quot;test_db&quot;</span> &#125; ]&#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>NoSql</tag>
+        <tag>MongoDB</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>TamperMonkey 使用指南以及脚本推荐</title>
     <url>/p/29031/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>Chrome浏览器是最适合开发者使用的浏览器，不仅仅是因为Chrome对于Js的友好支持，更是由于Chrome支持丰富且功能强大的插件，扩展了浏览器的功能和使用体验。</p>
@@ -2147,37 +2330,6 @@
       </categories>
       <tags>
         <tag>Chrome</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Ubuntu 安装MongoDB</title>
-    <url>/p/49357/</url>
-    <content><![CDATA[<p>Ubuntu16.04安装MongoDB指南</p>
-<span id="more"></span>
-
-<h1 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
-
-<h1 id="安装mongodb"><a href="#安装mongodb" class="headerlink" title="安装mongodb"></a>安装mongodb</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install mongodb</span><br></pre></td></tr></table></figure>
-
-<p>mongodb默认是监听在127.0.0.1端口的，要开启外网连接，需要修改mongodb配置文件：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/mongodb.conf</span><br></pre></td></tr></table></figure>
-
-<p><code>bind_ip = 127.0.0.1</code> 修改为<code>bind_ip = 0.0.0.0</code></p>
-<h1 id="连接mongodb"><a href="#连接mongodb" class="headerlink" title="连接mongodb"></a>连接mongodb</h1><p>使用工具<a href="https://robomongo.org/">robo 3t</a>，添加连接信息</p>
-<p><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
-<h1 id="启用密码访问"><a href="#启用密码访问" class="headerlink" title="启用密码访问"></a>启用密码访问</h1><p>mongodb默认是不开启密码登录的，如果要开启，修改mongodb配置文件：</p>
-<p>取消<code>#auth = true</code>前面的注释，并重启mongodb<code>service mongodb restart</code></p>
-<p>添加用户信息:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">use test_db;</span><br><span class="line">db.createUser(&#123;user:<span class="string">&#x27;cool&#x27;</span>, <span class="built_in">pwd</span>:<span class="string">&#x27;cool&#x27;</span>, roles: [ &#123; role: <span class="string">&quot;readWrite&quot;</span>, db: <span class="string">&quot;test_db&quot;</span> &#125; ]&#125;);</span><br></pre></td></tr></table></figure>
-
-<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>NoSql</tag>
-        <tag>MongoDB</tag>
       </tags>
   </entry>
   <entry>
@@ -2273,6 +2425,35 @@
       </categories>
       <tags>
         <tag>Ubuntu</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu部署docker</title>
+    <url>/p/42583/</url>
+    <content><![CDATA[<p>本文介绍在<code>Ubuntu</code>上部署docker</p>
+<span id="more"></span>
+
+<h1 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get update &amp;&amp; sudo apt-get -y install apt-transport-https ca-certificates curl gnupg-agent software-properties-common &amp;&amp; curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo apt-key add - &amp;&amp; sudo apt-key fingerprint 0EBFCD88 &amp;&amp; sudo add-apt-repository <span class="string">&quot;deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu <span class="subst">$(lsb_release -cs)</span> stable&quot;</span> &amp;&amp; sudo apt-get update &amp;&amp; sudo apt-get -y install docker-ce docker-ce-cli containerd.io &amp;&amp; sudo docker --version</span><br><span class="line">...</span><br><span class="line">Docker version 19.03.12, build 48a66213fe</span><br></pre></td></tr></table></figure>
+
+<h1 id="安装docker-compose"><a href="#安装docker-compose" class="headerlink" title="安装docker-compose"></a>安装docker-compose</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo curl -L <span class="string">&quot;https://github.91chifun.workers.dev/https://github.com//docker/compose/releases/download/1.29.2/docker-compose-<span class="subst">$(uname -s)</span>-<span class="subst">$(uname -m)</span>&quot;</span> -o /usr/<span class="built_in">local</span>/bin/docker-compose &amp;&amp; sudo chmod +x /usr/<span class="built_in">local</span>/bin/docker-compose &amp;&amp; docker-compose --version</span><br><span class="line">...</span><br><span class="line">docker-compose version 1.26.2, build eefe0d31</span><br></pre></td></tr></table></figure>
+
+<h1 id="配置docker"><a href="#配置docker" class="headerlink" title="配置docker"></a>配置docker</h1><blockquote>
+<p>可选，但是由于国内网络环境等因素，还是建议做一下配置</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo vim /etc/docker/daemon.json</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;data-root&quot;</span>: <span class="string">&quot;/data/docker&quot;</span>, // 将docker镜像等内容移动到数据盘，注意：之前如果有启动过的容器，或者拉取的镜像，修改这个值，将会失效，谨慎修改</span><br><span class="line">    <span class="string">&quot;log-driver&quot;</span>:<span class="string">&quot;json-file&quot;</span>, // 设置<span class="built_in">log</span>文件格式</span><br><span class="line">    <span class="string">&quot;log-opts&quot;</span>:&#123; // 设置<span class="built_in">log</span>文件</span><br><span class="line">        <span class="string">&quot;max-size&quot;</span>:<span class="string">&quot;10m&quot;</span>,</span><br><span class="line">        <span class="string">&quot;max-file&quot;</span>:<span class="string">&quot;3&quot;</span>,</span><br><span class="line">        <span class="string">&quot;labels&quot;</span>:<span class="string">&quot;production_status&quot;</span>,</span><br><span class="line">        <span class="string">&quot;env&quot;</span>:<span class="string">&quot;os,customer&quot;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">&quot;insecure-registries&quot;</span>:[ </span><br><span class="line">        <span class="string">&quot;registryhost:5000&quot;</span>,</span><br><span class="line">        <span class="string">&quot;10.0.0.0/8&quot;</span></span><br><span class="line">    ],</span><br><span class="line">    <span class="string">&quot;registry-mirrors&quot;</span>:[ // 阿里云镜像加速</span><br><span class="line">        <span class="string">&quot;https://mubkcb81.mirror.aliyuncs.com&quot;</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line">$ sudo systemctl daemon-reload</span><br><span class="line">$ sudo systemctl restart docker</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置docker开机自启动</span></span><br><span class="line">sudo systemctl <span class="built_in">enable</span> docker</span><br></pre></td></tr></table></figure>
+
+<h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
+<li><a href="https://docs.docker.com/engine/install/centos/">CentOS</a></li>
+<li><a href="https://docs.docker.com/engine/install/ubuntu/">Ubuntu</a></li>
+<li><a href="https://docs.docker.com/engine/install/debian/">Debian</a></li>
+<li><a href="https://docs.docker.com/engine/install/fedora/">Fedora</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>默认</tag>
       </tags>
   </entry>
   <entry>
@@ -2557,6 +2738,61 @@
       </tags>
   </entry>
   <entry>
+    <title>使用certbot给网站上免费的SSL证书</title>
+    <url>/p/16060/</url>
+    <content><![CDATA[<p>本文介绍使用<a href="">certbot</a>为网站添加HTTPS支持，并自动更新</p>
+<span id="more"></span>
+
+<h1 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h1><ul>
+<li>docker</li>
+<li>docker-compose</li>
+</ul>
+<h1 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h1><h2 id="克隆仓库"><a href="#克隆仓库" class="headerlink" title="克隆仓库"></a>克隆仓库</h2><blockquote>
+<p>这一步必不可少，一定要按照作者的仓库目录结构来执行，完成后，可以自行更改<code>nginx/conf.d</code>下的配置文件。</p>
+<p>具体原因我也不知，但是不照做，会出现一些奇怪的问题。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir -p /data</span><br><span class="line">$ <span class="built_in">cd</span> /data</span><br><span class="line">$ git <span class="built_in">clone</span> https://ghproxy.com/https://github.com/gcdd1993/nginx-certbot</span><br><span class="line">$ <span class="built_in">cd</span> nginx-certbot</span><br><span class="line">$ ls -l</span><br><span class="line">drwxr-xr-x 4 root root 4096 Jun  8 22:01 ./</span><br><span class="line">drwxr-xr-x 5 root root 4096 Jun  8 21:49 ../</span><br><span class="line">drwxr-xr-x 4 root root 4096 Jun  8 21:53 data/</span><br><span class="line">-rw-r--r-- 1 root root  660 Jun  8 21:49 docker-compose.yml</span><br><span class="line">drwxr-xr-x 8 root root 4096 Jun  8 21:49 .git/</span><br><span class="line">-rw-r--r-- 1 root root   14 Jun  8 21:49 .gitignore</span><br><span class="line">-rwxr-xr-x 1 root root 2286 Jun  8 22:01 init-letsencrypt.sh*</span><br><span class="line">-rw-r--r-- 1 root root 1074 Jun  8 21:49 LICENSE</span><br><span class="line">-rw-r--r-- 1 root root 1376 Jun  8 21:49 README.md</span><br></pre></td></tr></table></figure>
+
+<h2 id="为域名添加证书"><a href="#为域名添加证书" class="headerlink" title="为域名添加证书"></a>为域名添加证书</h2><blockquote>
+<p>💡在这一步执行前，请确认已经将需要添加证书的域名指向本机公网IP，因为在执行过程中，会进行服务器所属权校验，需要访问你所操作的域名</p>
+</blockquote>
+<h3 id="1、修改init-letsencrypt-sh的email为你的邮箱"><a href="#1、修改init-letsencrypt-sh的email为你的邮箱" class="headerlink" title="1、修改init-letsencrypt.sh的email为你的邮箱"></a>1、修改<code>init-letsencrypt.sh</code>的<code>email</code>为你的邮箱</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim init-letsencrypt.sh</span><br><span class="line">...</span><br><span class="line">email=<span class="string">&quot;gcwm99@gmail.com&quot;</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="2、修改操作域名"><a href="#2、修改操作域名" class="headerlink" title="2、修改操作域名"></a>2、修改操作域名</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sed -i <span class="string">&#x27;s/example.org/your_domain/g&#x27;</span> data/nginx/app.conf \</span><br><span class="line">	&amp;&amp; sed -i <span class="string">&#x27;s/example.org/your_domain/g&#x27;</span> init-letsencrypt.sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、执行init-letsencrypt-sh"><a href="#3、执行init-letsencrypt-sh" class="headerlink" title="3、执行init-letsencrypt.sh"></a>3、执行<code>init-letsencrypt.sh</code></h3><blockquote>
+<p>直到出现以下内容，说明已经完成</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ ./init-letsencrypt.sh</span><br><span class="line">...</span><br><span class="line">Requesting a certificate <span class="keyword">for</span> your_domain</span><br><span class="line"></span><br><span class="line">Successfully received certificate.</span><br><span class="line">Certificate is saved at: /etc/letsencrypt/live/your_domain/fullchain.pem</span><br><span class="line">Key is saved at:         /etc/letsencrypt/live/your_domain/privkey.pem</span><br><span class="line">This certificate expires on 2021-09-06.</span><br><span class="line">These files will be updated when the certificate renews.</span><br><span class="line"></span><br><span class="line">NEXT STEPS:</span><br><span class="line">- The certificate will need to be renewed before it expires. Certbot can automatically renew the certificate <span class="keyword">in</span> the background, but you may need to take steps to <span class="built_in">enable</span> that functionality. See https://certbot.org/renewal-setup <span class="keyword">for</span> instructions.</span><br><span class="line"></span><br><span class="line">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span><br><span class="line">If you like Certbot, please consider supporting our work by:</span><br><span class="line">* Donating to ISRG / Let<span class="string">&#x27;s Encrypt:   https://letsencrypt.org/donate</span></span><br><span class="line"><span class="string">* Donating to EFF:                    https://eff.org/donate-le</span></span><br><span class="line"><span class="string">- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4、多域名操作"><a href="#4、多域名操作" class="headerlink" title="4、多域名操作"></a>4、多域名操作</h3><blockquote>
+<p>步骤同上，先修改域名为待操作域名，然后执行<code>init-letsencrypt.sh</code></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sed -i <span class="string">&#x27;s/your_domain/your_domain2/g&#x27;</span> data/nginx/app.conf \</span><br><span class="line">	&amp;&amp; sed -i <span class="string">&#x27;s/your_domain/your_domain2/g&#x27;</span> init-letsencrypt.sh</span><br><span class="line">$ ./init-letsencrypt.sh</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="5、启动你的网站"><a href="#5、启动你的网站" class="headerlink" title="5、启动你的网站"></a>5、启动你的网站</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 注释app.conf</span></span><br><span class="line">$ <span class="built_in">cd</span> data/nginx</span><br><span class="line">$ mv app.conf app.conf.bak</span><br><span class="line"><span class="comment"># 添加你的网站配置</span></span><br></pre></td></tr></table></figure>
+
+<p>示例配置</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">upstream</span> my.site &#123;</span><br><span class="line">    <span class="attribute">server</span> localhost:<span class="number">8080</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">server_name</span> your_domain;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">proxy_read_timeout</span> <span class="number">600s</span>;</span><br><span class="line">    <span class="attribute">proxy_send_timeout</span> <span class="number">600s</span>;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">location</span> / &#123;</span><br><span class="line">        <span class="attribute">add_header</span> X-Frame-Options deny;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://my.site;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">listen</span> <span class="number">443</span> ssl; <span class="comment"># managed by Certbot</span></span><br><span class="line">    <span class="attribute">ssl_certificate</span> /etc/letsencrypt/live/your_domain/fullchain.pem;</span><br><span class="line">    <span class="attribute">ssl_certificate_key</span> /etc/letsencrypt/live/your_domain/privkey.pem;</span><br><span class="line">    <span class="attribute">include</span> /etc/letsencrypt/options-ssl-nginx.conf;</span><br><span class="line">    <span class="attribute">ssl_dhparam</span> /etc/letsencrypt/ssl-dhparams.pem;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">server_tokens</span> <span class="literal">off</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">if</span> ($host = your_domain) &#123;</span><br><span class="line">        <span class="attribute">return</span> <span class="number">301</span> https://$host$request_uri;</span><br><span class="line">    &#125; <span class="comment"># managed by Certbot</span></span><br><span class="line"></span><br><span class="line">    <span class="attribute">server_name</span> your_domain;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">return</span> <span class="number">404</span>; <span class="comment"># managed by Certbot</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="更新证书"><a href="#更新证书" class="headerlink" title="更新证书"></a>更新证书</h1><blockquote>
+<p>作者给出的<code>docker-compose.yml</code>已经默认12小时检查并更新一次，所以非常省心</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ docker <span class="built_in">exec</span> -it nginx-certbot_certbot_1 certbot renew</span><br><span class="line">...</span><br><span class="line">The following certificates are not due <span class="keyword">for</span> renewal yet:</span><br><span class="line">  /etc/letsencrypt/live/your_domain/fullchain.pem expires on 2021-09-06 (skipped)</span><br><span class="line">No renewals were attempted.</span><br></pre></td></tr></table></figure>
+
+<h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
+<li><a href="https://github.com/certbot/certbot">certbot</a></li>
+<li><a href="https://github.com/gcdd1993/nginx-certbot">nginx-certbot</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>默认</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>分布式任务调度XXL-JOB初体验</title>
     <url>/p/29085/</url>
     <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><a href="http://www.xuxueli.com/xxl-job/#/">XXL-JOB</a>是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。<span id="more"></span></p>
@@ -2611,6 +2847,38 @@
       <tags>
         <tag>xxl-job</tag>
         <tag>分布式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>后端跨域的N种方法</title>
+    <url>/p/34331/</url>
+    <content><![CDATA[<blockquote>
+<p>简单来说，CORS是一种访问机制，英文全称是Cross-Origin Resource Sharing，即我们常说的跨域资源共享，通过在服务器端设置响应头，把发起跨域的原始域名添加到Access-Control-Allow-Origin 即可。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="返回新的CorsFilter-全局跨域"><a href="#返回新的CorsFilter-全局跨域" class="headerlink" title="返回新的CorsFilter(全局跨域)"></a>返回新的CorsFilter(全局跨域)</h1><blockquote>
+<p>在任意配置类，返回一个新的CorsFilter Bean，并添加映射路径和具体的CORS配置信息。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalCorsConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CorsFilter <span class="title">corsFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1.添加CORS配置信息</span></span><br><span class="line">        CorsConfiguration config = <span class="keyword">new</span> CorsConfiguration();</span><br><span class="line">        <span class="comment">//放行哪些原始域</span></span><br><span class="line">        config.addAllowedOrigin(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">        config.setAllowCredentials(<span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">        config.addAllowedMethod(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">        config.addAllowedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//暴露哪些头部信息(因为跨域访问默认不能获取全部头部信息)</span></span><br><span class="line">        config.addExposedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.添加映射路径</span></span><br><span class="line">        UrlBasedCorsConfigurationSource configSource = <span class="keyword">new</span> UrlBasedCorsConfigurationSource();</span><br><span class="line">        configSource.registerCorsConfiguration(<span class="string">&quot;/**&quot;</span>, config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.返回新的CorsFilter.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CorsFilter(configSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用注解-局部跨域"><a href="#使用注解-局部跨域" class="headerlink" title="使用注解(局部跨域)"></a>使用注解(局部跨域)</h1><h2 id="在方法上-RequestMapping-使用注解-CrossOrigin"><a href="#在方法上-RequestMapping-使用注解-CrossOrigin" class="headerlink" title="在方法上(@RequestMapping)使用注解 @CrossOrigin"></a>在方法上(@RequestMapping)使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="meta">@CrossOrigin(&quot;http://localhost:8080&quot;)</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="在控制器-Controller-上使用注解-CrossOrigin"><a href="#在控制器-Controller-上使用注解-CrossOrigin" class="headerlink" title="在控制器(@Controller)上使用注解 @CrossOrigin"></a>在控制器(@Controller)上使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@CrossOrigin(origins = &quot;http://domain.com&quot;, maxAge = 3600)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="手工设置响应头-局部跨域"><a href="#手工设置响应头-局部跨域" class="headerlink" title="手工设置响应头(局部跨域)"></a>手工设置响应头(局部跨域)</h2><blockquote>
+<p>使用HttpServletResponse对象添加响应头（Access-Control-Allow-Origin）来授权原始域，这里Origin的值也可以设置为”*” ，表示全部放行。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletResponse response)</span></span>&#123;</span><br><span class="line">    response.addHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Nginx配置跨域"><a href="#Nginx配置跨域" class="headerlink" title="Nginx配置跨域"></a>Nginx配置跨域</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upstream server &#123;</span><br><span class="line">        server 127.0.0.1:8091;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name domain.com;</span><br><span class="line"></span><br><span class="line">        location ^~/api &#123;</span><br><span class="line">                //添加跨域请求头</span><br><span class="line">                proxy_set_header Access-Control-Allow-Origin *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Methods *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Headers *;</span><br><span class="line"></span><br><span class="line">                if ($request_method = &#x27;OPTIONS&#x27;) &#123;</span><br><span class="line">                        return 204;</span><br><span class="line">                &#125;</span><br><span class="line">                rewrite ^/api/(.+?)$ /$1 break;</span><br><span class="line">                proxy_pass http://server;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>跨域</tag>
       </tags>
   </entry>
   <entry>
@@ -2675,38 +2943,6 @@
       </categories>
       <tags>
         <tag>Jcenter</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>后端跨域的N种方法</title>
-    <url>/p/34331/</url>
-    <content><![CDATA[<blockquote>
-<p>简单来说，CORS是一种访问机制，英文全称是Cross-Origin Resource Sharing，即我们常说的跨域资源共享，通过在服务器端设置响应头，把发起跨域的原始域名添加到Access-Control-Allow-Origin 即可。</p>
-</blockquote>
-<span id="more"></span>
-
-<h1 id="返回新的CorsFilter-全局跨域"><a href="#返回新的CorsFilter-全局跨域" class="headerlink" title="返回新的CorsFilter(全局跨域)"></a>返回新的CorsFilter(全局跨域)</h1><blockquote>
-<p>在任意配置类，返回一个新的CorsFilter Bean，并添加映射路径和具体的CORS配置信息。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalCorsConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CorsFilter <span class="title">corsFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1.添加CORS配置信息</span></span><br><span class="line">        CorsConfiguration config = <span class="keyword">new</span> CorsConfiguration();</span><br><span class="line">        <span class="comment">//放行哪些原始域</span></span><br><span class="line">        config.addAllowedOrigin(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">        config.setAllowCredentials(<span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">        config.addAllowedMethod(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">        config.addAllowedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//暴露哪些头部信息(因为跨域访问默认不能获取全部头部信息)</span></span><br><span class="line">        config.addExposedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.添加映射路径</span></span><br><span class="line">        UrlBasedCorsConfigurationSource configSource = <span class="keyword">new</span> UrlBasedCorsConfigurationSource();</span><br><span class="line">        configSource.registerCorsConfiguration(<span class="string">&quot;/**&quot;</span>, config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.返回新的CorsFilter.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CorsFilter(configSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="使用注解-局部跨域"><a href="#使用注解-局部跨域" class="headerlink" title="使用注解(局部跨域)"></a>使用注解(局部跨域)</h1><h2 id="在方法上-RequestMapping-使用注解-CrossOrigin"><a href="#在方法上-RequestMapping-使用注解-CrossOrigin" class="headerlink" title="在方法上(@RequestMapping)使用注解 @CrossOrigin"></a>在方法上(@RequestMapping)使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="meta">@CrossOrigin(&quot;http://localhost:8080&quot;)</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="在控制器-Controller-上使用注解-CrossOrigin"><a href="#在控制器-Controller-上使用注解-CrossOrigin" class="headerlink" title="在控制器(@Controller)上使用注解 @CrossOrigin"></a>在控制器(@Controller)上使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@CrossOrigin(origins = &quot;http://domain.com&quot;, maxAge = 3600)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="手工设置响应头-局部跨域"><a href="#手工设置响应头-局部跨域" class="headerlink" title="手工设置响应头(局部跨域)"></a>手工设置响应头(局部跨域)</h2><blockquote>
-<p>使用HttpServletResponse对象添加响应头（Access-Control-Allow-Origin）来授权原始域，这里Origin的值也可以设置为”*” ，表示全部放行。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletResponse response)</span></span>&#123;</span><br><span class="line">    response.addHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="Nginx配置跨域"><a href="#Nginx配置跨域" class="headerlink" title="Nginx配置跨域"></a>Nginx配置跨域</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upstream server &#123;</span><br><span class="line">        server 127.0.0.1:8091;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name domain.com;</span><br><span class="line"></span><br><span class="line">        location ^~/api &#123;</span><br><span class="line">                //添加跨域请求头</span><br><span class="line">                proxy_set_header Access-Control-Allow-Origin *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Methods *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Headers *;</span><br><span class="line"></span><br><span class="line">                if ($request_method = &#x27;OPTIONS&#x27;) &#123;</span><br><span class="line">                        return 204;</span><br><span class="line">                &#125;</span><br><span class="line">                rewrite ^/api/(.+?)$ /$1 break;</span><br><span class="line">                proxy_pass http://server;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>跨域</tag>
       </tags>
   </entry>
   <entry>
@@ -2873,6 +3109,35 @@
       </tags>
   </entry>
   <entry>
+    <title>掘金解绑方案（已成功解绑微信）</title>
+    <url>/p/34461/</url>
+    <content><![CDATA[<p>掘金的绑定限制为同一个第三方账号只能绑定一个掘金账号，且必须留存一个第三方绑定。</p>
+<p>比如，我只绑定了微信，想要解绑微信，对不起，不支持。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
+<span id="more"></span>
+
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我突然想到，既然必须留存一个第三方绑定，那我留存一个<strong>邮箱绑定</strong>不就好了吗？</p>
+<p>思路就是<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，通过绑定一个邮箱账号，来绑定邮箱，从而将我们的账号解放出来，绑定我们的大号或者其他账号。</p>
+<h2 id="获取临时电子邮件地址"><a href="#获取临时电子邮件地址" class="headerlink" title="获取临时电子邮件地址"></a>获取临时电子邮件地址</h2><p>打开<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，你将会获取到一个临时电子邮件地址，我们将使用这个邮件绑定我们的掘金账号。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
+<h2 id="绑定临时邮箱"><a href="#绑定临时邮箱" class="headerlink" title="绑定临时邮箱"></a>绑定临时邮箱</h2><p>点击绑定邮箱，输入我们上一步获取到的临时邮件地址，返回<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>网站，耐心等待10s左右。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
+<p>你将会受到掘金的邮箱绑定验证邮件，打开并点击，直到绑定成功。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
+<h2 id="解绑"><a href="#解绑" class="headerlink" title="解绑"></a>解绑</h2><p>接下来我们就可以开心的解绑我们自己的账号了。我要解绑的是微信，试一下吧。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
+<h1 id="友情提醒"><a href="#友情提醒" class="headerlink" title="友情提醒"></a>友情提醒</h1><blockquote>
+<p>由于使用的是一次性邮件地址，该做法可能会导致你解绑的账号登录不上，请谨慎操作！</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>技巧</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>手写IOC容器</title>
     <url>/p/11305/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文是为了学习<code>Spring IOC</code>容器的执行过程而写，不能完全代表<code>Spring IOC</code>容器，只是简单实现了容器的<strong>依赖注入</strong>和<strong>控制反转</strong>功能，无法用于生产，只能说对理解Spring容器能够起到一定的作用。</p>
@@ -2946,32 +3211,89 @@
       </tags>
   </entry>
   <entry>
-    <title>掘金解绑方案（已成功解绑微信）</title>
-    <url>/p/34461/</url>
-    <content><![CDATA[<p>掘金的绑定限制为同一个第三方账号只能绑定一个掘金账号，且必须留存一个第三方绑定。</p>
-<p>比如，我只绑定了微信，想要解绑微信，对不起，不支持。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
+    <title>消息队列（三）Apache ActiveMQ</title>
+    <url>/p/32495/</url>
+    <content><![CDATA[<h1 id="在Ubuntu上安装ActiveMQ"><a href="#在Ubuntu上安装ActiveMQ" class="headerlink" title="在Ubuntu上安装ActiveMQ"></a>在Ubuntu上安装ActiveMQ</h1><h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
+
 <span id="more"></span>
 
-<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我突然想到，既然必须留存一个第三方绑定，那我留存一个<strong>邮箱绑定</strong>不就好了吗？</p>
-<p>思路就是<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，通过绑定一个邮箱账号，来绑定邮箱，从而将我们的账号解放出来，绑定我们的大号或者其他账号。</p>
-<h2 id="获取临时电子邮件地址"><a href="#获取临时电子邮件地址" class="headerlink" title="获取临时电子邮件地址"></a>获取临时电子邮件地址</h2><p>打开<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，你将会获取到一个临时电子邮件地址，我们将使用这个邮件绑定我们的掘金账号。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
-<h2 id="绑定临时邮箱"><a href="#绑定临时邮箱" class="headerlink" title="绑定临时邮箱"></a>绑定临时邮箱</h2><p>点击绑定邮箱，输入我们上一步获取到的临时邮件地址，返回<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>网站，耐心等待10s左右。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
-<p>你将会受到掘金的邮箱绑定验证邮件，打开并点击，直到绑定成功。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
-<h2 id="解绑"><a href="#解绑" class="headerlink" title="解绑"></a>解绑</h2><p>接下来我们就可以开心的解绑我们自己的账号了。我要解绑的是微信，试一下吧。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
-<h1 id="友情提醒"><a href="#友情提醒" class="headerlink" title="友情提醒"></a>友情提醒</h1><blockquote>
-<p>由于使用的是一次性邮件地址，该做法可能会导致你解绑的账号登录不上，请谨慎操作！</p>
+<h2 id="搭建activemq服务"><a href="#搭建activemq服务" class="headerlink" title="搭建activemq服务"></a>搭建activemq服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /home/active-mq</span><br><span class="line">$ <span class="built_in">cd</span> /home/active-mq</span><br><span class="line">$ wget http://www.apache.org/dist/activemq/5.15.9/apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 具体版本请查看http://www.apache.org/dist/activemq</span></span><br><span class="line">$ tar -zxvf apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 如果未安装jdk，执行 sudo apt-get install openjdk-8-jdk</span></span><br><span class="line">$ ./activemq start</span><br><span class="line">INFO: Loading <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//bin/env&#x27;</span></span><br><span class="line">INFO: Using java <span class="string">&#x27;/usr/bin/java&#x27;</span></span><br><span class="line">INFO: Starting - inspect logfiles specified <span class="keyword">in</span> logging.properties and log4j.properties to get details</span><br><span class="line">INFO: pidfile created : <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//data/activemq.pid&#x27;</span> (pid <span class="string">&#x27;6356&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>浏览器打开<a href="http://localhost:8161/admin/%EF%BC%8C%E8%BE%93%E5%85%A5admin%EF%BC%8Cadmin">http://localhost:8161/admin/，输入admin，admin</a></p>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
+<p>至此，ActiveMQ搭建完成。</p>
+<h1 id="理解JMS-Java-Message-Service"><a href="#理解JMS-Java-Message-Service" class="headerlink" title="理解JMS( Java Message Service)"></a>理解JMS( Java Message Service)</h1><p>Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持JAVA应用程序开发。</p>
+<h2 id="JMS模型"><a href="#JMS模型" class="headerlink" title="JMS模型"></a>JMS模型</h2><ul>
+<li><p><a href="https://zh.wikipedia.org/wiki/%E7%82%B9%E5%AF%B9%E7%82%B9">点对点</a>（P2P）或队列模型</p>
+<ul>
+<li>只有一个消费者将获得消息</li>
+<li>生产者不需要在接收者消费该消息期间处于运行状态，接收者也同样不需要在消息发送时处于运行状态。</li>
+<li>每一个成功处理的消息都由接收者签收</li>
+</ul>
+</li>
+<li><p><a href="https://zh.wikipedia.org/wiki/%E5%8F%91%E5%B8%83/%E8%AE%A2%E9%98%85">发布/订阅</a>模型</p>
+<ul>
+<li>多个消费者可以获得消息</li>
+<li>在发布者和订阅者之间存在时间依赖性。发布者需要创建一个订阅（subscription），以便客户能够购订阅。订阅者必须保持持续的活动状态以接收消息，除非订阅者创建了持久的订阅。在那种情况下，在订阅者未连接时发布的消息将在订阅者重新连接时重新发布。</li>
+</ul>
+</li>
+</ul>
+<h2 id="传统API"><a href="#传统API" class="headerlink" title="传统API"></a>传统API</h2><p>传统API提供的主要接口如下：</p>
+<ul>
+<li><p>ConnectionFactory：客户端用来创建连接的受管对象。简化API也会使用此接口。</p>
+</li>
+<li><p>Connection：客户端到JMS提供者之间的活动连接。</p>
+</li>
+<li><p>Session：发送和接收消息的一个单线程上下文。</p>
+</li>
+<li><p>MessageProducer：由Session创建的对象，用于发送消息到Queue或Topic</p>
+</li>
+<li><p>MessageConsumer：由Session创建的对象，用于接收Queue或Topic中的消息</p>
+</li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
+<h2 id="简化API"><a href="#简化API" class="headerlink" title="简化API"></a>简化API</h2><p>简化API与传统API提供的消息功能是一样的，但是它需要的接口更少、使用更方便。 简化API提供的主要接口如下：</p>
+<ul>
+<li>ConnectionFactory：客户端用来创建连接的受管对象。传统API也会使用此接口。</li>
+<li>JMSContext：客户端到JMS提供者之间的活动连接，以及发送和接收消息的一个单线程上下文。</li>
+<li>JMSProducer：由JMSContext创建的对象，用于发送消息到Queue或Topic</li>
+<li>JMSConsumer：由JMSContext创建的对象，用于接收Queue或Topic中的消息</li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
+<p>在简化API中，一个JMSContext对象封装了传统API中Connection和Session两个对象的行为。</p>
+<h2 id="开发一个JMS客户端"><a href="#开发一个JMS客户端" class="headerlink" title="开发一个JMS客户端"></a>开发一个JMS客户端</h2><p>一个使用传统API的JMS客户端典型的使用步骤如下：</p>
+<ul>
+<li>使用JNDI查找一个ConnectionFactory对象</li>
+<li>使用JNDI查找一个或多个Destination对象</li>
+<li>使用ConnectionFactory创建一个JMS Connection对象</li>
+<li>使用Connection创建一个或多个JMS Session对象</li>
+<li>使用Session和Destination对象创建需要的MessageProducer和MessageConsumer对象</li>
+<li>通知Connection对象开始投递消息</li>
+</ul>
+<blockquote>
+<p>Active MQ是完全实现JMS规范的JMS客户端</p>
 </blockquote>
+<h1 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h1><h2 id="创建Hello-World项目"><a href="#创建Hello-World项目" class="headerlink" title="创建Hello World项目"></a>创建Hello World项目</h2><p>创建gradle项目，并编辑build.gradle</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile group: &#x27;org.apache.activemq&#x27;, name: &#x27;activemq-all&#x27;, version: &#x27;5.15.9&#x27;</span><br><span class="line">compile group: &#x27;com.fasterxml.jackson.core&#x27;, name: &#x27;jackson-databind&#x27;, version: &#x27;2.9.8&#x27;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建生产者"><a href="#创建生产者" class="headerlink" title="创建生产者"></a>创建生产者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldProducer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息发布者</span></span><br><span class="line">            MessageProducer producer = session.createProducer(destination);</span><br><span class="line">            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);</span><br><span class="line">            <span class="comment">// 6. 创建并发布消息</span></span><br><span class="line">            String text = <span class="string">&quot;Hello world! From: &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + <span class="keyword">this</span>.hashCode();</span><br><span class="line">            TextMessage message = session.createTextMessage(text);</span><br><span class="line">            System.out.println(<span class="string">&quot;Sent message: &quot;</span> + message.hashCode() + <span class="string">&quot; : &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">            producer.send(message);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建消费者"><a href="#创建消费者" class="headerlink" title="创建消费者"></a>创建消费者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span>, <span class="title">ExceptionListener</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息消费者</span></span><br><span class="line">            MessageConsumer consumer = session.createConsumer(destination);</span><br><span class="line">            <span class="comment">// 6. 等待接收消息</span></span><br><span class="line">            Message message = consumer.receive(<span class="number">1000</span>);</span><br><span class="line">            <span class="keyword">if</span> (message <span class="keyword">instanceof</span> TextMessage) &#123;</span><br><span class="line">                TextMessage textMessage = (TextMessage) message;</span><br><span class="line">                String text = textMessage.getText();</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + text);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + message);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            consumer.close();</span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(JMSException exception)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;JMS Exception occured.  Shutting down client.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">thread</span><span class="params">(Runnable runnable, <span class="keyword">boolean</span> daemon)</span> </span>&#123;</span><br><span class="line">        Thread brokerThread = <span class="keyword">new</span> Thread(runnable);</span><br><span class="line">        brokerThread.setDaemon(daemon);</span><br><span class="line">        brokerThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行我们的测试程序，控制台将会打印：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sent message: 507732978 : Thread-6</span><br><span class="line">Sent message: 2056557229 : Thread-0</span><br><span class="line">Sent message: 39234146 : Thread-8</span><br><span class="line">Sent message: 1100925878 : Thread-13</span><br><span class="line">Sent message: 1566392082 : Thread-17</span><br><span class="line">Sent message: 1329793151 : Thread-1</span><br><span class="line">Sent message: 988436874 : Thread-16</span><br><span class="line">Received: Hello world! From: Thread-6 : 1442537083</span><br><span class="line">Received: Hello world! From: Thread-1 : 1531760310</span><br><span class="line">Received: Hello world! From: Thread-0 : 1817576164</span><br><span class="line">Received: Hello world! From: Thread-8 : 262381200</span><br><span class="line">Received: Hello world! From: Thread-17 : 1647178742</span><br><span class="line">Received: Hello world! From: Thread-13 : 1610404140</span><br></pre></td></tr></table></figure>
+
+
+
 ]]></content>
       <categories>
-        <category>工具</category>
+        <category>学习</category>
       </categories>
       <tags>
-        <tag>技巧</tag>
+        <tag>ActiveMQ</tag>
+        <tag>消息中间件</tag>
       </tags>
   </entry>
   <entry>
@@ -3071,94 +3393,8 @@
         <category>学习</category>
       </categories>
       <tags>
+        <tag>消息中间件</tag>
         <tag>mq</tag>
-        <tag>消息中间件</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>消息队列（三）Apache ActiveMQ</title>
-    <url>/p/32495/</url>
-    <content><![CDATA[<h1 id="在Ubuntu上安装ActiveMQ"><a href="#在Ubuntu上安装ActiveMQ" class="headerlink" title="在Ubuntu上安装ActiveMQ"></a>在Ubuntu上安装ActiveMQ</h1><h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
-
-<span id="more"></span>
-
-<h2 id="搭建activemq服务"><a href="#搭建activemq服务" class="headerlink" title="搭建activemq服务"></a>搭建activemq服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /home/active-mq</span><br><span class="line">$ <span class="built_in">cd</span> /home/active-mq</span><br><span class="line">$ wget http://www.apache.org/dist/activemq/5.15.9/apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 具体版本请查看http://www.apache.org/dist/activemq</span></span><br><span class="line">$ tar -zxvf apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 如果未安装jdk，执行 sudo apt-get install openjdk-8-jdk</span></span><br><span class="line">$ ./activemq start</span><br><span class="line">INFO: Loading <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//bin/env&#x27;</span></span><br><span class="line">INFO: Using java <span class="string">&#x27;/usr/bin/java&#x27;</span></span><br><span class="line">INFO: Starting - inspect logfiles specified <span class="keyword">in</span> logging.properties and log4j.properties to get details</span><br><span class="line">INFO: pidfile created : <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//data/activemq.pid&#x27;</span> (pid <span class="string">&#x27;6356&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>浏览器打开<a href="http://localhost:8161/admin/%EF%BC%8C%E8%BE%93%E5%85%A5admin%EF%BC%8Cadmin">http://localhost:8161/admin/，输入admin，admin</a></p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
-<p>至此，ActiveMQ搭建完成。</p>
-<h1 id="理解JMS-Java-Message-Service"><a href="#理解JMS-Java-Message-Service" class="headerlink" title="理解JMS( Java Message Service)"></a>理解JMS( Java Message Service)</h1><p>Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持JAVA应用程序开发。</p>
-<h2 id="JMS模型"><a href="#JMS模型" class="headerlink" title="JMS模型"></a>JMS模型</h2><ul>
-<li><p><a href="https://zh.wikipedia.org/wiki/%E7%82%B9%E5%AF%B9%E7%82%B9">点对点</a>（P2P）或队列模型</p>
-<ul>
-<li>只有一个消费者将获得消息</li>
-<li>生产者不需要在接收者消费该消息期间处于运行状态，接收者也同样不需要在消息发送时处于运行状态。</li>
-<li>每一个成功处理的消息都由接收者签收</li>
-</ul>
-</li>
-<li><p><a href="https://zh.wikipedia.org/wiki/%E5%8F%91%E5%B8%83/%E8%AE%A2%E9%98%85">发布/订阅</a>模型</p>
-<ul>
-<li>多个消费者可以获得消息</li>
-<li>在发布者和订阅者之间存在时间依赖性。发布者需要创建一个订阅（subscription），以便客户能够购订阅。订阅者必须保持持续的活动状态以接收消息，除非订阅者创建了持久的订阅。在那种情况下，在订阅者未连接时发布的消息将在订阅者重新连接时重新发布。</li>
-</ul>
-</li>
-</ul>
-<h2 id="传统API"><a href="#传统API" class="headerlink" title="传统API"></a>传统API</h2><p>传统API提供的主要接口如下：</p>
-<ul>
-<li><p>ConnectionFactory：客户端用来创建连接的受管对象。简化API也会使用此接口。</p>
-</li>
-<li><p>Connection：客户端到JMS提供者之间的活动连接。</p>
-</li>
-<li><p>Session：发送和接收消息的一个单线程上下文。</p>
-</li>
-<li><p>MessageProducer：由Session创建的对象，用于发送消息到Queue或Topic</p>
-</li>
-<li><p>MessageConsumer：由Session创建的对象，用于接收Queue或Topic中的消息</p>
-</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
-<h2 id="简化API"><a href="#简化API" class="headerlink" title="简化API"></a>简化API</h2><p>简化API与传统API提供的消息功能是一样的，但是它需要的接口更少、使用更方便。 简化API提供的主要接口如下：</p>
-<ul>
-<li>ConnectionFactory：客户端用来创建连接的受管对象。传统API也会使用此接口。</li>
-<li>JMSContext：客户端到JMS提供者之间的活动连接，以及发送和接收消息的一个单线程上下文。</li>
-<li>JMSProducer：由JMSContext创建的对象，用于发送消息到Queue或Topic</li>
-<li>JMSConsumer：由JMSContext创建的对象，用于接收Queue或Topic中的消息</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
-<p>在简化API中，一个JMSContext对象封装了传统API中Connection和Session两个对象的行为。</p>
-<h2 id="开发一个JMS客户端"><a href="#开发一个JMS客户端" class="headerlink" title="开发一个JMS客户端"></a>开发一个JMS客户端</h2><p>一个使用传统API的JMS客户端典型的使用步骤如下：</p>
-<ul>
-<li>使用JNDI查找一个ConnectionFactory对象</li>
-<li>使用JNDI查找一个或多个Destination对象</li>
-<li>使用ConnectionFactory创建一个JMS Connection对象</li>
-<li>使用Connection创建一个或多个JMS Session对象</li>
-<li>使用Session和Destination对象创建需要的MessageProducer和MessageConsumer对象</li>
-<li>通知Connection对象开始投递消息</li>
-</ul>
-<blockquote>
-<p>Active MQ是完全实现JMS规范的JMS客户端</p>
-</blockquote>
-<h1 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h1><h2 id="创建Hello-World项目"><a href="#创建Hello-World项目" class="headerlink" title="创建Hello World项目"></a>创建Hello World项目</h2><p>创建gradle项目，并编辑build.gradle</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile group: &#x27;org.apache.activemq&#x27;, name: &#x27;activemq-all&#x27;, version: &#x27;5.15.9&#x27;</span><br><span class="line">compile group: &#x27;com.fasterxml.jackson.core&#x27;, name: &#x27;jackson-databind&#x27;, version: &#x27;2.9.8&#x27;</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建生产者"><a href="#创建生产者" class="headerlink" title="创建生产者"></a>创建生产者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldProducer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息发布者</span></span><br><span class="line">            MessageProducer producer = session.createProducer(destination);</span><br><span class="line">            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);</span><br><span class="line">            <span class="comment">// 6. 创建并发布消息</span></span><br><span class="line">            String text = <span class="string">&quot;Hello world! From: &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + <span class="keyword">this</span>.hashCode();</span><br><span class="line">            TextMessage message = session.createTextMessage(text);</span><br><span class="line">            System.out.println(<span class="string">&quot;Sent message: &quot;</span> + message.hashCode() + <span class="string">&quot; : &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">            producer.send(message);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建消费者"><a href="#创建消费者" class="headerlink" title="创建消费者"></a>创建消费者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span>, <span class="title">ExceptionListener</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息消费者</span></span><br><span class="line">            MessageConsumer consumer = session.createConsumer(destination);</span><br><span class="line">            <span class="comment">// 6. 等待接收消息</span></span><br><span class="line">            Message message = consumer.receive(<span class="number">1000</span>);</span><br><span class="line">            <span class="keyword">if</span> (message <span class="keyword">instanceof</span> TextMessage) &#123;</span><br><span class="line">                TextMessage textMessage = (TextMessage) message;</span><br><span class="line">                String text = textMessage.getText();</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + text);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + message);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            consumer.close();</span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(JMSException exception)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;JMS Exception occured.  Shutting down client.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">thread</span><span class="params">(Runnable runnable, <span class="keyword">boolean</span> daemon)</span> </span>&#123;</span><br><span class="line">        Thread brokerThread = <span class="keyword">new</span> Thread(runnable);</span><br><span class="line">        brokerThread.setDaemon(daemon);</span><br><span class="line">        brokerThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>运行我们的测试程序，控制台将会打印：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sent message: 507732978 : Thread-6</span><br><span class="line">Sent message: 2056557229 : Thread-0</span><br><span class="line">Sent message: 39234146 : Thread-8</span><br><span class="line">Sent message: 1100925878 : Thread-13</span><br><span class="line">Sent message: 1566392082 : Thread-17</span><br><span class="line">Sent message: 1329793151 : Thread-1</span><br><span class="line">Sent message: 988436874 : Thread-16</span><br><span class="line">Received: Hello world! From: Thread-6 : 1442537083</span><br><span class="line">Received: Hello world! From: Thread-1 : 1531760310</span><br><span class="line">Received: Hello world! From: Thread-0 : 1817576164</span><br><span class="line">Received: Hello world! From: Thread-8 : 262381200</span><br><span class="line">Received: Hello world! From: Thread-17 : 1647178742</span><br><span class="line">Received: Hello world! From: Thread-13 : 1610404140</span><br></pre></td></tr></table></figure>
-
-
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>消息中间件</tag>
-        <tag>ActiveMQ</tag>
       </tags>
   </entry>
   <entry>
@@ -3380,6 +3616,42 @@
       </categories>
       <tags>
         <tag>一致性Hash</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>算法很美（蓝桥） | 位运算的奇技淫巧</title>
+    <url>/p/60563/</url>
+    <content><![CDATA[<h1 id="我有话说"><a href="#我有话说" class="headerlink" title="我有话说"></a>我有话说</h1><p>前阵子跑去面试，有家公司是做电商广告数据分析的，很有意思，上来先做了三道算法题（答得不好），然后面试官花了很长时间为我解答了三道题目，一度让我以为已经是这家公司的员工了。临了，征求了下面试官对我的建议，“不是科班出身（我本科学的物理），计算机基础和算法是偏弱些，这两块要好好打磨打磨。”<span id="more"></span></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><blockquote>
+<p>在学习算法很美课程的时候，学习到了一些位运算的奇技淫巧，收录在此</p>
+</blockquote>
+<h2 id="判断奇偶数"><a href="#判断奇偶数" class="headerlink" title="判断奇偶数"></a>判断奇偶数</h2><h3 id="判断奇数1-amp-x-1"><a href="#判断奇数1-amp-x-1" class="headerlink" title="判断奇数1 &amp; x == 1"></a>判断奇数<code>1 &amp; x == 1</code></h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">System.out.println((<span class="number">1991</span> &amp; <span class="number">1</span>) == <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p>判断偶数<code>1 &amp; x == 0</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">System.out.println((1990 &amp; 1) == 0);</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取二进制数x位y是1还是0"><a href="#获取二进制数x位y是1还是0" class="headerlink" title="获取二进制数x位y是1还是0"></a>获取二进制数x位y是1还是0</h2><blockquote>
+<p>将x右移<code>y - 1</code>位，与1</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> x = <span class="number">0b010110010</span>;</span><br><span class="line"><span class="keyword">int</span> y = <span class="number">5</span>;</span><br><span class="line"><span class="keyword">int</span> res = (x &gt;&gt; (y - <span class="number">1</span>)) &amp; <span class="number">1</span>;</span><br><span class="line">System.out.println(res);</span><br></pre></td></tr></table></figure>
+
+<h2 id="交换两个整数变量的值"><a href="#交换两个整数变量的值" class="headerlink" title="交换两个整数变量的值"></a>交换两个整数变量的值</h2><h2 id="不用判断语句，求整数的绝对值"><a href="#不用判断语句，求整数的绝对值" class="headerlink" title="不用判断语句，求整数的绝对值"></a>不用判断语句，求整数的绝对值</h2><blockquote>
+<p>异或，可以理解为不进位加法，<code>1 + 1 = 0，0 + 0 = 0，1 + 0 = 1</code></p>
+</blockquote>
+<h3 id="异或的性质"><a href="#异或的性质" class="headerlink" title="异或的性质"></a>异或的性质</h3><ul>
+<li>交换律：可任意交换运算因子的位置，结果不变</li>
+<li>结合律：即<code>（a ^ b）^ c == a ^ ( b ^ c )</code></li>
+<li>对于任何数x，都有<code>x ^ x = 0, x ^ 0 = x</code>，同自己求异或为0，同0求异或为自己</li>
+<li>自反性：<code>A ^ B ^ B = A ^ 0 = A</code>，连续和同一个因子做异或运算，最终结果为自己</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> a = -<span class="number">100</span>;</span><br><span class="line"><span class="comment">// a为正数，a &gt;&gt; 31 = 00000000 00000000 00000000 00000000，求绝对值就是自己</span></span><br><span class="line"><span class="comment">// a为负数，a &gt;&gt; 31 = 11111111 11111111 11111111 11111111，求绝对值就是自己 * -1（00000000 00000000 00000000 00000001）</span></span><br><span class="line">System.out.println((a + (a &gt;&gt; <span class="number">31</span>) ^ (a &gt;&gt; <span class="number">31</span>)));</span><br></pre></td></tr></table></figure>
+<p>这边课程讲的不是很明白，可以参考下<a href="https://blog.csdn.net/weixin_37490221/article/details/91044963">位运算求整数的绝对值</a>，写的很好。</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>algorithm</tag>
       </tags>
   </entry>
   <entry>
