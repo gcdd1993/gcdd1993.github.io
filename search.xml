@@ -95,6 +95,40 @@
       </tags>
   </entry>
   <entry>
+    <title>EntityManager的Clear方法的使用</title>
+    <url>/p/12153/</url>
+    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关联了两张表:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
+
+<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
+<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
+<li>保存完毕后，执行entityManager.clear();</li>
+<li>然后再次查询该对象，即可完整返回该对象。</li>
+</ol>
+<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
+<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
+<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
+<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Dubbo使用Kryo序列化协议的思考</title>
     <url>/p/13982/</url>
     <content><![CDATA[<p>本文是使用<code>Dubbo</code>过程中的一些思考，不足以作为参考，只为留存记录。</p>
@@ -229,40 +263,6 @@
       </categories>
       <tags>
         <tag>FastDFS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EntityManager的Clear方法的使用</title>
-    <url>/p/12153/</url>
-    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
-<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>关联了两张表:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
-
-<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
-<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
-<li>保存完毕后，执行entityManager.clear();</li>
-<li>然后再次查询该对象，即可完整返回该对象。</li>
-</ol>
-<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
-<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
-<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
-<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -1192,40 +1192,6 @@
       </tags>
   </entry>
   <entry>
-    <title>PG数据库常用操作</title>
-    <url>/p/59866/</url>
-    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
-<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
-<li>备份数据</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>正式迁移</li>
-</ul>
-<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
-<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
-
-<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
-
-<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Nginx配置Https指南</title>
     <url>/p/17023/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文是对Nginx配置SSL证书的总结。<span id="more"></span></p>
@@ -1285,6 +1251,40 @@
       </categories>
       <tags>
         <tag>Nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PG数据库常用操作</title>
+    <url>/p/59866/</url>
+    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
+<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
+<li>备份数据</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>正式迁移</li>
+</ul>
+<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
+<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
+
+<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
+
+<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -2223,37 +2223,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Ubuntu 安装MongoDB</title>
-    <url>/p/49357/</url>
-    <content><![CDATA[<p>Ubuntu16.04安装MongoDB指南</p>
-<span id="more"></span>
-
-<h1 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
-
-<h1 id="安装mongodb"><a href="#安装mongodb" class="headerlink" title="安装mongodb"></a>安装mongodb</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install mongodb</span><br></pre></td></tr></table></figure>
-
-<p>mongodb默认是监听在127.0.0.1端口的，要开启外网连接，需要修改mongodb配置文件：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/mongodb.conf</span><br></pre></td></tr></table></figure>
-
-<p><code>bind_ip = 127.0.0.1</code> 修改为<code>bind_ip = 0.0.0.0</code></p>
-<h1 id="连接mongodb"><a href="#连接mongodb" class="headerlink" title="连接mongodb"></a>连接mongodb</h1><p>使用工具<a href="https://robomongo.org/">robo 3t</a>，添加连接信息</p>
-<p><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
-<h1 id="启用密码访问"><a href="#启用密码访问" class="headerlink" title="启用密码访问"></a>启用密码访问</h1><p>mongodb默认是不开启密码登录的，如果要开启，修改mongodb配置文件：</p>
-<p>取消<code>#auth = true</code>前面的注释，并重启mongodb<code>service mongodb restart</code></p>
-<p>添加用户信息:</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">use test_db;</span><br><span class="line">db.createUser(&#123;user:<span class="string">&#x27;cool&#x27;</span>, <span class="built_in">pwd</span>:<span class="string">&#x27;cool&#x27;</span>, roles: [ &#123; role: <span class="string">&quot;readWrite&quot;</span>, db: <span class="string">&quot;test_db&quot;</span> &#125; ]&#125;);</span><br></pre></td></tr></table></figure>
-
-<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>NoSql</tag>
-        <tag>MongoDB</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>TamperMonkey 使用指南以及脚本推荐</title>
     <url>/p/29031/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>Chrome浏览器是最适合开发者使用的浏览器，不仅仅是因为Chrome对于Js的友好支持，更是由于Chrome支持丰富且功能强大的插件，扩展了浏览器的功能和使用体验。</p>
@@ -2330,6 +2299,37 @@
       </categories>
       <tags>
         <tag>Chrome</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Ubuntu 安装MongoDB</title>
+    <url>/p/49357/</url>
+    <content><![CDATA[<p>Ubuntu16.04安装MongoDB指南</p>
+<span id="more"></span>
+
+<h1 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
+
+<h1 id="安装mongodb"><a href="#安装mongodb" class="headerlink" title="安装mongodb"></a>安装mongodb</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install mongodb</span><br></pre></td></tr></table></figure>
+
+<p>mongodb默认是监听在127.0.0.1端口的，要开启外网连接，需要修改mongodb配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/mongodb.conf</span><br></pre></td></tr></table></figure>
+
+<p><code>bind_ip = 127.0.0.1</code> 修改为<code>bind_ip = 0.0.0.0</code></p>
+<h1 id="连接mongodb"><a href="#连接mongodb" class="headerlink" title="连接mongodb"></a>连接mongodb</h1><p>使用工具<a href="https://robomongo.org/">robo 3t</a>，添加连接信息</p>
+<p><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
+<h1 id="启用密码访问"><a href="#启用密码访问" class="headerlink" title="启用密码访问"></a>启用密码访问</h1><p>mongodb默认是不开启密码登录的，如果要开启，修改mongodb配置文件：</p>
+<p>取消<code>#auth = true</code>前面的注释，并重启mongodb<code>service mongodb restart</code></p>
+<p>添加用户信息:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">use test_db;</span><br><span class="line">db.createUser(&#123;user:<span class="string">&#x27;cool&#x27;</span>, <span class="built_in">pwd</span>:<span class="string">&#x27;cool&#x27;</span>, roles: [ &#123; role: <span class="string">&quot;readWrite&quot;</span>, db: <span class="string">&quot;test_db&quot;</span> &#125; ]&#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>NoSql</tag>
+        <tag>MongoDB</tag>
       </tags>
   </entry>
   <entry>
@@ -2457,6 +2457,35 @@
       </tags>
   </entry>
   <entry>
+    <title>MacOs使用CleanMyMac X清除可清除空间</title>
+    <url>/p/46997/</url>
+    <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>本文介绍如何使用<code>CleanMyMac X</code>清除可清除的空间</p>
+<p><img data-src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
+<span id="more"></span>
+
+<p>可以看到，可清除的空间达到了125.79GB，虽然说不影响系统的使用，但是在使用时间机器进行备份的时候，仍然会将可清除空间当成备份的一部分，造成备份文件过大，首次备份时间过长。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>清除可清除空间，你只需要<strong>CleanMyMac X</strong>这个工具即可，我分享下我使用的版本，当然有能力的建议使用正版。</p>
+<p><a href="https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw">https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw</a></p>
+<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>安装完毕后，打开<strong>CleanMyMac X</strong></p>
+<p><img data-src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
+<p>点击”维护“，你可以使用“<strong>释放可清除空间</strong>”或者是“<strong>时间机器快照瘦身</strong>”，我使用的是“时间机器快照瘦身”</p>
+<div class="note warning"><p>建议先使用“时间机器快照瘦身”，如果不行，再释放可清除空间，因为释放可清除空间耗时较长</p>
+</div>
+
+<p><img data-src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
+<p>点击运行，稍作等待即可</p>
+<p><img data-src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
+<p>这时候，我们回到磁盘工具，再次查看可清除空间，可以发现，可清除空间小了不少！</p>
+<p><img data-src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>macOs</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Postman使用技巧</title>
     <url>/p/4537/</url>
     <content><![CDATA[<h1 id="Postman是什么"><a href="#Postman是什么" class="headerlink" title="Postman是什么"></a>Postman是什么</h1><p>Postman是chrome的一款插件,用于做接口请求测试,无论是前端,后台还是测试人员,都可以用postman来测试接口,用起来非常方便。<span id="more"></span></p>
@@ -2543,35 +2572,6 @@
       </categories>
       <tags>
         <tag>Spring-Cloud</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MacOs使用CleanMyMac X清除可清除空间</title>
-    <url>/p/46997/</url>
-    <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>本文介绍如何使用<code>CleanMyMac X</code>清除可清除的空间</p>
-<p><img data-src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
-<span id="more"></span>
-
-<p>可以看到，可清除的空间达到了125.79GB，虽然说不影响系统的使用，但是在使用时间机器进行备份的时候，仍然会将可清除空间当成备份的一部分，造成备份文件过大，首次备份时间过长。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>清除可清除空间，你只需要<strong>CleanMyMac X</strong>这个工具即可，我分享下我使用的版本，当然有能力的建议使用正版。</p>
-<p><a href="https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw">https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw</a></p>
-<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>安装完毕后，打开<strong>CleanMyMac X</strong></p>
-<p><img data-src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
-<p>点击”维护“，你可以使用“<strong>释放可清除空间</strong>”或者是“<strong>时间机器快照瘦身</strong>”，我使用的是“时间机器快照瘦身”</p>
-<div class="note warning"><p>建议先使用“时间机器快照瘦身”，如果不行，再释放可清除空间，因为释放可清除空间耗时较长</p>
-</div>
-
-<p><img data-src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
-<p>点击运行，稍作等待即可</p>
-<p><img data-src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
-<p>这时候，我们回到磁盘工具，再次查看可清除空间，可以发现，可清除空间小了不少！</p>
-<p><img data-src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>macOs</tag>
       </tags>
   </entry>
   <entry>
@@ -3014,6 +3014,44 @@
       </tags>
   </entry>
   <entry>
+    <title>常用软件集合</title>
+    <url>/p/37491/</url>
+    <content><![CDATA[<p>常用软件工具收藏集，收藏了在工作生活中遇到的好用实用的软件。<span id="more"></span></p>
+<h1 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2eptwh">BeyondCompare破解版</a></li>
+<li><a href="https://www.lanzous.com/i2eptrc">Navicat Premium 12破解版</a></li>
+<li><a href="https://www.lanzous.com/b547205/">markdown pad2破解版</a> 密码:23w2</li>
+<li><a href="https://www.lanzous.com/b539472/">RedisDesktopManager 免费版</a> 密码:ciq1</li>
+<li><a href="https://www.lanzous.com/i2q4x3i">QTransate翻译工具</a></li>
+<li><a href="https://www.lanzous.com/i2epu5g">正则表达式测试工具</a></li>
+<li><a href="https://www.lanzous.com/i2epu2d">draw.io拓扑图工具</a></li>
+<li><a href="https://www.lanzous.com/i2eptdi">DevCenter cassandra管理工具</a></li>
+<li><a href="https://www.lanzous.com/i2en5xc">PostMan便携版</a></li>
+<li><a href="https://www.lanzous.com/i2q4xyj">Git</a></li>
+<li><a href="https://www.lanzous.com/i2q4y1c">SourceTree(Git Gui工具)</a></li>
+<li><a href="https://www.lanzous.com/i2v3p2d">XShell5破解版</a></li>
+</ul>
+<h1 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2q4y6h">RSS订阅工具(只限windows)</a></li>
+<li><a href="https://www.lanzous.com/b539477">科学上网ShadowSocks</a></li>
+<li><a href="https://www.lanzous.com/i2saiib">win10激活工具</a></li>
+<li><a href="https://www.lanzous.com/i2t3ukj">Office安装工具</a></li>
+<li><a href="https://www.lanzous.com/i2flrje">OCR文字识别工具</a></li>
+<li><a href="https://www.lanzous.com/i2flr6b">GIF录制工具</a></li>
+<li><a href="https://www.lanzous.com/i2fls4f">冰点文库下载器破解版</a></li>
+</ul>
+<h1 id="推荐工具"><a href="#推荐工具" class="headerlink" title="推荐工具"></a>推荐工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2zaiyj">现代化Markdown编辑工具</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>软件</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>我的JAVA环境搭建</title>
     <url>/p/12106/</url>
     <content><![CDATA[<p>每次重装系统后的开发环境搭建，总是会花费大量的时间精力，软件下载安装啦，配置修改啦等等，索性把这些流程记录一下，毕竟时间就是金钱。<span id="more"></span></p>
@@ -3068,44 +3106,6 @@
       </categories>
       <tags>
         <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常用软件集合</title>
-    <url>/p/37491/</url>
-    <content><![CDATA[<p>常用软件工具收藏集，收藏了在工作生活中遇到的好用实用的软件。<span id="more"></span></p>
-<h1 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2eptwh">BeyondCompare破解版</a></li>
-<li><a href="https://www.lanzous.com/i2eptrc">Navicat Premium 12破解版</a></li>
-<li><a href="https://www.lanzous.com/b547205/">markdown pad2破解版</a> 密码:23w2</li>
-<li><a href="https://www.lanzous.com/b539472/">RedisDesktopManager 免费版</a> 密码:ciq1</li>
-<li><a href="https://www.lanzous.com/i2q4x3i">QTransate翻译工具</a></li>
-<li><a href="https://www.lanzous.com/i2epu5g">正则表达式测试工具</a></li>
-<li><a href="https://www.lanzous.com/i2epu2d">draw.io拓扑图工具</a></li>
-<li><a href="https://www.lanzous.com/i2eptdi">DevCenter cassandra管理工具</a></li>
-<li><a href="https://www.lanzous.com/i2en5xc">PostMan便携版</a></li>
-<li><a href="https://www.lanzous.com/i2q4xyj">Git</a></li>
-<li><a href="https://www.lanzous.com/i2q4y1c">SourceTree(Git Gui工具)</a></li>
-<li><a href="https://www.lanzous.com/i2v3p2d">XShell5破解版</a></li>
-</ul>
-<h1 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2q4y6h">RSS订阅工具(只限windows)</a></li>
-<li><a href="https://www.lanzous.com/b539477">科学上网ShadowSocks</a></li>
-<li><a href="https://www.lanzous.com/i2saiib">win10激活工具</a></li>
-<li><a href="https://www.lanzous.com/i2t3ukj">Office安装工具</a></li>
-<li><a href="https://www.lanzous.com/i2flrje">OCR文字识别工具</a></li>
-<li><a href="https://www.lanzous.com/i2flr6b">GIF录制工具</a></li>
-<li><a href="https://www.lanzous.com/i2fls4f">冰点文库下载器破解版</a></li>
-</ul>
-<h1 id="推荐工具"><a href="#推荐工具" class="headerlink" title="推荐工具"></a>推荐工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2zaiyj">现代化Markdown编辑工具</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>软件</tag>
       </tags>
   </entry>
   <entry>
@@ -3715,6 +3715,53 @@
       </tags>
   </entry>
   <entry>
+    <title>记一次Postgres CPU爆满故障</title>
+    <url>/p/7877/</url>
+    <content><![CDATA[<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>公司项目测试环境调用某些接口的时候，服务器立即崩溃，并一定时间内无法提供服务。<span id="more"></span></p>
+<h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="服务器配置不够"><a href="#服务器配置不够" class="headerlink" title="服务器配置不够"></a>服务器配置不够</h2><p>第一反应是服务器需要升配啦，花钱解决一切！毕竟测试服务器配置确实不高，2CPU + 4Gib，能干啥？不过问题是今天突然发生的，而且说崩就崩。凭着严谨的态度，还是要刨根问底地找下问题。</p>
+<h2 id="查看服务器负载"><a href="#查看服务器负载" class="headerlink" title="查看服务器负载"></a>查看服务器负载</h2><ul>
+<li><code>free -m</code></li>
+</ul>
+<p>内存占用并不大，忘记截图了，反正看下来不是内存过高导致的崩溃</p>
+<ul>
+<li><code>top</code></li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
+<h2 id="数据库占用CPU过高"><a href="#数据库占用CPU过高" class="headerlink" title="数据库占用CPU过高"></a>数据库占用CPU过高</h2><h3 id="连接数过多"><a href="#连接数过多" class="headerlink" title="连接数过多"></a>连接数过多</h3><blockquote>
+<p>业务高峰活跃连接陡增，活跃的连接数是否比平时多很多</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT </span><br><span class="line">  COUNT(*) </span><br><span class="line">FROM </span><br><span class="line">  pg_stat_activity </span><br><span class="line">WHERE </span><br><span class="line">  STATE NOT LIKE &#x27;%idle&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询下来只有3个连接，所以不是连接数导致的CPU过高</p>
+<h3 id="慢SQL"><a href="#慢SQL" class="headerlink" title="慢SQL"></a>慢SQL</h3><blockquote>
+<p>如果活跃连接数的变化处于正常范围，则可能是当时有性能很差的SQL被大量执行。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select </span><br><span class="line">  datname, </span><br><span class="line">  usename, </span><br><span class="line">  client_addr, </span><br><span class="line">  application_name, </span><br><span class="line">  state, </span><br><span class="line">  backend_start, </span><br><span class="line">  xact_start, </span><br><span class="line">  xact_stay, </span><br><span class="line">  query_start, </span><br><span class="line">  query_stay, </span><br><span class="line">  replace(</span><br><span class="line">    query, </span><br><span class="line">    chr(10), </span><br><span class="line">    &#x27; &#x27;</span><br><span class="line">  ) as query </span><br><span class="line">from </span><br><span class="line">  (</span><br><span class="line">    select </span><br><span class="line">      pgsa.datname as datname, </span><br><span class="line">      pgsa.usename as usename, </span><br><span class="line">      pgsa.client_addr client_addr, </span><br><span class="line">      pgsa.application_name as application_name, </span><br><span class="line">      pgsa.state as state, </span><br><span class="line">      pgsa.backend_start as backend_start, </span><br><span class="line">      pgsa.xact_start as xact_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.xact_start)</span><br><span class="line">      ) as xact_stay, </span><br><span class="line">      pgsa.query_start as query_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.query_start)</span><br><span class="line">      ) as query_stay, </span><br><span class="line">      pgsa.query as query </span><br><span class="line">    from </span><br><span class="line">      pg_stat_activity as pgsa </span><br><span class="line">    where </span><br><span class="line">      pgsa.state != &#x27;idle&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction (aborted)&#x27;</span><br><span class="line">  ) idleconnections </span><br><span class="line">order by </span><br><span class="line">  query_stay desc </span><br><span class="line">limit </span><br><span class="line">  5;</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
+<p>可以看到，确实有一条慢SQL，而且属于奇慢无比，执行了接近1分钟还没执行完毕，基本可以定位，是慢SQL导致的CPU占用陡增。</p>
+<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>对于上面的方法查出来的慢SQL，首先需要做的是Kill掉他们，使业务先恢复。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select pg_cancel_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br><span class="line">select pg_terminate_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br></pre></td></tr></table></figure>
+
+<p>如果这些SQL确实是业务上必需的，则需要对他们做如下优化：</p>
+<ol>
+<li>对查询涉及的表，执行<code>ANALYZE &lt;table&gt;</code>或<code>VACUUM ANZLYZE &lt;table&gt;</code>，更新表的统计信息，使查询计划更准确。为避免对业务影响，最好在业务低峰执行。</li>
+<li>执行<code>explain &lt;query text&gt;</code>或<code>explain (buffers true, analyze true, verbose true) &lt;query text&gt;</code>命令，查看SQL的执行计划（前者不会实际执行SQL，后者会实际执行而且能得到详细的执行信息），对其中的Table Scan涉及的表，建立索引。</li>
+<li>重新编写SQL，去除掉不必要的子查询、改写UNION ALL、使用JOIN CLAUSE固定连接顺序等，都是进一步深度优化SQL的手段，这里不再深入说明。</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在查询语句中，尽量减少不必要的子查询，公司使用的ORM框架是Spring JPA，针对一些特别慢的HQL，可以采用直接执行SQL的方式来优化查询效率。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(value = &quot;select count(*) from example_table where example_id = :exampleId&quot;, nativeQuery = true)</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">exampleNativeQuery</span><span class="params">(<span class="meta">@Param(&quot;exampleId&quot;)</span> Long exampleId)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://help.aliyun.com/knowledge_detail/43562.html">PostgreSQL/PPAS CPU使用率高的原因及解决办法</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>记一次生产事故--磁盘被占满</title>
     <url>/p/58700/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>今天，跑在阿里云ECS上的生产环境，突然间访问异常，接口各种报错，无奈公司没有专业的运维人员，只能硬着头皮解决一下。<span id="more"></span></p>
@@ -3777,53 +3824,6 @@
       </categories>
       <tags>
         <tag>运维</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记一次Postgres CPU爆满故障</title>
-    <url>/p/7877/</url>
-    <content><![CDATA[<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>公司项目测试环境调用某些接口的时候，服务器立即崩溃，并一定时间内无法提供服务。<span id="more"></span></p>
-<h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="服务器配置不够"><a href="#服务器配置不够" class="headerlink" title="服务器配置不够"></a>服务器配置不够</h2><p>第一反应是服务器需要升配啦，花钱解决一切！毕竟测试服务器配置确实不高，2CPU + 4Gib，能干啥？不过问题是今天突然发生的，而且说崩就崩。凭着严谨的态度，还是要刨根问底地找下问题。</p>
-<h2 id="查看服务器负载"><a href="#查看服务器负载" class="headerlink" title="查看服务器负载"></a>查看服务器负载</h2><ul>
-<li><code>free -m</code></li>
-</ul>
-<p>内存占用并不大，忘记截图了，反正看下来不是内存过高导致的崩溃</p>
-<ul>
-<li><code>top</code></li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
-<h2 id="数据库占用CPU过高"><a href="#数据库占用CPU过高" class="headerlink" title="数据库占用CPU过高"></a>数据库占用CPU过高</h2><h3 id="连接数过多"><a href="#连接数过多" class="headerlink" title="连接数过多"></a>连接数过多</h3><blockquote>
-<p>业务高峰活跃连接陡增，活跃的连接数是否比平时多很多</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT </span><br><span class="line">  COUNT(*) </span><br><span class="line">FROM </span><br><span class="line">  pg_stat_activity </span><br><span class="line">WHERE </span><br><span class="line">  STATE NOT LIKE &#x27;%idle&#x27;;</span><br></pre></td></tr></table></figure>
-
-<p>查询下来只有3个连接，所以不是连接数导致的CPU过高</p>
-<h3 id="慢SQL"><a href="#慢SQL" class="headerlink" title="慢SQL"></a>慢SQL</h3><blockquote>
-<p>如果活跃连接数的变化处于正常范围，则可能是当时有性能很差的SQL被大量执行。</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select </span><br><span class="line">  datname, </span><br><span class="line">  usename, </span><br><span class="line">  client_addr, </span><br><span class="line">  application_name, </span><br><span class="line">  state, </span><br><span class="line">  backend_start, </span><br><span class="line">  xact_start, </span><br><span class="line">  xact_stay, </span><br><span class="line">  query_start, </span><br><span class="line">  query_stay, </span><br><span class="line">  replace(</span><br><span class="line">    query, </span><br><span class="line">    chr(10), </span><br><span class="line">    &#x27; &#x27;</span><br><span class="line">  ) as query </span><br><span class="line">from </span><br><span class="line">  (</span><br><span class="line">    select </span><br><span class="line">      pgsa.datname as datname, </span><br><span class="line">      pgsa.usename as usename, </span><br><span class="line">      pgsa.client_addr client_addr, </span><br><span class="line">      pgsa.application_name as application_name, </span><br><span class="line">      pgsa.state as state, </span><br><span class="line">      pgsa.backend_start as backend_start, </span><br><span class="line">      pgsa.xact_start as xact_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.xact_start)</span><br><span class="line">      ) as xact_stay, </span><br><span class="line">      pgsa.query_start as query_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.query_start)</span><br><span class="line">      ) as query_stay, </span><br><span class="line">      pgsa.query as query </span><br><span class="line">    from </span><br><span class="line">      pg_stat_activity as pgsa </span><br><span class="line">    where </span><br><span class="line">      pgsa.state != &#x27;idle&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction (aborted)&#x27;</span><br><span class="line">  ) idleconnections </span><br><span class="line">order by </span><br><span class="line">  query_stay desc </span><br><span class="line">limit </span><br><span class="line">  5;</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
-<p>可以看到，确实有一条慢SQL，而且属于奇慢无比，执行了接近1分钟还没执行完毕，基本可以定位，是慢SQL导致的CPU占用陡增。</p>
-<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>对于上面的方法查出来的慢SQL，首先需要做的是Kill掉他们，使业务先恢复。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select pg_cancel_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br><span class="line">select pg_terminate_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br></pre></td></tr></table></figure>
-
-<p>如果这些SQL确实是业务上必需的，则需要对他们做如下优化：</p>
-<ol>
-<li>对查询涉及的表，执行<code>ANALYZE &lt;table&gt;</code>或<code>VACUUM ANZLYZE &lt;table&gt;</code>，更新表的统计信息，使查询计划更准确。为避免对业务影响，最好在业务低峰执行。</li>
-<li>执行<code>explain &lt;query text&gt;</code>或<code>explain (buffers true, analyze true, verbose true) &lt;query text&gt;</code>命令，查看SQL的执行计划（前者不会实际执行SQL，后者会实际执行而且能得到详细的执行信息），对其中的Table Scan涉及的表，建立索引。</li>
-<li>重新编写SQL，去除掉不必要的子查询、改写UNION ALL、使用JOIN CLAUSE固定连接顺序等，都是进一步深度优化SQL的手段，这里不再深入说明。</li>
-</ol>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在查询语句中，尽量减少不必要的子查询，公司使用的ORM框架是Spring JPA，针对一些特别慢的HQL，可以采用直接执行SQL的方式来优化查询效率。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(value = &quot;select count(*) from example_table where example_id = :exampleId&quot;, nativeQuery = true)</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">exampleNativeQuery</span><span class="params">(<span class="meta">@Param(&quot;exampleId&quot;)</span> Long exampleId)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://help.aliyun.com/knowledge_detail/43562.html">PostgreSQL/PPAS CPU使用率高的原因及解决办法</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
