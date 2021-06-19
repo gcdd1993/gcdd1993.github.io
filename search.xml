@@ -95,40 +95,6 @@
       </tags>
   </entry>
   <entry>
-    <title>EntityManager的Clear方法的使用</title>
-    <url>/p/12153/</url>
-    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
-<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>关联了两张表:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
-
-<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
-<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
-<li>保存完毕后，执行entityManager.clear();</li>
-<li>然后再次查询该对象，即可完整返回该对象。</li>
-</ol>
-<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
-<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
-<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
-<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>Spring</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Dubbo使用Kryo序列化协议的思考</title>
     <url>/p/13982/</url>
     <content><![CDATA[<p>本文是使用<code>Dubbo</code>过程中的一些思考，不足以作为参考，只为留存记录。</p>
@@ -168,6 +134,40 @@
       </categories>
       <tags>
         <tag>Dubbo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EntityManager的Clear方法的使用</title>
+    <url>/p/12153/</url>
+    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关联了两张表:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
+
+<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
+<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
+<li>保存完毕后，执行entityManager.clear();</li>
+<li>然后再次查询该对象，即可完整返回该对象。</li>
+</ol>
+<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
+<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
+<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
+<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -1036,6 +1036,66 @@
       </tags>
   </entry>
   <entry>
+    <title>MacOs科学上网</title>
+    <url>/p/709/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
+<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
+<span id="more"></span>
+
+<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
+<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
+</blockquote>
+<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
+<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
+<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
+<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
+<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
+</blockquote>
+<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
+<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
+<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
+<li>点击Proxies</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
+<ol start="2">
+<li>点击Add，添加代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
+<ol start="3">
+<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
+<ol start="4">
+<li>测试</li>
+</ol>
+<p>打开ITerm2测试下，在终端输入</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
+<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
+<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
+<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
+<ol>
+<li>在Rules标签中点击Add，新建一个规则</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
+<ol start="2">
+<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
+<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
+<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
+<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
+</ul>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Lombok 详解</title>
     <url>/p/12232/</url>
     <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>lombok是一个编译级别的插件，它可以在项目编译的时候生成一些代码。通俗的说，lombok可以通过注解来标示生成<code>getter</code> <code>settter</code>等代码。</p>
@@ -1129,66 +1189,6 @@
       </categories>
       <tags>
         <tag>Lombok</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MacOs科学上网</title>
-    <url>/p/709/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
-<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
-<span id="more"></span>
-
-<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
-<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
-</blockquote>
-<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
-<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
-<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
-<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
-<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
-</blockquote>
-<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
-<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
-<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
-<li>点击Proxies</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
-<ol start="2">
-<li>点击Add，添加代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
-<ol start="3">
-<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
-<ol start="4">
-<li>测试</li>
-</ol>
-<p>打开ITerm2测试下，在终端输入</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
-<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
-<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
-<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
-<ol>
-<li>在Rules标签中点击Add，新建一个规则</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
-<ol start="2">
-<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
-<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
-<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
-<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
-</ul>
-]]></content>
-      <categories>
-        <category>随笔</category>
-      </categories>
-      <tags>
-        <tag>科学上网</tag>
       </tags>
   </entry>
   <entry>
@@ -2557,24 +2557,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Spring-Cloud微服务踩坑记录</title>
-    <url>/p/61811/</url>
-    <content><![CDATA[<p>记录在开发微服务过程中遇到的问题以及解决方案。<span id="more"></span></p>
-<h1 id="No-Feign-Client-for-loadBalancing-defined-Did-you-forget-to-include-spring-cloud-starter-netflix-ribbon"><a href="#No-Feign-Client-for-loadBalancing-defined-Did-you-forget-to-include-spring-cloud-starter-netflix-ribbon" class="headerlink" title="No Feign Client for loadBalancing defined. Did you forget to include spring-cloud-starter-netflix-ribbon?"></a>No Feign Client for loadBalancing defined. Did you forget to include spring-cloud-starter-netflix-ribbon?</h1><h1 id="feignclient和-requestmapping混用的时候出错"><a href="#feignclient和-requestmapping混用的时候出错" class="headerlink" title="@feignclient和@requestmapping混用的时候出错"></a>@feignclient和@requestmapping混用的时候出错</h1><p>重写springmvc扫描controller时不带有@feignclient才实例化</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ConditionalOnClass(&#123;Feign.class&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> WebMvcRegistrations <span class="title">feignWebRegistrations</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WebMvcRegistrationsAdapter() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> RequestMappingHandlerMapping <span class="title">getRequestMappingHandlerMapping</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> FeignRequestMappingHandlerMapping();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignRequestMappingHandlerMapping</span> <span class="keyword">extends</span> <span class="title">RequestMappingHandlerMapping</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">isHandler</span><span class="params">(Class&lt;?&gt; beanType)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.isHandler(beanType) &amp;&amp;</span><br><span class="line">                    !AnnotatedElementUtils.hasAnnotation(beanType, FeignClient.class);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="SpringCloud使用Zuul出现“Forwarding-error”错误解决方法"><a href="#SpringCloud使用Zuul出现“Forwarding-error”错误解决方法" class="headerlink" title="SpringCloud使用Zuul出现“Forwarding error”错误解决方法"></a>SpringCloud使用Zuul出现“Forwarding error”错误解决方法</h1><p>在application.yml中添加ribbon的超时时间设置：</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">ribbon:</span>  </span><br><span class="line">  <span class="attr">ReadTimeout:</span> <span class="number">3000</span></span><br><span class="line">  <span class="attr">ConnectTimeout:</span> <span class="number">3000</span></span><br><span class="line"><span class="attr">zuul:</span></span><br><span class="line">    <span class="attr">host:</span></span><br><span class="line">        <span class="attr">connect-timeout-millis:</span> <span class="number">3000</span></span><br><span class="line">        <span class="attr">socket-timeout-millis:</span> <span class="number">3000</span></span><br><span class="line"><span class="attr">hystrix:</span></span><br><span class="line">    <span class="attr">command:</span></span><br><span class="line">        <span class="attr">default:</span></span><br><span class="line">            <span class="attr">execution:</span></span><br><span class="line">                <span class="attr">isolation:</span></span><br><span class="line">                    <span class="attr">thread:</span></span><br><span class="line">                        <span class="attr">timeout-in-milliseconds:</span> <span class="number">3000</span></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>Spring-Cloud</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用Hyper-V替代VMware</title>
     <url>/p/14834/</url>
     <content><![CDATA[<h1 id="Hyper-V是什么"><a href="#Hyper-V是什么" class="headerlink" title="Hyper-V是什么"></a>Hyper-V是什么</h1><blockquote>
@@ -2672,6 +2654,24 @@
       </categories>
       <tags>
         <tag>Hyper-V</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spring-Cloud微服务踩坑记录</title>
+    <url>/p/61811/</url>
+    <content><![CDATA[<p>记录在开发微服务过程中遇到的问题以及解决方案。<span id="more"></span></p>
+<h1 id="No-Feign-Client-for-loadBalancing-defined-Did-you-forget-to-include-spring-cloud-starter-netflix-ribbon"><a href="#No-Feign-Client-for-loadBalancing-defined-Did-you-forget-to-include-spring-cloud-starter-netflix-ribbon" class="headerlink" title="No Feign Client for loadBalancing defined. Did you forget to include spring-cloud-starter-netflix-ribbon?"></a>No Feign Client for loadBalancing defined. Did you forget to include spring-cloud-starter-netflix-ribbon?</h1><h1 id="feignclient和-requestmapping混用的时候出错"><a href="#feignclient和-requestmapping混用的时候出错" class="headerlink" title="@feignclient和@requestmapping混用的时候出错"></a>@feignclient和@requestmapping混用的时候出错</h1><p>重写springmvc扫描controller时不带有@feignclient才实例化</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ConditionalOnClass(&#123;Feign.class&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignConfiguration</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> WebMvcRegistrations <span class="title">feignWebRegistrations</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> WebMvcRegistrationsAdapter() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> RequestMappingHandlerMapping <span class="title">getRequestMappingHandlerMapping</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> FeignRequestMappingHandlerMapping();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignRequestMappingHandlerMapping</span> <span class="keyword">extends</span> <span class="title">RequestMappingHandlerMapping</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">isHandler</span><span class="params">(Class&lt;?&gt; beanType)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.isHandler(beanType) &amp;&amp;</span><br><span class="line">                    !AnnotatedElementUtils.hasAnnotation(beanType, FeignClient.class);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="SpringCloud使用Zuul出现“Forwarding-error”错误解决方法"><a href="#SpringCloud使用Zuul出现“Forwarding-error”错误解决方法" class="headerlink" title="SpringCloud使用Zuul出现“Forwarding error”错误解决方法"></a>SpringCloud使用Zuul出现“Forwarding error”错误解决方法</h1><p>在application.yml中添加ribbon的超时时间设置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">ribbon:</span>  </span><br><span class="line">  <span class="attr">ReadTimeout:</span> <span class="number">3000</span></span><br><span class="line">  <span class="attr">ConnectTimeout:</span> <span class="number">3000</span></span><br><span class="line"><span class="attr">zuul:</span></span><br><span class="line">    <span class="attr">host:</span></span><br><span class="line">        <span class="attr">connect-timeout-millis:</span> <span class="number">3000</span></span><br><span class="line">        <span class="attr">socket-timeout-millis:</span> <span class="number">3000</span></span><br><span class="line"><span class="attr">hystrix:</span></span><br><span class="line">    <span class="attr">command:</span></span><br><span class="line">        <span class="attr">default:</span></span><br><span class="line">            <span class="attr">execution:</span></span><br><span class="line">                <span class="attr">isolation:</span></span><br><span class="line">                    <span class="attr">thread:</span></span><br><span class="line">                        <span class="attr">timeout-in-milliseconds:</span> <span class="number">3000</span></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>Spring-Cloud</tag>
       </tags>
   </entry>
   <entry>
@@ -4361,189 +4361,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java8新特性一览表</title>
-    <url>/p/55630/</url>
-    <content><![CDATA[<h1 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h1><ul>
-<li>forEach() method in Iterable interface(Iterable接口中的forEach()方法)</li>
-<li>default and static methods in Interfaces(接口中的默认和静态方法)</li>
-<li>Functional Interfaces and Lambda Expressions(function接口和Lambda表达式)</li>
-<li>Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)</li>
-<li>Java Time API</li>
-<li>Collection API improvements</li>
-<li>Concurrency API improvements</li>
-<li>Java IO improvements</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="1-forEach-method-in-Iterable-interface-Iterable接口中的forEach-方法"><a href="#1-forEach-method-in-Iterable-interface-Iterable接口中的forEach-方法" class="headerlink" title="1.forEach() method in Iterable interface(Iterable接口中的forEach()方法)"></a>1.forEach() method in Iterable interface(Iterable接口中的forEach()方法)</h1><p>每当我们需要遍历Collection时，我们需要创建一个Iterator，其目的是迭代，然后我们在循环中为Collection中的每个元素提供业务逻辑。如果没有正确使用迭代器，会抛出异常ConcurrentModificationException。</p>
-<p>Java 8在java.lang.Iterable接口中引入了forEach方法，这样在编写代码时我们只关注业务逻辑。 forEach方法将java.util.function.Consumer对象作为参数，因此它有助于将我们的业务逻辑放在我们可以重用的单独位置。让我们通过简单的例子看看每个用法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;IntegermyList = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">10</span>; i++) myList.add(i);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用iterator</span></span><br><span class="line">Iterator&lt;Integeriterator = myList.iterator();</span><br><span class="line"><span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">    Integer next = iterator.next();</span><br><span class="line">    System.out.println(<span class="string">&quot;Iterator Value::&quot;</span> + next);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//foreach + 匿名类</span></span><br><span class="line">myList.forEach(<span class="keyword">new</span> Consumer&lt;Integer&gt;() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(Integer t)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;forEach anonymous class Value::&quot;</span>+t);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用consumer 接口</span></span><br><span class="line">MyConsumer action = <span class="keyword">new</span> MyConsumer();</span><br><span class="line">myList.forEach(action);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用lambda表达式</span></span><br><span class="line">myList.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
-
-<h1 id="2-default-and-static-methods-in-Interfaces-接口中的默认和静态方法"><a href="#2-default-and-static-methods-in-Interfaces-接口中的默认和静态方法" class="headerlink" title="2.default and static methods in Interfaces(接口中的默认和静态方法)"></a>2.default and static methods in Interfaces(接口中的默认和静态方法)</h1><p>jdk8之前，interface方法不能有实现，但是从Java 8开始，接口被增强为具有实现方法。我们可以使用default和static关键字来创建具有方法实现的接口。例如Iterable接口中的forEach方法实现是</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">forEach</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> Taction)</span> </span>&#123;</span><br><span class="line">    Objects.requireNonNull(action);</span><br><span class="line">    <span class="keyword">for</span> (T t : <span class="keyword">this</span>) &#123;</span><br><span class="line">        action.accept(t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p>创建一个接口</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">show</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">showA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是接口默认方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">showB</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是接口静态方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建该接口实现类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> <span class="keyword">implements</span> <span class="title">MyInterface</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是实现方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//默认方法支持重写,不覆盖则执行接口的默认方法</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我覆盖了接口的默认方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态方法不可以重写</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>测试</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MyClass myClass = <span class="keyword">new</span> MyClass();</span><br><span class="line">        myClass.show();</span><br><span class="line">        myClass.showA();</span><br><span class="line">        <span class="comment">//通过类名.方法名调用接口静态方法</span></span><br><span class="line">        MyInterface.showB();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="3-Functional-Interfaces-and-Lambda-Expressions（function接口和Lambda表达式）"><a href="#3-Functional-Interfaces-and-Lambda-Expressions（function接口和Lambda表达式）" class="headerlink" title="3.Functional Interfaces and Lambda Expressions（function接口和Lambda表达式）"></a>3.Functional Interfaces and Lambda Expressions（function接口和Lambda表达式）</h1><p>如果你注意到上面的接口代码，你会注意到@FunctionalInterface注释。功能接口是Java 8中引入的新概念。<strong>只有一个抽象方法的接口就变成了功能接口</strong>。我们不需要使用@FunctionalInterface注释将接口标记为功能接口。 @FunctionalInterface注释是一种避免在功能界面中意外添加抽象方法的工具。您可以将其视为@Override注释，并且最佳实践是使用它。实例：java8 的runnable run接口，带有一个抽象方法:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>功能接口的主要好处之一是可以使用lambda表达式来实例化它们。我们可以使用匿名类实例化一个接口，但代码看起来很笨重。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用匿名类实例化</span></span><br><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;My Runnable&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>由于功能接口只有一个方法，因此lambda表达式可以很容易地提供方法实现。我们只需要提供方法参数和业务逻辑。例如，我们可以使用lambda表达式将上面的实现编写为：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用lambda表达式</span></span><br><span class="line">Runnable runnable1 = () -System.out.println(<span class="string">&quot;My Runnable&quot;</span>);</span><br><span class="line">runnable.run();</span><br><span class="line">runnable1.run();</span><br></pre></td></tr></table></figure>
-
-<p>如果在方法实现中有单个语句，我们也不需要花括号。例如，上面的Interface1匿名类可以使用lambda实例化，如下所示：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Interface1 interface1 = (s) -System.out.println(s);</span><br><span class="line">interface1.method1(<span class="string">&quot;interface1 method&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<h2 id="lambda表达式扩展"><a href="#lambda表达式扩展" class="headerlink" title="lambda表达式扩展"></a>lambda表达式扩展</h2><h3 id="Java-中的-Lambda-表达式通常使用-argument-body-语法书写，例如："><a href="#Java-中的-Lambda-表达式通常使用-argument-body-语法书写，例如：" class="headerlink" title="Java 中的 Lambda 表达式通常使用 (argument) -(body) 语法书写，例如："></a>Java 中的 Lambda 表达式通常使用 (argument) -(body) 语法书写，例如：</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">(arg1, arg2...) -&gt; &#123; body &#125;</span><br><span class="line">(type1 arg1, type2 arg2...) -&gt; &#123; body &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Lambda-表达式的结构"><a href="#Lambda-表达式的结构" class="headerlink" title="Lambda 表达式的结构"></a>Lambda 表达式的结构</h3><ul>
-<li>一个Lambda表达式可以有零个或多个参数</li>
-<li>参数的类型既可以明确声明，也可以根据上下文来推断。例如：<code>(int a)</code>与<code>(a)</code>效果相同</li>
-<li>所有参数需包含在圆括号内，参数之间用逗号相隔。例如：<code>(a, b)</code> 或 <code>(int a, int b)</code> 或 <code>(String a, int b, float c)</code></li>
-<li>空圆括号代表参数集为空。例如：<code>() -&gt; 42</code></li>
-<li>当只有一个参数，且其类型可推导时，圆括号（）可省略。例如：<code>a -&gt; return a * a</code></li>
-<li>Lambda表达式的主体可包含零条或多条语句</li>
-<li>如果Lambda表达式的主体只有一条语句，花括号{}可省略。匿名函数的返回类型与该主体表达式一致</li>
-<li>如果Lambda表达式的主体包含一条以上语句，则表达式必须包含在花括号{}中（形成代码块）。匿名函数的返回类型与代码块的返回类型一致，若没有返回则为空</li>
-</ul>
-<h2 id="函数式接口扩展"><a href="#函数式接口扩展" class="headerlink" title="函数式接口扩展"></a>函数式接口扩展</h2><p>函数式接口是只包含一个抽象方法声明的接口,可以使用<code>@FunctionalInterface</code>标记</p>
-<h3 id="JDK8之前已有的函数式接口"><a href="#JDK8之前已有的函数式接口" class="headerlink" title="JDK8之前已有的函数式接口"></a>JDK8之前已有的函数式接口</h3><ul>
-<li>java.lang.Runnable</li>
-<li>java.util.concurrent.Callable</li>
-<li>java.security.PrivilegedAction</li>
-<li>java.util.Comparator</li>
-<li>java.io.FileFilter</li>
-<li>java.nio.file.PathMatcher</li>
-<li>java.lang.reflect.InvocationHandler</li>
-<li>java.beans.PropertyChangeListener</li>
-<li>java.awt.event.ActionListener</li>
-<li>javax.swing.event.ChangeListener</li>
-</ul>
-<h3 id="新定义的函数式接口"><a href="#新定义的函数式接口" class="headerlink" title="新定义的函数式接口"></a>新定义的函数式接口</h3><p>java.util.function中定义了几组类型的函数式接口以及针对基本数据类型的子接口。</p>
-<ul>
-<li>Predicate:传入一个参数，返回一个bool结果，方法为boolean test(T t)</li>
-<li>Consumer:传入一个参数，无返回值，纯消费。方法为void accept(T t)</li>
-<li>Function:传入一个参数，返回一个结果，方法为R apply(T t)</li>
-<li>Supplier:无参数传入，返回一个结果，方法为T get()</li>
-<li>UnaryOperator:一元操作符，继承Function,传入参数的类型和返回类型相同。</li>
-<li>BinaryOperator:二元操作符，传入的两个参数的类型和返回类型相同，继承BiFunction。</li>
-</ul>
-<p>【示例】</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Predicate&lt;Integer&gt; predicate = (i) -&gt; i &gt; <span class="number">0</span>;</span><br><span class="line">Consumer&lt;Integer&gt; consumer = (i) -&gt; System.out.println(<span class="string">&quot;consumer : &quot;</span> + i);</span><br><span class="line">Function&lt;Integer,Boolean&gt; function = (i) -&gt; i &gt; <span class="number">0</span>;</span><br><span class="line">Supplier&lt;Integer&gt; supplier = () -&gt; <span class="number">1</span>;</span><br><span class="line">UnaryOperator&lt;Integer&gt; unaryOperator = (i) -&gt; i * i;</span><br><span class="line">BinaryOperator&lt;Integer&gt; binaryOperator = (i1,i2) -&gt; i1 * i2;</span><br><span class="line"></span><br><span class="line">System.out.println(predicate.test(<span class="number">10</span>));</span><br><span class="line">consumer.accept(<span class="number">10</span>);</span><br><span class="line">System.out.println(function.apply(<span class="number">10</span>));</span><br><span class="line">System.out.println(supplier.get());</span><br><span class="line">System.out.println(unaryOperator.apply(<span class="number">100</span>));</span><br><span class="line">System.out.println(binaryOperator.apply(<span class="number">100</span>,<span class="number">200</span>));</span><br></pre></td></tr></table></figure>
-
-<h1 id="4-Java-Stream-API-for-Bulk-Data-Operations-on-Collections-用于集合上的批量数据操作的Java-Stream-API"><a href="#4-Java-Stream-API-for-Bulk-Data-Operations-on-Collections-用于集合上的批量数据操作的Java-Stream-API" class="headerlink" title="4.Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)"></a>4.Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)</h1><h2 id="示例代码-1"><a href="#示例代码-1" class="headerlink" title="示例代码"></a>示例代码</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//从 Collection 和数组</span></span><br><span class="line">List&lt;Integerlist = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++) &#123;</span><br><span class="line">    list.add(i);</span><br><span class="line">&#125;</span><br><span class="line">Stream&lt;Integerstream = list.stream(); <span class="comment">//串行流</span></span><br><span class="line">Stream&lt;Integerstream1 = list.parallelStream(); <span class="comment">//并行流</span></span><br><span class="line">Stream&lt;Integerstream2 = Arrays.stream(list.toArray(<span class="keyword">new</span> Integer[<span class="number">0</span>]));</span><br><span class="line">Stream&lt;Integerstream3 = Stream.of(list.toArray(<span class="keyword">new</span> Integer[<span class="number">0</span>]));</span><br><span class="line"></span><br><span class="line"><span class="comment">//从 BufferedReader</span></span><br><span class="line">BufferedReader bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(<span class="keyword">new</span> File(<span class="string">&quot;path&quot;</span>)));</span><br><span class="line">Stream&lt;Stringstream4 = bufferedReader.lines();</span><br><span class="line"></span><br><span class="line"><span class="comment">//静态工厂</span></span><br><span class="line">IntStream stream5 = IntStream.rangeClosed(<span class="number">1</span>, <span class="number">100</span>);<span class="comment">//生成1-100 的int stream</span></span><br><span class="line">Stream&lt;Pathstream6 = Files.walk(Paths.get(<span class="string">&quot;path&quot;</span>), <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//自己构建 通过StreamSupport辅助类从spliterator产生流</span></span><br><span class="line">Stream&lt;Integerstream7 = StreamSupport.stream(list.spliterator(), <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//其它</span></span><br><span class="line">Random random = <span class="keyword">new</span> Random();</span><br><span class="line">IntStream stream8 = random.ints();</span><br><span class="line"></span><br><span class="line">BitSet bitSet = BitSet.valueOf(<span class="keyword">new</span> <span class="keyword">long</span>[]&#123;<span class="number">1L</span>, <span class="number">2L</span>, <span class="number">3L</span>&#125;);</span><br><span class="line">IntStream stream9 = bitSet.stream();</span><br><span class="line"></span><br><span class="line">Pattern pattern = Pattern.compile(<span class="string">&quot;\\d+&quot;</span>);</span><br><span class="line">Stream&lt;Stringstream10 = pattern.splitAsStream(<span class="string">&quot;111sda123sda&quot;</span>);</span><br><span class="line"></span><br><span class="line">JarFile jarFile = <span class="keyword">new</span> JarFile(<span class="string">&quot;xxx.jar&quot;</span>);</span><br><span class="line">Stream&lt;JarEntrystream11 = jarFile.stream();</span><br></pre></td></tr></table></figure>
-
-<h1 id="5-Java-Time-API-Java时间API"><a href="#5-Java-Time-API-Java时间API" class="headerlink" title="5.Java Time API(Java时间API)"></a>5.Java Time API(Java时间API)</h1><p>Java 8通过发布新的Date-Time API (JSR 310)来进一步加强对日期与时间的处理。对日期与时间的操作一直是Java程序员最痛苦的地方之一。标准的 java.util.Date以及后来的java.util.Calendar一点没有改善这种情况（可以这么说，它们一定程度上更加复杂）。</p>
-<h2 id="Clock类"><a href="#Clock类" class="headerlink" title="Clock类"></a>Clock类</h2><p>它通过指定一个时区，然后就可以获取到当前的时刻，日期与时间。Clock可以替换System.currentTimeMillis()与TimeZone.getDefault()。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the system clock as UTC offset </span></span><br><span class="line"><span class="keyword">final</span> Clock clock = Clock.systemUTC();</span><br><span class="line">System.out.println(clock.instant());</span><br><span class="line">System.out.println(clock.millis());</span><br></pre></td></tr></table></figure>
-
-<p>下面是程序在控制台上的输出:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">52</span>:<span class="number">50.</span>111Z</span><br><span class="line"><span class="number">1547045570335</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="LocaleDate与LocalTime"><a href="#LocaleDate与LocalTime" class="headerlink" title="LocaleDate与LocalTime"></a>LocaleDate与LocalTime</h2><p>LocaleDate只持有ISO-8601格式且无时区信息的日期部分。相应的，LocaleTime只持有ISO-8601格式且无时区信息的时间部分。LocaleDate与LocalTime都可以从Clock中得到。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the local date and local time</span></span><br><span class="line"><span class="keyword">final</span> LocalDate date = LocalDate.now();</span><br><span class="line"><span class="keyword">final</span> LocalDate dateFromClock = LocalDate.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(date);</span><br><span class="line">System.out.println(dateFromClock);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get the local date and local time</span></span><br><span class="line"><span class="keyword">final</span> LocalTime time = LocalTime.now();</span><br><span class="line"><span class="keyword">final</span> LocalTime timeFromClock = LocalTime.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(time);</span><br><span class="line">System.out.println(timeFromClock);</span><br></pre></td></tr></table></figure>
-
-<p>下面是程序在控制台上的输出：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09</span><br><span class="line"><span class="number">22</span>:<span class="number">52</span>:<span class="number">50.383</span></span><br><span class="line"><span class="number">14</span>:<span class="number">52</span>:<span class="number">50.383</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="LocaleDateTime"><a href="#LocaleDateTime" class="headerlink" title="LocaleDateTime"></a>LocaleDateTime</h2><p>LocaleDateTime把LocaleDate与LocaleTime的功能合并起来，它持有的是ISO-8601格式无时区信息的日期与时间。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the local date/time</span></span><br><span class="line"><span class="keyword">final</span> LocalDateTime datetime = LocalDateTime.now();</span><br><span class="line"><span class="keyword">final</span> LocalDateTime datetimeFromClock = LocalDateTime.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(datetime);</span><br><span class="line">System.out.println(datetimeFromClock);</span><br></pre></td></tr></table></figure>
-
-<p>下面是程序在控制台上的输出:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T22:<span class="number">55</span>:<span class="number">05.194</span></span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">55</span>:<span class="number">05.194</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="ZonedDateTime"><a href="#ZonedDateTime" class="headerlink" title="ZonedDateTime"></a>ZonedDateTime</h2><p>如果你需要特定时区的日期/时间，那么ZonedDateTime是你的选择。它持有ISO-8601格式具具有时区信息的日期与时间。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the zoned date/time</span></span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetime = ZonedDateTime.now();</span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetimeFromClock = ZonedDateTime.now(clock);</span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetimeFromZone = ZonedDateTime.now(ZoneId.of(<span class="string">&quot;America/Los_Angeles&quot;</span>));</span><br><span class="line"></span><br><span class="line">System.out.println(zonedDatetime);</span><br><span class="line">System.out.println(zonedDatetimeFromClock);</span><br><span class="line">System.out.println(zonedDatetimeFromZone);</span><br></pre></td></tr></table></figure>
-
-<p>下面是程序在控制台上的输出：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T22:<span class="number">56</span>:<span class="number">34.033</span>+08:<span class="number">00</span>[Asia/Shanghai]</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">56</span>:<span class="number">34.</span>033Z</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T06:<span class="number">56</span>:<span class="number">34.035</span>-08:<span class="number">00</span>[America/Los_Angeles]</span><br></pre></td></tr></table></figure>
-
-<h2 id="Duration"><a href="#Duration" class="headerlink" title="Duration"></a>Duration</h2><p>在秒与纳秒级别上的一段时间。Duration使计算两个日期间的不同变的十分简单。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get duration between two dates</span></span><br><span class="line"><span class="keyword">final</span> LocalDateTime from = LocalDateTime.of(<span class="number">2018</span>, Month.APRIL, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">final</span> LocalDateTime to = LocalDateTime.of(<span class="number">2019</span>, Month.APRIL, <span class="number">16</span>, <span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Duration duration = Duration.between(from, to);</span><br><span class="line">System.out.println(<span class="string">&quot;Duration in days: &quot;</span> + duration.toDays());</span><br><span class="line">System.out.println(<span class="string">&quot;Duration in hours: &quot;</span> + duration.toHours());</span><br></pre></td></tr></table></figure>
-
-<p>上面的例子计算了两个日期2018年4月16号与2019年4月16号之间的过程。下面是程序在控制台上的输出：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Duration in days: <span class="number">365</span></span><br><span class="line">Duration in hours: <span class="number">8783</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="Collection-API-improvements-集合API改进"><a href="#Collection-API-improvements-集合API改进" class="headerlink" title="Collection API improvements(集合API改进)"></a>Collection API improvements(集合API改进)</h1><p>上面已经展示了forEach()方法和Stream API在集合上的使用。java8的Collection API中添加了一些新方法：</p>
-<h2 id="Iterator-default-method-forEachRemaining-Consumer-action"><a href="#Iterator-default-method-forEachRemaining-Consumer-action" class="headerlink" title="Iterator default method forEachRemaining(Consumer action)"></a>Iterator default method forEachRemaining(Consumer action)</h2><p>为每个元素执行给定操作，直到所有元素都已处理或操作引发异常。</p>
-<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">forEachRemaining</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> E&gt; action)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//传入一个非空消费者</span></span><br><span class="line">    Objects.requireNonNull(action);</span><br><span class="line">	<span class="comment">//遍历执行消费者函数</span></span><br><span class="line">    <span class="keyword">while</span> (hasNext())</span><br><span class="line">        action.accept(next());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="示例代码-2"><a href="#示例代码-2" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);</span><br><span class="line">Iterator&lt;Integer&gt; iterator = list.iterator();</span><br><span class="line"><span class="comment">//创建一个消费者</span></span><br><span class="line">Consumer&lt;Integer&gt; consumer = i -&gt; System.out.println(<span class="string">&quot;consumer print &quot;</span> + i);</span><br><span class="line"><span class="comment">//iterator的forEachRemaining将集合中的每个元素消费</span></span><br><span class="line">iterator.forEachRemaining(consumer);</span><br></pre></td></tr></table></figure>
-
-<h3 id="控制台输出"><a href="#控制台输出" class="headerlink" title="控制台输出"></a>控制台输出</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">consumer print <span class="number">1</span></span><br><span class="line">consumer print <span class="number">2</span></span><br><span class="line">consumer print <span class="number">3</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<h2 id="Collection-default-method-removeIf-Predicate-filter"><a href="#Collection-default-method-removeIf-Predicate-filter" class="headerlink" title="Collection default method removeIf(Predicate filter)"></a>Collection default method removeIf(Predicate filter)</h2><p>删除满足给定条件的此集合的所有元素。</p>
-<h3 id="源码-1"><a href="#源码-1" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">removeIf</span><span class="params">(Predicate&lt;? <span class="keyword">super</span> E&gt; filter)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//传入一个非空谓语</span></span><br><span class="line">    Objects.requireNonNull(filter);</span><br><span class="line">    <span class="keyword">boolean</span> removed = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">final</span> Iterator&lt;E&gt; each = iterator();</span><br><span class="line">    <span class="keyword">while</span> (each.hasNext()) &#123;</span><br><span class="line">		<span class="comment">//遍历元素，执行谓语的校验，如果为真，则删除该元素</span></span><br><span class="line">        <span class="keyword">if</span> (filter.test(each.next())) &#123;</span><br><span class="line">            each.remove();</span><br><span class="line">            removed = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> removed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="示例代码-3"><a href="#示例代码-3" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">list.add(<span class="number">1</span>);</span><br><span class="line">list.add(<span class="number">2</span>);</span><br><span class="line">list.add(<span class="number">3</span>);</span><br><span class="line">list.add(<span class="number">4</span>);</span><br><span class="line">Predicate&lt;Integer&gt; predicate = i -&gt; i &gt; <span class="number">1</span>;</span><br><span class="line">list.removeIf(predicate);</span><br><span class="line">System.out.println(<span class="string">&quot;remove if left items : &quot;</span> + list);</span><br></pre></td></tr></table></figure>
-
-<h3 id="控制台输出-1"><a href="#控制台输出-1" class="headerlink" title="控制台输出"></a>控制台输出</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2,3,4满足条件被删除了</span></span><br><span class="line">remove <span class="keyword">if</span> left items : [<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
-
-<h2 id="Collection-spliterator"><a href="#Collection-spliterator" class="headerlink" title="Collection spliterator()"></a>Collection spliterator()</h2><p>返回Spliterator实例的方法，该实例可用于顺序或并行遍历元素。</p>
-<h3 id="源码-2"><a href="#源码-2" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//该方法是接口默认方法</span></span><br><span class="line"><span class="function"><span class="keyword">default</span> Spliterator&lt;E&gt; <span class="title">spliterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Spliterators.spliterator(<span class="keyword">this</span>, Spliterator.ORDERED);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="示例代码-4"><a href="#示例代码-4" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);</span><br><span class="line">Spliterator&lt;Integer&gt; spliterator = list.spliterator();</span><br><span class="line"><span class="comment">//创建顺序流</span></span><br><span class="line">Stream&lt;Integer&gt; stream = StreamSupport.stream(spliterator, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">//创建并行流</span></span><br><span class="line">Stream&lt;Integer&gt; parallelStream = StreamSupport.stream(spliterator, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
-
-<h2 id="Map-replaceAll-compute-merge-methods"><a href="#Map-replaceAll-compute-merge-methods" class="headerlink" title="Map replaceAll(), compute(), merge() methods"></a>Map replaceAll(), compute(), merge() methods</h2><h3 id="replaceAll"><a href="#replaceAll" class="headerlink" title="replaceAll()"></a>replaceAll()</h3><p>替换Map中所有Entry的value值，这个值由旧的key和value计算得出，接收参数 (K, V) -&gt; V</p>
-<h4 id="源码-3"><a href="#源码-3" class="headerlink" title="源码"></a>源码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">replaceAll</span><span class="params">(BiFunction&lt;? <span class="keyword">super</span> K, ? <span class="keyword">super</span> V, ? extends V&gt; function)</span> </span>&#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab;</span><br><span class="line">    <span class="keyword">if</span> (function == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">if</span> (size &gt; <span class="number">0</span> &amp;&amp; (tab = table) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> mc = modCount;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; tab.length; ++i) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Node&lt;K,V&gt; e = tab[i]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">				<span class="comment">//使用给定的函数替换原来的value值，key不变</span></span><br><span class="line">                e.value = function.apply(e.key, e.value);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (modCount != mc)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="示例代码-5"><a href="#示例代码-5" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//replaceAll方法</span></span><br><span class="line">map.replaceAll((s, s2) -&gt; s + s2);</span><br><span class="line">System.out.println(map);</span><br></pre></td></tr></table></figure>
-
-<h4 id="控制台输出-2"><a href="#控制台输出-2" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//原来的value由key + value替换掉了</span></span><br><span class="line">&#123;<span class="number">1</span>=1A, <span class="number">2</span>=2B, <span class="number">3</span>=3C, <span class="number">4</span>=<span class="number">4D</span>, <span class="number">5</span>=5E&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="compute"><a href="#compute" class="headerlink" title="compute()"></a>compute()</h3><p>是<code>computeIfPresent</code>和<code>computeIfAbsent</code>方法的组合体</p>
-<ul>
-<li>computeIfPresent:如果指定的key不存在，则通过指定的K -&gt; V计算出新的值设置为key的值。</li>
-<li>computeIfPresent:如果指定的key存在，则根据旧的key和value计算新的值newValue, 如果newValue不为null，则设置key新的值为newValue, 如果newValue为null, 则删除该key的值。</li>
-</ul>
-<h4 id="示例代码-6"><a href="#示例代码-6" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//key存在，根据旧的key和value计算新的值newValue</span></span><br><span class="line">map.compute(<span class="string">&quot;1&quot;</span>, (k, v) -&gt; v + <span class="string">&quot; computed&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key存在&quot;</span> + map.get(<span class="string">&quot;1&quot;</span>));</span><br><span class="line"><span class="comment">//key不存在，通过指定的K -&gt; V计算出新的值设置为key的值</span></span><br><span class="line">map.compute(<span class="string">&quot;6&quot;</span>, (k, v) -&gt; <span class="string">&quot;F&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key不存在&quot;</span> + map.get(<span class="string">&quot;6&quot;</span>));</span><br><span class="line"><span class="comment">//key存在，如果newValue为null, 则删除该key的值</span></span><br><span class="line">map.compute(<span class="string">&quot;1&quot;</span>, (k, v) -&gt; <span class="keyword">null</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key存在，设置为null &quot;</span> + map.get(<span class="string">&quot;1&quot;</span>));</span><br></pre></td></tr></table></figure>
-
-<h4 id="控制台输出-3"><a href="#控制台输出-3" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">key存在A computed</span><br><span class="line">key不存在F</span><br><span class="line">key存在，设置为<span class="keyword">null</span> <span class="keyword">null</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="merge"><a href="#merge" class="headerlink" title="merge()"></a>merge()</h3><p>如果指定的key不存在，则设置指定的value值，否则根据key的旧的值oldvalue，value计算出新的值newValue, 如果newValue为null, 则删除该key，否则设置key的新值newValue。</p>
-<h4 id="示例代码-7"><a href="#示例代码-7" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//存在key为1,输出 Amerge</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; k + v));</span><br><span class="line"><span class="comment">//新值为null，删除key，输出 null</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; <span class="keyword">null</span>));</span><br><span class="line"><span class="comment">//不存在key为6，输出 &quot;merge&quot;</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;6&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; k + v));</span><br></pre></td></tr></table></figure>
-
-<h4 id="控制台输出-4"><a href="#控制台输出-4" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Amerge</span><br><span class="line"><span class="keyword">null</span></span><br><span class="line">merge</span><br></pre></td></tr></table></figure>
-<h2 id="Performance-Improvement-for-HashMap-class-with-Key-Collisions"><a href="#Performance-Improvement-for-HashMap-class-with-Key-Collisions" class="headerlink" title="Performance Improvement for HashMap class with Key Collisions"></a>Performance Improvement for HashMap class with Key Collisions</h2><p>具有键冲突的HashMap类的性能改进</p>
-<h1 id="Concurrency-API-improvements-并发API改进"><a href="#Concurrency-API-improvements-并发API改进" class="headerlink" title="Concurrency API improvements(并发API改进)"></a>Concurrency API improvements(并发API改进)</h1><h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><p>JDK8提供的并发友好的HashMap</p>
-<h2 id="CompletableFuture"><a href="#CompletableFuture" class="headerlink" title="CompletableFuture"></a>CompletableFuture</h2><p>提供了非常强大的 Future 的扩展功能，可以帮助我们简化异步编程的复杂性，并且提供了函数式编程的能力，可以通过回调的方式处理计算结果，也提供了转换和组合 CompletableFuture 的方法。</p>
-<h2 id="Executors-newWorkStealingPool"><a href="#Executors-newWorkStealingPool" class="headerlink" title="Executors newWorkStealingPool()"></a>Executors newWorkStealingPool()</h2><p>创建持有足够线程的线程池来支持给定的并行级别，并通过使用多个队列，减少竞争，它需要传一个并行级别的参数，如果不传，则被设定为默认的CPU数量。</p>
-<h1 id="Java-IO-improvements-Java-IO-API的改进"><a href="#Java-IO-improvements-Java-IO-API的改进" class="headerlink" title="Java IO improvements(Java IO API的改进)"></a>Java IO improvements(Java IO API的改进)</h1><h2 id="Files-list-Path-dir"><a href="#Files-list-Path-dir" class="headerlink" title="Files.list(Path dir)"></a>Files.list(Path dir)</h2><p>返回一个延迟填充的Stream，其中的元素是目录中的条目。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回目录下的元素集合流</span></span><br><span class="line">Stream&lt;Path&gt; list = Files.list(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop&quot;</span>).toPath());</span><br><span class="line">list.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
-
-<h2 id="Files-lines-Path-path"><a href="#Files-lines-Path-path" class="headerlink" title="Files.lines(Path path)"></a>Files.lines(Path path)</h2><p>从文件中读取所有行作为流。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回文件中的所有行数</span></span><br><span class="line">Stream&lt;String&gt; lines = Files.lines(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop\\new 3.txt&quot;</span>).toPath());</span><br><span class="line">lines.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
-
-<h2 id="Files-find"><a href="#Files-find" class="headerlink" title="Files.find()"></a>Files.find()</h2><p>通过搜索以给定起始文件为根的文件树中的文件，返回使用Path延迟填充的Stream。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回符合判断条件的Path流</span></span><br><span class="line">Stream&lt;Path&gt; stream = Files.find(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop&quot;</span>).toPath(),</span><br><span class="line">        <span class="number">1</span>,</span><br><span class="line">        (path, basicFileAttributes) -&gt; basicFileAttributes.isDirectory());</span><br><span class="line">stream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
-
-<h2 id="BufferedReader-lines"><a href="#BufferedReader-lines" class="headerlink" title="BufferedReader.lines()"></a>BufferedReader.lines()</h2><p>返回一个Stream，其元素是从这个BufferedReader读取的行。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回文件中的所有行数,类似Files.lines()</span></span><br><span class="line">BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(<span class="string">&quot;C:\\Users\\Administrator\\Desktop\\new 3.txt&quot;</span>));</span><br><span class="line">Stream&lt;String&gt; stringStream = br.lines();</span><br><span class="line">stringStream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
-
-
-<h1 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h1><ul>
-<li><a href="https://www.journaldev.com/2389/java-8-features-with-examples#java8-collection">Java 8 Features with Examples</a></li>
-<li><a href="https://www.cnblogs.com/yangming1996/p/8031199.html">为并发而生的 ConcurrentHashMap（Java 8）</a></li>
-<li><a href="https://www.ibm.com/developerworks/cn/java/j-cf-of-jdk8/index.html">通过实例理解 JDK8 的 CompletableFuture</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Jackson使用指南</title>
     <url>/p/56384/</url>
     <content><![CDATA[<p>从事JAVA开发工作以来,一直都离不开Jackson的序列化反序列化,对于Jackson的使用也一直处于够用但不深入的状态，下面是日常使用过程中对Jackson的总结。</p>
@@ -4933,6 +4750,189 @@
       </categories>
       <tags>
         <tag>jackson</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java8新特性一览表</title>
+    <url>/p/55630/</url>
+    <content><![CDATA[<h1 id="总览"><a href="#总览" class="headerlink" title="总览"></a>总览</h1><ul>
+<li>forEach() method in Iterable interface(Iterable接口中的forEach()方法)</li>
+<li>default and static methods in Interfaces(接口中的默认和静态方法)</li>
+<li>Functional Interfaces and Lambda Expressions(function接口和Lambda表达式)</li>
+<li>Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)</li>
+<li>Java Time API</li>
+<li>Collection API improvements</li>
+<li>Concurrency API improvements</li>
+<li>Java IO improvements</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="1-forEach-method-in-Iterable-interface-Iterable接口中的forEach-方法"><a href="#1-forEach-method-in-Iterable-interface-Iterable接口中的forEach-方法" class="headerlink" title="1.forEach() method in Iterable interface(Iterable接口中的forEach()方法)"></a>1.forEach() method in Iterable interface(Iterable接口中的forEach()方法)</h1><p>每当我们需要遍历Collection时，我们需要创建一个Iterator，其目的是迭代，然后我们在循环中为Collection中的每个元素提供业务逻辑。如果没有正确使用迭代器，会抛出异常ConcurrentModificationException。</p>
+<p>Java 8在java.lang.Iterable接口中引入了forEach方法，这样在编写代码时我们只关注业务逻辑。 forEach方法将java.util.function.Consumer对象作为参数，因此它有助于将我们的业务逻辑放在我们可以重用的单独位置。让我们通过简单的例子看看每个用法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;IntegermyList = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">10</span>; i++) myList.add(i);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用iterator</span></span><br><span class="line">Iterator&lt;Integeriterator = myList.iterator();</span><br><span class="line"><span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">    Integer next = iterator.next();</span><br><span class="line">    System.out.println(<span class="string">&quot;Iterator Value::&quot;</span> + next);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//foreach + 匿名类</span></span><br><span class="line">myList.forEach(<span class="keyword">new</span> Consumer&lt;Integer&gt;() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(Integer t)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;forEach anonymous class Value::&quot;</span>+t);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用consumer 接口</span></span><br><span class="line">MyConsumer action = <span class="keyword">new</span> MyConsumer();</span><br><span class="line">myList.forEach(action);</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用lambda表达式</span></span><br><span class="line">myList.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-default-and-static-methods-in-Interfaces-接口中的默认和静态方法"><a href="#2-default-and-static-methods-in-Interfaces-接口中的默认和静态方法" class="headerlink" title="2.default and static methods in Interfaces(接口中的默认和静态方法)"></a>2.default and static methods in Interfaces(接口中的默认和静态方法)</h1><p>jdk8之前，interface方法不能有实现，但是从Java 8开始，接口被增强为具有实现方法。我们可以使用default和static关键字来创建具有方法实现的接口。例如Iterable接口中的forEach方法实现是</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">forEach</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> Taction)</span> </span>&#123;</span><br><span class="line">    Objects.requireNonNull(action);</span><br><span class="line">    <span class="keyword">for</span> (T t : <span class="keyword">this</span>) &#123;</span><br><span class="line">        action.accept(t);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p>创建一个接口</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">MyInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">show</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">showA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是接口默认方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">showB</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是接口静态方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建该接口实现类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> <span class="keyword">implements</span> <span class="title">MyInterface</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">show</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我是实现方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//默认方法支持重写,不覆盖则执行接口的默认方法</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;我覆盖了接口的默认方法&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态方法不可以重写</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MyClass myClass = <span class="keyword">new</span> MyClass();</span><br><span class="line">        myClass.show();</span><br><span class="line">        myClass.showA();</span><br><span class="line">        <span class="comment">//通过类名.方法名调用接口静态方法</span></span><br><span class="line">        MyInterface.showB();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-Functional-Interfaces-and-Lambda-Expressions（function接口和Lambda表达式）"><a href="#3-Functional-Interfaces-and-Lambda-Expressions（function接口和Lambda表达式）" class="headerlink" title="3.Functional Interfaces and Lambda Expressions（function接口和Lambda表达式）"></a>3.Functional Interfaces and Lambda Expressions（function接口和Lambda表达式）</h1><p>如果你注意到上面的接口代码，你会注意到@FunctionalInterface注释。功能接口是Java 8中引入的新概念。<strong>只有一个抽象方法的接口就变成了功能接口</strong>。我们不需要使用@FunctionalInterface注释将接口标记为功能接口。 @FunctionalInterface注释是一种避免在功能界面中意外添加抽象方法的工具。您可以将其视为@Override注释，并且最佳实践是使用它。实例：java8 的runnable run接口，带有一个抽象方法:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>功能接口的主要好处之一是可以使用lambda表达式来实例化它们。我们可以使用匿名类实例化一个接口，但代码看起来很笨重。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用匿名类实例化</span></span><br><span class="line">Runnable runnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;My Runnable&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>由于功能接口只有一个方法，因此lambda表达式可以很容易地提供方法实现。我们只需要提供方法参数和业务逻辑。例如，我们可以使用lambda表达式将上面的实现编写为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用lambda表达式</span></span><br><span class="line">Runnable runnable1 = () -System.out.println(<span class="string">&quot;My Runnable&quot;</span>);</span><br><span class="line">runnable.run();</span><br><span class="line">runnable1.run();</span><br></pre></td></tr></table></figure>
+
+<p>如果在方法实现中有单个语句，我们也不需要花括号。例如，上面的Interface1匿名类可以使用lambda实例化，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Interface1 interface1 = (s) -System.out.println(s);</span><br><span class="line">interface1.method1(<span class="string">&quot;interface1 method&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="lambda表达式扩展"><a href="#lambda表达式扩展" class="headerlink" title="lambda表达式扩展"></a>lambda表达式扩展</h2><h3 id="Java-中的-Lambda-表达式通常使用-argument-body-语法书写，例如："><a href="#Java-中的-Lambda-表达式通常使用-argument-body-语法书写，例如：" class="headerlink" title="Java 中的 Lambda 表达式通常使用 (argument) -(body) 语法书写，例如："></a>Java 中的 Lambda 表达式通常使用 (argument) -(body) 语法书写，例如：</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">(arg1, arg2...) -&gt; &#123; body &#125;</span><br><span class="line">(type1 arg1, type2 arg2...) -&gt; &#123; body &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Lambda-表达式的结构"><a href="#Lambda-表达式的结构" class="headerlink" title="Lambda 表达式的结构"></a>Lambda 表达式的结构</h3><ul>
+<li>一个Lambda表达式可以有零个或多个参数</li>
+<li>参数的类型既可以明确声明，也可以根据上下文来推断。例如：<code>(int a)</code>与<code>(a)</code>效果相同</li>
+<li>所有参数需包含在圆括号内，参数之间用逗号相隔。例如：<code>(a, b)</code> 或 <code>(int a, int b)</code> 或 <code>(String a, int b, float c)</code></li>
+<li>空圆括号代表参数集为空。例如：<code>() -&gt; 42</code></li>
+<li>当只有一个参数，且其类型可推导时，圆括号（）可省略。例如：<code>a -&gt; return a * a</code></li>
+<li>Lambda表达式的主体可包含零条或多条语句</li>
+<li>如果Lambda表达式的主体只有一条语句，花括号{}可省略。匿名函数的返回类型与该主体表达式一致</li>
+<li>如果Lambda表达式的主体包含一条以上语句，则表达式必须包含在花括号{}中（形成代码块）。匿名函数的返回类型与代码块的返回类型一致，若没有返回则为空</li>
+</ul>
+<h2 id="函数式接口扩展"><a href="#函数式接口扩展" class="headerlink" title="函数式接口扩展"></a>函数式接口扩展</h2><p>函数式接口是只包含一个抽象方法声明的接口,可以使用<code>@FunctionalInterface</code>标记</p>
+<h3 id="JDK8之前已有的函数式接口"><a href="#JDK8之前已有的函数式接口" class="headerlink" title="JDK8之前已有的函数式接口"></a>JDK8之前已有的函数式接口</h3><ul>
+<li>java.lang.Runnable</li>
+<li>java.util.concurrent.Callable</li>
+<li>java.security.PrivilegedAction</li>
+<li>java.util.Comparator</li>
+<li>java.io.FileFilter</li>
+<li>java.nio.file.PathMatcher</li>
+<li>java.lang.reflect.InvocationHandler</li>
+<li>java.beans.PropertyChangeListener</li>
+<li>java.awt.event.ActionListener</li>
+<li>javax.swing.event.ChangeListener</li>
+</ul>
+<h3 id="新定义的函数式接口"><a href="#新定义的函数式接口" class="headerlink" title="新定义的函数式接口"></a>新定义的函数式接口</h3><p>java.util.function中定义了几组类型的函数式接口以及针对基本数据类型的子接口。</p>
+<ul>
+<li>Predicate:传入一个参数，返回一个bool结果，方法为boolean test(T t)</li>
+<li>Consumer:传入一个参数，无返回值，纯消费。方法为void accept(T t)</li>
+<li>Function:传入一个参数，返回一个结果，方法为R apply(T t)</li>
+<li>Supplier:无参数传入，返回一个结果，方法为T get()</li>
+<li>UnaryOperator:一元操作符，继承Function,传入参数的类型和返回类型相同。</li>
+<li>BinaryOperator:二元操作符，传入的两个参数的类型和返回类型相同，继承BiFunction。</li>
+</ul>
+<p>【示例】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Predicate&lt;Integer&gt; predicate = (i) -&gt; i &gt; <span class="number">0</span>;</span><br><span class="line">Consumer&lt;Integer&gt; consumer = (i) -&gt; System.out.println(<span class="string">&quot;consumer : &quot;</span> + i);</span><br><span class="line">Function&lt;Integer,Boolean&gt; function = (i) -&gt; i &gt; <span class="number">0</span>;</span><br><span class="line">Supplier&lt;Integer&gt; supplier = () -&gt; <span class="number">1</span>;</span><br><span class="line">UnaryOperator&lt;Integer&gt; unaryOperator = (i) -&gt; i * i;</span><br><span class="line">BinaryOperator&lt;Integer&gt; binaryOperator = (i1,i2) -&gt; i1 * i2;</span><br><span class="line"></span><br><span class="line">System.out.println(predicate.test(<span class="number">10</span>));</span><br><span class="line">consumer.accept(<span class="number">10</span>);</span><br><span class="line">System.out.println(function.apply(<span class="number">10</span>));</span><br><span class="line">System.out.println(supplier.get());</span><br><span class="line">System.out.println(unaryOperator.apply(<span class="number">100</span>));</span><br><span class="line">System.out.println(binaryOperator.apply(<span class="number">100</span>,<span class="number">200</span>));</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-Java-Stream-API-for-Bulk-Data-Operations-on-Collections-用于集合上的批量数据操作的Java-Stream-API"><a href="#4-Java-Stream-API-for-Bulk-Data-Operations-on-Collections-用于集合上的批量数据操作的Java-Stream-API" class="headerlink" title="4.Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)"></a>4.Java Stream API for Bulk Data Operations on Collections(用于集合上的批量数据操作的Java Stream API)</h1><h2 id="示例代码-1"><a href="#示例代码-1" class="headerlink" title="示例代码"></a>示例代码</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//从 Collection 和数组</span></span><br><span class="line">List&lt;Integerlist = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">100</span>;i++) &#123;</span><br><span class="line">    list.add(i);</span><br><span class="line">&#125;</span><br><span class="line">Stream&lt;Integerstream = list.stream(); <span class="comment">//串行流</span></span><br><span class="line">Stream&lt;Integerstream1 = list.parallelStream(); <span class="comment">//并行流</span></span><br><span class="line">Stream&lt;Integerstream2 = Arrays.stream(list.toArray(<span class="keyword">new</span> Integer[<span class="number">0</span>]));</span><br><span class="line">Stream&lt;Integerstream3 = Stream.of(list.toArray(<span class="keyword">new</span> Integer[<span class="number">0</span>]));</span><br><span class="line"></span><br><span class="line"><span class="comment">//从 BufferedReader</span></span><br><span class="line">BufferedReader bufferedReader = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(<span class="keyword">new</span> File(<span class="string">&quot;path&quot;</span>)));</span><br><span class="line">Stream&lt;Stringstream4 = bufferedReader.lines();</span><br><span class="line"></span><br><span class="line"><span class="comment">//静态工厂</span></span><br><span class="line">IntStream stream5 = IntStream.rangeClosed(<span class="number">1</span>, <span class="number">100</span>);<span class="comment">//生成1-100 的int stream</span></span><br><span class="line">Stream&lt;Pathstream6 = Files.walk(Paths.get(<span class="string">&quot;path&quot;</span>), <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//自己构建 通过StreamSupport辅助类从spliterator产生流</span></span><br><span class="line">Stream&lt;Integerstream7 = StreamSupport.stream(list.spliterator(), <span class="keyword">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">//其它</span></span><br><span class="line">Random random = <span class="keyword">new</span> Random();</span><br><span class="line">IntStream stream8 = random.ints();</span><br><span class="line"></span><br><span class="line">BitSet bitSet = BitSet.valueOf(<span class="keyword">new</span> <span class="keyword">long</span>[]&#123;<span class="number">1L</span>, <span class="number">2L</span>, <span class="number">3L</span>&#125;);</span><br><span class="line">IntStream stream9 = bitSet.stream();</span><br><span class="line"></span><br><span class="line">Pattern pattern = Pattern.compile(<span class="string">&quot;\\d+&quot;</span>);</span><br><span class="line">Stream&lt;Stringstream10 = pattern.splitAsStream(<span class="string">&quot;111sda123sda&quot;</span>);</span><br><span class="line"></span><br><span class="line">JarFile jarFile = <span class="keyword">new</span> JarFile(<span class="string">&quot;xxx.jar&quot;</span>);</span><br><span class="line">Stream&lt;JarEntrystream11 = jarFile.stream();</span><br></pre></td></tr></table></figure>
+
+<h1 id="5-Java-Time-API-Java时间API"><a href="#5-Java-Time-API-Java时间API" class="headerlink" title="5.Java Time API(Java时间API)"></a>5.Java Time API(Java时间API)</h1><p>Java 8通过发布新的Date-Time API (JSR 310)来进一步加强对日期与时间的处理。对日期与时间的操作一直是Java程序员最痛苦的地方之一。标准的 java.util.Date以及后来的java.util.Calendar一点没有改善这种情况（可以这么说，它们一定程度上更加复杂）。</p>
+<h2 id="Clock类"><a href="#Clock类" class="headerlink" title="Clock类"></a>Clock类</h2><p>它通过指定一个时区，然后就可以获取到当前的时刻，日期与时间。Clock可以替换System.currentTimeMillis()与TimeZone.getDefault()。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the system clock as UTC offset </span></span><br><span class="line"><span class="keyword">final</span> Clock clock = Clock.systemUTC();</span><br><span class="line">System.out.println(clock.instant());</span><br><span class="line">System.out.println(clock.millis());</span><br></pre></td></tr></table></figure>
+
+<p>下面是程序在控制台上的输出:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">52</span>:<span class="number">50.</span>111Z</span><br><span class="line"><span class="number">1547045570335</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="LocaleDate与LocalTime"><a href="#LocaleDate与LocalTime" class="headerlink" title="LocaleDate与LocalTime"></a>LocaleDate与LocalTime</h2><p>LocaleDate只持有ISO-8601格式且无时区信息的日期部分。相应的，LocaleTime只持有ISO-8601格式且无时区信息的时间部分。LocaleDate与LocalTime都可以从Clock中得到。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the local date and local time</span></span><br><span class="line"><span class="keyword">final</span> LocalDate date = LocalDate.now();</span><br><span class="line"><span class="keyword">final</span> LocalDate dateFromClock = LocalDate.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(date);</span><br><span class="line">System.out.println(dateFromClock);</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get the local date and local time</span></span><br><span class="line"><span class="keyword">final</span> LocalTime time = LocalTime.now();</span><br><span class="line"><span class="keyword">final</span> LocalTime timeFromClock = LocalTime.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(time);</span><br><span class="line">System.out.println(timeFromClock);</span><br></pre></td></tr></table></figure>
+
+<p>下面是程序在控制台上的输出：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09</span><br><span class="line"><span class="number">22</span>:<span class="number">52</span>:<span class="number">50.383</span></span><br><span class="line"><span class="number">14</span>:<span class="number">52</span>:<span class="number">50.383</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="LocaleDateTime"><a href="#LocaleDateTime" class="headerlink" title="LocaleDateTime"></a>LocaleDateTime</h2><p>LocaleDateTime把LocaleDate与LocaleTime的功能合并起来，它持有的是ISO-8601格式无时区信息的日期与时间。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the local date/time</span></span><br><span class="line"><span class="keyword">final</span> LocalDateTime datetime = LocalDateTime.now();</span><br><span class="line"><span class="keyword">final</span> LocalDateTime datetimeFromClock = LocalDateTime.now(clock);</span><br><span class="line"></span><br><span class="line">System.out.println(datetime);</span><br><span class="line">System.out.println(datetimeFromClock);</span><br></pre></td></tr></table></figure>
+
+<p>下面是程序在控制台上的输出:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T22:<span class="number">55</span>:<span class="number">05.194</span></span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">55</span>:<span class="number">05.194</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="ZonedDateTime"><a href="#ZonedDateTime" class="headerlink" title="ZonedDateTime"></a>ZonedDateTime</h2><p>如果你需要特定时区的日期/时间，那么ZonedDateTime是你的选择。它持有ISO-8601格式具具有时区信息的日期与时间。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get the zoned date/time</span></span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetime = ZonedDateTime.now();</span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetimeFromClock = ZonedDateTime.now(clock);</span><br><span class="line"><span class="keyword">final</span> ZonedDateTime zonedDatetimeFromZone = ZonedDateTime.now(ZoneId.of(<span class="string">&quot;America/Los_Angeles&quot;</span>));</span><br><span class="line"></span><br><span class="line">System.out.println(zonedDatetime);</span><br><span class="line">System.out.println(zonedDatetimeFromClock);</span><br><span class="line">System.out.println(zonedDatetimeFromZone);</span><br></pre></td></tr></table></figure>
+
+<p>下面是程序在控制台上的输出：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T22:<span class="number">56</span>:<span class="number">34.033</span>+08:<span class="number">00</span>[Asia/Shanghai]</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T14:<span class="number">56</span>:<span class="number">34.</span>033Z</span><br><span class="line"><span class="number">2019</span>-<span class="number">01</span>-09T06:<span class="number">56</span>:<span class="number">34.035</span>-08:<span class="number">00</span>[America/Los_Angeles]</span><br></pre></td></tr></table></figure>
+
+<h2 id="Duration"><a href="#Duration" class="headerlink" title="Duration"></a>Duration</h2><p>在秒与纳秒级别上的一段时间。Duration使计算两个日期间的不同变的十分简单。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Get duration between two dates</span></span><br><span class="line"><span class="keyword">final</span> LocalDateTime from = LocalDateTime.of(<span class="number">2018</span>, Month.APRIL, <span class="number">16</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line"><span class="keyword">final</span> LocalDateTime to = LocalDateTime.of(<span class="number">2019</span>, Month.APRIL, <span class="number">16</span>, <span class="number">23</span>, <span class="number">59</span>, <span class="number">59</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> Duration duration = Duration.between(from, to);</span><br><span class="line">System.out.println(<span class="string">&quot;Duration in days: &quot;</span> + duration.toDays());</span><br><span class="line">System.out.println(<span class="string">&quot;Duration in hours: &quot;</span> + duration.toHours());</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子计算了两个日期2018年4月16号与2019年4月16号之间的过程。下面是程序在控制台上的输出：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Duration in days: <span class="number">365</span></span><br><span class="line">Duration in hours: <span class="number">8783</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Collection-API-improvements-集合API改进"><a href="#Collection-API-improvements-集合API改进" class="headerlink" title="Collection API improvements(集合API改进)"></a>Collection API improvements(集合API改进)</h1><p>上面已经展示了forEach()方法和Stream API在集合上的使用。java8的Collection API中添加了一些新方法：</p>
+<h2 id="Iterator-default-method-forEachRemaining-Consumer-action"><a href="#Iterator-default-method-forEachRemaining-Consumer-action" class="headerlink" title="Iterator default method forEachRemaining(Consumer action)"></a>Iterator default method forEachRemaining(Consumer action)</h2><p>为每个元素执行给定操作，直到所有元素都已处理或操作引发异常。</p>
+<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title">forEachRemaining</span><span class="params">(Consumer&lt;? <span class="keyword">super</span> E&gt; action)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//传入一个非空消费者</span></span><br><span class="line">    Objects.requireNonNull(action);</span><br><span class="line">	<span class="comment">//遍历执行消费者函数</span></span><br><span class="line">    <span class="keyword">while</span> (hasNext())</span><br><span class="line">        action.accept(next());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="示例代码-2"><a href="#示例代码-2" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);</span><br><span class="line">Iterator&lt;Integer&gt; iterator = list.iterator();</span><br><span class="line"><span class="comment">//创建一个消费者</span></span><br><span class="line">Consumer&lt;Integer&gt; consumer = i -&gt; System.out.println(<span class="string">&quot;consumer print &quot;</span> + i);</span><br><span class="line"><span class="comment">//iterator的forEachRemaining将集合中的每个元素消费</span></span><br><span class="line">iterator.forEachRemaining(consumer);</span><br></pre></td></tr></table></figure>
+
+<h3 id="控制台输出"><a href="#控制台输出" class="headerlink" title="控制台输出"></a>控制台输出</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">consumer print <span class="number">1</span></span><br><span class="line">consumer print <span class="number">2</span></span><br><span class="line">consumer print <span class="number">3</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h2 id="Collection-default-method-removeIf-Predicate-filter"><a href="#Collection-default-method-removeIf-Predicate-filter" class="headerlink" title="Collection default method removeIf(Predicate filter)"></a>Collection default method removeIf(Predicate filter)</h2><p>删除满足给定条件的此集合的所有元素。</p>
+<h3 id="源码-1"><a href="#源码-1" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">removeIf</span><span class="params">(Predicate&lt;? <span class="keyword">super</span> E&gt; filter)</span> </span>&#123;</span><br><span class="line">	<span class="comment">//传入一个非空谓语</span></span><br><span class="line">    Objects.requireNonNull(filter);</span><br><span class="line">    <span class="keyword">boolean</span> removed = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">final</span> Iterator&lt;E&gt; each = iterator();</span><br><span class="line">    <span class="keyword">while</span> (each.hasNext()) &#123;</span><br><span class="line">		<span class="comment">//遍历元素，执行谓语的校验，如果为真，则删除该元素</span></span><br><span class="line">        <span class="keyword">if</span> (filter.test(each.next())) &#123;</span><br><span class="line">            each.remove();</span><br><span class="line">            removed = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> removed;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="示例代码-3"><a href="#示例代码-3" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">list.add(<span class="number">1</span>);</span><br><span class="line">list.add(<span class="number">2</span>);</span><br><span class="line">list.add(<span class="number">3</span>);</span><br><span class="line">list.add(<span class="number">4</span>);</span><br><span class="line">Predicate&lt;Integer&gt; predicate = i -&gt; i &gt; <span class="number">1</span>;</span><br><span class="line">list.removeIf(predicate);</span><br><span class="line">System.out.println(<span class="string">&quot;remove if left items : &quot;</span> + list);</span><br></pre></td></tr></table></figure>
+
+<h3 id="控制台输出-1"><a href="#控制台输出-1" class="headerlink" title="控制台输出"></a>控制台输出</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//2,3,4满足条件被删除了</span></span><br><span class="line">remove <span class="keyword">if</span> left items : [<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="Collection-spliterator"><a href="#Collection-spliterator" class="headerlink" title="Collection spliterator()"></a>Collection spliterator()</h2><p>返回Spliterator实例的方法，该实例可用于顺序或并行遍历元素。</p>
+<h3 id="源码-2"><a href="#源码-2" class="headerlink" title="源码"></a>源码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//该方法是接口默认方法</span></span><br><span class="line"><span class="function"><span class="keyword">default</span> Spliterator&lt;E&gt; <span class="title">spliterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Spliterators.spliterator(<span class="keyword">this</span>, Spliterator.ORDERED);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="示例代码-4"><a href="#示例代码-4" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);</span><br><span class="line">Spliterator&lt;Integer&gt; spliterator = list.spliterator();</span><br><span class="line"><span class="comment">//创建顺序流</span></span><br><span class="line">Stream&lt;Integer&gt; stream = StreamSupport.stream(spliterator, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">//创建并行流</span></span><br><span class="line">Stream&lt;Integer&gt; parallelStream = StreamSupport.stream(spliterator, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Map-replaceAll-compute-merge-methods"><a href="#Map-replaceAll-compute-merge-methods" class="headerlink" title="Map replaceAll(), compute(), merge() methods"></a>Map replaceAll(), compute(), merge() methods</h2><h3 id="replaceAll"><a href="#replaceAll" class="headerlink" title="replaceAll()"></a>replaceAll()</h3><p>替换Map中所有Entry的value值，这个值由旧的key和value计算得出，接收参数 (K, V) -&gt; V</p>
+<h4 id="源码-3"><a href="#源码-3" class="headerlink" title="源码"></a>源码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">replaceAll</span><span class="params">(BiFunction&lt;? <span class="keyword">super</span> K, ? <span class="keyword">super</span> V, ? extends V&gt; function)</span> </span>&#123;</span><br><span class="line">    Node&lt;K,V&gt;[] tab;</span><br><span class="line">    <span class="keyword">if</span> (function == <span class="keyword">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">if</span> (size &gt; <span class="number">0</span> &amp;&amp; (tab = table) != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> mc = modCount;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; tab.length; ++i) &#123;</span><br><span class="line">            <span class="keyword">for</span> (Node&lt;K,V&gt; e = tab[i]; e != <span class="keyword">null</span>; e = e.next) &#123;</span><br><span class="line">				<span class="comment">//使用给定的函数替换原来的value值，key不变</span></span><br><span class="line">                e.value = function.apply(e.key, e.value);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (modCount != mc)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ConcurrentModificationException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="示例代码-5"><a href="#示例代码-5" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//replaceAll方法</span></span><br><span class="line">map.replaceAll((s, s2) -&gt; s + s2);</span><br><span class="line">System.out.println(map);</span><br></pre></td></tr></table></figure>
+
+<h4 id="控制台输出-2"><a href="#控制台输出-2" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//原来的value由key + value替换掉了</span></span><br><span class="line">&#123;<span class="number">1</span>=1A, <span class="number">2</span>=2B, <span class="number">3</span>=3C, <span class="number">4</span>=<span class="number">4D</span>, <span class="number">5</span>=5E&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="compute"><a href="#compute" class="headerlink" title="compute()"></a>compute()</h3><p>是<code>computeIfPresent</code>和<code>computeIfAbsent</code>方法的组合体</p>
+<ul>
+<li>computeIfPresent:如果指定的key不存在，则通过指定的K -&gt; V计算出新的值设置为key的值。</li>
+<li>computeIfPresent:如果指定的key存在，则根据旧的key和value计算新的值newValue, 如果newValue不为null，则设置key新的值为newValue, 如果newValue为null, 则删除该key的值。</li>
+</ul>
+<h4 id="示例代码-6"><a href="#示例代码-6" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//key存在，根据旧的key和value计算新的值newValue</span></span><br><span class="line">map.compute(<span class="string">&quot;1&quot;</span>, (k, v) -&gt; v + <span class="string">&quot; computed&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key存在&quot;</span> + map.get(<span class="string">&quot;1&quot;</span>));</span><br><span class="line"><span class="comment">//key不存在，通过指定的K -&gt; V计算出新的值设置为key的值</span></span><br><span class="line">map.compute(<span class="string">&quot;6&quot;</span>, (k, v) -&gt; <span class="string">&quot;F&quot;</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key不存在&quot;</span> + map.get(<span class="string">&quot;6&quot;</span>));</span><br><span class="line"><span class="comment">//key存在，如果newValue为null, 则删除该key的值</span></span><br><span class="line">map.compute(<span class="string">&quot;1&quot;</span>, (k, v) -&gt; <span class="keyword">null</span>);</span><br><span class="line">System.out.println(<span class="string">&quot;key存在，设置为null &quot;</span> + map.get(<span class="string">&quot;1&quot;</span>));</span><br></pre></td></tr></table></figure>
+
+<h4 id="控制台输出-3"><a href="#控制台输出-3" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">key存在A computed</span><br><span class="line">key不存在F</span><br><span class="line">key存在，设置为<span class="keyword">null</span> <span class="keyword">null</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="merge"><a href="#merge" class="headerlink" title="merge()"></a>merge()</h3><p>如果指定的key不存在，则设置指定的value值，否则根据key的旧的值oldvalue，value计算出新的值newValue, 如果newValue为null, 则删除该key，否则设置key的新值newValue。</p>
+<h4 id="示例代码-7"><a href="#示例代码-7" class="headerlink" title="示例代码"></a>示例代码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">map.put(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;A&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;B&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;3&quot;</span>, <span class="string">&quot;C&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;4&quot;</span>, <span class="string">&quot;D&quot;</span>);</span><br><span class="line">map.put(<span class="string">&quot;5&quot;</span>, <span class="string">&quot;E&quot;</span>);</span><br><span class="line"><span class="comment">//存在key为1,输出 Amerge</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; k + v));</span><br><span class="line"><span class="comment">//新值为null，删除key，输出 null</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; <span class="keyword">null</span>));</span><br><span class="line"><span class="comment">//不存在key为6，输出 &quot;merge&quot;</span></span><br><span class="line">System.out.println(map.merge(<span class="string">&quot;6&quot;</span>, <span class="string">&quot;merge&quot;</span>, (k, v) -&gt; k + v));</span><br></pre></td></tr></table></figure>
+
+<h4 id="控制台输出-4"><a href="#控制台输出-4" class="headerlink" title="控制台输出"></a>控制台输出</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Amerge</span><br><span class="line"><span class="keyword">null</span></span><br><span class="line">merge</span><br></pre></td></tr></table></figure>
+<h2 id="Performance-Improvement-for-HashMap-class-with-Key-Collisions"><a href="#Performance-Improvement-for-HashMap-class-with-Key-Collisions" class="headerlink" title="Performance Improvement for HashMap class with Key Collisions"></a>Performance Improvement for HashMap class with Key Collisions</h2><p>具有键冲突的HashMap类的性能改进</p>
+<h1 id="Concurrency-API-improvements-并发API改进"><a href="#Concurrency-API-improvements-并发API改进" class="headerlink" title="Concurrency API improvements(并发API改进)"></a>Concurrency API improvements(并发API改进)</h1><h2 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h2><p>JDK8提供的并发友好的HashMap</p>
+<h2 id="CompletableFuture"><a href="#CompletableFuture" class="headerlink" title="CompletableFuture"></a>CompletableFuture</h2><p>提供了非常强大的 Future 的扩展功能，可以帮助我们简化异步编程的复杂性，并且提供了函数式编程的能力，可以通过回调的方式处理计算结果，也提供了转换和组合 CompletableFuture 的方法。</p>
+<h2 id="Executors-newWorkStealingPool"><a href="#Executors-newWorkStealingPool" class="headerlink" title="Executors newWorkStealingPool()"></a>Executors newWorkStealingPool()</h2><p>创建持有足够线程的线程池来支持给定的并行级别，并通过使用多个队列，减少竞争，它需要传一个并行级别的参数，如果不传，则被设定为默认的CPU数量。</p>
+<h1 id="Java-IO-improvements-Java-IO-API的改进"><a href="#Java-IO-improvements-Java-IO-API的改进" class="headerlink" title="Java IO improvements(Java IO API的改进)"></a>Java IO improvements(Java IO API的改进)</h1><h2 id="Files-list-Path-dir"><a href="#Files-list-Path-dir" class="headerlink" title="Files.list(Path dir)"></a>Files.list(Path dir)</h2><p>返回一个延迟填充的Stream，其中的元素是目录中的条目。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回目录下的元素集合流</span></span><br><span class="line">Stream&lt;Path&gt; list = Files.list(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop&quot;</span>).toPath());</span><br><span class="line">list.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Files-lines-Path-path"><a href="#Files-lines-Path-path" class="headerlink" title="Files.lines(Path path)"></a>Files.lines(Path path)</h2><p>从文件中读取所有行作为流。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回文件中的所有行数</span></span><br><span class="line">Stream&lt;String&gt; lines = Files.lines(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop\\new 3.txt&quot;</span>).toPath());</span><br><span class="line">lines.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Files-find"><a href="#Files-find" class="headerlink" title="Files.find()"></a>Files.find()</h2><p>通过搜索以给定起始文件为根的文件树中的文件，返回使用Path延迟填充的Stream。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回符合判断条件的Path流</span></span><br><span class="line">Stream&lt;Path&gt; stream = Files.find(<span class="keyword">new</span> File(<span class="string">&quot;C:\\Users\\Administrator\\Desktop&quot;</span>).toPath(),</span><br><span class="line">        <span class="number">1</span>,</span><br><span class="line">        (path, basicFileAttributes) -&gt; basicFileAttributes.isDirectory());</span><br><span class="line">stream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<h2 id="BufferedReader-lines"><a href="#BufferedReader-lines" class="headerlink" title="BufferedReader.lines()"></a>BufferedReader.lines()</h2><p>返回一个Stream，其元素是从这个BufferedReader读取的行。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//返回文件中的所有行数,类似Files.lines()</span></span><br><span class="line">BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> FileReader(<span class="string">&quot;C:\\Users\\Administrator\\Desktop\\new 3.txt&quot;</span>));</span><br><span class="line">Stream&lt;String&gt; stringStream = br.lines();</span><br><span class="line">stringStream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h1><ul>
+<li><a href="https://www.journaldev.com/2389/java-8-features-with-examples#java8-collection">Java 8 Features with Examples</a></li>
+<li><a href="https://www.cnblogs.com/yangming1996/p/8031199.html">为并发而生的 ConcurrentHashMap（Java 8）</a></li>
+<li><a href="https://www.ibm.com/developerworks/cn/java/j-cf-of-jdk8/index.html">通过实例理解 JDK8 的 CompletableFuture</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
