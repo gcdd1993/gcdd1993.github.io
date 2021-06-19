@@ -670,6 +670,64 @@
       </tags>
   </entry>
   <entry>
+    <title>Java设计模式（三）简单工厂模式</title>
+    <url>/p/21710/</url>
+    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
+<li>定义:由一个工厂对象决定创建出哪一种产品类的实例</li>
+<li>类型:创建型，但不属于GOF23种设计模式</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
+<li>工厂类负责创建的对象比较少</li>
+<li>客户端(应用层)只知道传入工厂类的参数，对于如何创建对象(逻辑)不关心</li>
+</ul>
+<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>只需要传入一个正确的参数，就可以获取你所需要的对象，而无须知道其创建细节</p>
+<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>工厂类的<strong>职责相对过重</strong>，增加新的产品，需要修改工厂类的判断逻辑，<strong>违背开闭原则</strong></p>
+<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>创建一个抽象产品类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>产品实现类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建产品对应的简单工厂，通过产品类型来创建产品，应用方无需知道创建产品的细节</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(String type)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;java&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;python&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory videoFactory = <span class="keyword">new</span> VideoFactory();</span><br><span class="line">        Video video = videoFactory.getVideo(<span class="string">&quot;Java&quot;</span>);</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制台输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br></pre></td></tr></table></figure>
+
+<p>如果增加产品，我们不仅需要修改产品对应的产品类，还需要修改工厂类，违反了开闭原则。</p>
+<p>我们可以通过反射来优化下我们的工厂类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(Class&lt;? extends Video&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.newInstance();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，添加产品的时候不用再修改我们的工厂类，而是直接添加产品即可。</p>
+<p>最终的UML类图</p>
+<p><img data-src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
+<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="JDK源码"><a href="#JDK源码" class="headerlink" title="JDK源码"></a><code>JDK</code>源码</h2><p>在JDK中，使用简单工厂模式的例子如<code>java.util.Calendar</code>，一组<code>getInstance</code>的重载方法，提供了创建<code>Calendar</code>产品的简单工厂方法。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(Locale aLocale)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>核心方法为</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Calendar <span class="title">createCalendar</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>源码较长，不贴了，有兴趣的可以去看下源码。</p>
+<p><code>Calendar</code>的UML类图如下</p>
+<p><img data-src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
+<h2 id="Logback源码"><a href="#Logback源码" class="headerlink" title="Logback源码"></a><code>Logback</code>源码</h2><p><code>logback</code>类中的简单工厂模式主要体现在<code>ch.qos.logback.classic.LoggerContext#getLogger(String)</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;name argument cannot be null&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断log类型返回root节点的logger</span></span><br><span class="line">    <span class="keyword">if</span> (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) &#123;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    Logger logger = root;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果缓存中已经存在的指定的logger，直接返回childLogger</span></span><br><span class="line">    Logger childLogger = (Logger) loggerCache.get(name);</span><br><span class="line">    <span class="comment">// if we have the child， then let us return it without wasting time</span></span><br><span class="line">    <span class="keyword">if</span> (childLogger != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> childLogger;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下是创建logger的逻辑</span></span><br><span class="line">    String childName;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = LoggerNameUtil.getSeparatorIndexOf(name， i);</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            childName = name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            childName = name.substring(<span class="number">0</span>， h);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// move i left of the last point</span></span><br><span class="line">        i = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (logger) &#123;</span><br><span class="line">            childLogger = logger.getChildByName(childName);</span><br><span class="line">            <span class="keyword">if</span> (childLogger == <span class="keyword">null</span>) &#123;</span><br><span class="line">                childLogger = logger.createChildByName(childName);</span><br><span class="line">                loggerCache.put(childName， childLogger);</span><br><span class="line">                incSize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        logger = childLogger;</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> childLogger;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是一个典型的简单工厂方法</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java设计模式（二）设计模式原则</title>
     <url>/p/64818/</url>
     <content><![CDATA[<p>学习Java设计模式之前，有必要先了解设计模式原则。<span id="more"></span></p>
@@ -846,64 +904,6 @@
       <tags>
         <tag>设计模式</tag>
         <tag>UML</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java设计模式（三）简单工厂模式</title>
-    <url>/p/21710/</url>
-    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
-<li>定义:由一个工厂对象决定创建出哪一种产品类的实例</li>
-<li>类型:创建型，但不属于GOF23种设计模式</li>
-</ul>
-<span id="more"></span>
-
-<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
-<li>工厂类负责创建的对象比较少</li>
-<li>客户端(应用层)只知道传入工厂类的参数，对于如何创建对象(逻辑)不关心</li>
-</ul>
-<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><p>只需要传入一个正确的参数，就可以获取你所需要的对象，而无须知道其创建细节</p>
-<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><p>工厂类的<strong>职责相对过重</strong>，增加新的产品，需要修改工厂类的判断逻辑，<strong>违背开闭原则</strong></p>
-<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>创建一个抽象产品类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>产品实现类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建产品对应的简单工厂，通过产品类型来创建产品，应用方无需知道创建产品的细节</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(String type)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;java&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;python&quot;</span>.equalsIgnoreCase(type)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>测试类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory videoFactory = <span class="keyword">new</span> VideoFactory();</span><br><span class="line">        Video video = videoFactory.getVideo(<span class="string">&quot;Java&quot;</span>);</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>控制台输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br></pre></td></tr></table></figure>
-
-<p>如果增加产品，我们不仅需要修改产品对应的产品类，还需要修改工厂类，违反了开闭原则。</p>
-<p>我们可以通过反射来优化下我们的工厂类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">(Class&lt;? extends Video&gt; clazz)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.newInstance();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样一来，添加产品的时候不用再修改我们的工厂类，而是直接添加产品即可。</p>
-<p>最终的UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
-<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="JDK源码"><a href="#JDK源码" class="headerlink" title="JDK源码"></a><code>JDK</code>源码</h2><p>在JDK中，使用简单工厂模式的例子如<code>java.util.Calendar</code>，一组<code>getInstance</code>的重载方法，提供了创建<code>Calendar</code>产品的简单工厂方法。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(Locale aLocale)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>核心方法为</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Calendar <span class="title">createCalendar</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
-
-<p>源码较长，不贴了，有兴趣的可以去看下源码。</p>
-<p><code>Calendar</code>的UML类图如下</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
-<h2 id="Logback源码"><a href="#Logback源码" class="headerlink" title="Logback源码"></a><code>Logback</code>源码</h2><p><code>logback</code>类中的简单工厂模式主要体现在<code>ch.qos.logback.classic.LoggerContext#getLogger(String)</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;name argument cannot be null&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断log类型返回root节点的logger</span></span><br><span class="line">    <span class="keyword">if</span> (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) &#123;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    Logger logger = root;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果缓存中已经存在的指定的logger，直接返回childLogger</span></span><br><span class="line">    Logger childLogger = (Logger) loggerCache.get(name);</span><br><span class="line">    <span class="comment">// if we have the child， then let us return it without wasting time</span></span><br><span class="line">    <span class="keyword">if</span> (childLogger != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> childLogger;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下是创建logger的逻辑</span></span><br><span class="line">    String childName;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = LoggerNameUtil.getSeparatorIndexOf(name， i);</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            childName = name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            childName = name.substring(<span class="number">0</span>， h);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// move i left of the last point</span></span><br><span class="line">        i = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (logger) &#123;</span><br><span class="line">            childLogger = logger.getChildByName(childName);</span><br><span class="line">            <span class="keyword">if</span> (childLogger == <span class="keyword">null</span>) &#123;</span><br><span class="line">                childLogger = logger.createChildByName(childName);</span><br><span class="line">                loggerCache.put(childName， childLogger);</span><br><span class="line">                incSize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        logger = childLogger;</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> childLogger;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>是一个典型的简单工厂方法</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>设计模式</tag>
       </tags>
   </entry>
   <entry>
@@ -1192,6 +1192,40 @@
       </tags>
   </entry>
   <entry>
+    <title>PG数据库常用操作</title>
+    <url>/p/59866/</url>
+    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
+<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
+<li>备份数据</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>正式迁移</li>
+</ul>
+<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
+<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
+
+<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
+
+<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Nginx配置Https指南</title>
     <url>/p/17023/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本文是对Nginx配置SSL证书的总结。<span id="more"></span></p>
@@ -1251,40 +1285,6 @@
       </categories>
       <tags>
         <tag>Nginx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PG数据库常用操作</title>
-    <url>/p/59866/</url>
-    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
-<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
-<li>备份数据</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>正式迁移</li>
-</ul>
-<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
-<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
-
-<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
-
-<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -2457,35 +2457,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MacOs使用CleanMyMac X清除可清除空间</title>
-    <url>/p/46997/</url>
-    <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>本文介绍如何使用<code>CleanMyMac X</code>清除可清除的空间</p>
-<p><img data-src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
-<span id="more"></span>
-
-<p>可以看到，可清除的空间达到了125.79GB，虽然说不影响系统的使用，但是在使用时间机器进行备份的时候，仍然会将可清除空间当成备份的一部分，造成备份文件过大，首次备份时间过长。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>清除可清除空间，你只需要<strong>CleanMyMac X</strong>这个工具即可，我分享下我使用的版本，当然有能力的建议使用正版。</p>
-<p><a href="https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw">https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw</a></p>
-<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>安装完毕后，打开<strong>CleanMyMac X</strong></p>
-<p><img data-src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
-<p>点击”维护“，你可以使用“<strong>释放可清除空间</strong>”或者是“<strong>时间机器快照瘦身</strong>”，我使用的是“时间机器快照瘦身”</p>
-<div class="note warning"><p>建议先使用“时间机器快照瘦身”，如果不行，再释放可清除空间，因为释放可清除空间耗时较长</p>
-</div>
-
-<p><img data-src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
-<p>点击运行，稍作等待即可</p>
-<p><img data-src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
-<p>这时候，我们回到磁盘工具，再次查看可清除空间，可以发现，可清除空间小了不少！</p>
-<p><img data-src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>macOs</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Postman使用技巧</title>
     <url>/p/4537/</url>
     <content><![CDATA[<h1 id="Postman是什么"><a href="#Postman是什么" class="headerlink" title="Postman是什么"></a>Postman是什么</h1><p>Postman是chrome的一款插件,用于做接口请求测试,无论是前端,后台还是测试人员,都可以用postman来测试接口,用起来非常方便。<span id="more"></span></p>
@@ -2572,6 +2543,35 @@
       </categories>
       <tags>
         <tag>Spring-Cloud</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MacOs使用CleanMyMac X清除可清除空间</title>
+    <url>/p/46997/</url>
+    <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>本文介绍如何使用<code>CleanMyMac X</code>清除可清除的空间</p>
+<p><img data-src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
+<span id="more"></span>
+
+<p>可以看到，可清除的空间达到了125.79GB，虽然说不影响系统的使用，但是在使用时间机器进行备份的时候，仍然会将可清除空间当成备份的一部分，造成备份文件过大，首次备份时间过长。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>清除可清除空间，你只需要<strong>CleanMyMac X</strong>这个工具即可，我分享下我使用的版本，当然有能力的建议使用正版。</p>
+<p><a href="https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw">https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw</a></p>
+<h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>安装完毕后，打开<strong>CleanMyMac X</strong></p>
+<p><img data-src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
+<p>点击”维护“，你可以使用“<strong>释放可清除空间</strong>”或者是“<strong>时间机器快照瘦身</strong>”，我使用的是“时间机器快照瘦身”</p>
+<div class="note warning"><p>建议先使用“时间机器快照瘦身”，如果不行，再释放可清除空间，因为释放可清除空间耗时较长</p>
+</div>
+
+<p><img data-src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
+<p>点击运行，稍作等待即可</p>
+<p><img data-src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
+<p>这时候，我们回到磁盘工具，再次查看可清除空间，可以发现，可清除空间小了不少！</p>
+<p><img data-src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
+]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>macOs</tag>
       </tags>
   </entry>
   <entry>
@@ -2850,38 +2850,6 @@
       </tags>
   </entry>
   <entry>
-    <title>后端跨域的N种方法</title>
-    <url>/p/34331/</url>
-    <content><![CDATA[<blockquote>
-<p>简单来说，CORS是一种访问机制，英文全称是Cross-Origin Resource Sharing，即我们常说的跨域资源共享，通过在服务器端设置响应头，把发起跨域的原始域名添加到Access-Control-Allow-Origin 即可。</p>
-</blockquote>
-<span id="more"></span>
-
-<h1 id="返回新的CorsFilter-全局跨域"><a href="#返回新的CorsFilter-全局跨域" class="headerlink" title="返回新的CorsFilter(全局跨域)"></a>返回新的CorsFilter(全局跨域)</h1><blockquote>
-<p>在任意配置类，返回一个新的CorsFilter Bean，并添加映射路径和具体的CORS配置信息。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalCorsConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CorsFilter <span class="title">corsFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1.添加CORS配置信息</span></span><br><span class="line">        CorsConfiguration config = <span class="keyword">new</span> CorsConfiguration();</span><br><span class="line">        <span class="comment">//放行哪些原始域</span></span><br><span class="line">        config.addAllowedOrigin(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">        config.setAllowCredentials(<span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">        config.addAllowedMethod(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">        config.addAllowedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//暴露哪些头部信息(因为跨域访问默认不能获取全部头部信息)</span></span><br><span class="line">        config.addExposedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.添加映射路径</span></span><br><span class="line">        UrlBasedCorsConfigurationSource configSource = <span class="keyword">new</span> UrlBasedCorsConfigurationSource();</span><br><span class="line">        configSource.registerCorsConfiguration(<span class="string">&quot;/**&quot;</span>, config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.返回新的CorsFilter.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CorsFilter(configSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="使用注解-局部跨域"><a href="#使用注解-局部跨域" class="headerlink" title="使用注解(局部跨域)"></a>使用注解(局部跨域)</h1><h2 id="在方法上-RequestMapping-使用注解-CrossOrigin"><a href="#在方法上-RequestMapping-使用注解-CrossOrigin" class="headerlink" title="在方法上(@RequestMapping)使用注解 @CrossOrigin"></a>在方法上(@RequestMapping)使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="meta">@CrossOrigin(&quot;http://localhost:8080&quot;)</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="在控制器-Controller-上使用注解-CrossOrigin"><a href="#在控制器-Controller-上使用注解-CrossOrigin" class="headerlink" title="在控制器(@Controller)上使用注解 @CrossOrigin"></a>在控制器(@Controller)上使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@CrossOrigin(origins = &quot;http://domain.com&quot;, maxAge = 3600)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="手工设置响应头-局部跨域"><a href="#手工设置响应头-局部跨域" class="headerlink" title="手工设置响应头(局部跨域)"></a>手工设置响应头(局部跨域)</h2><blockquote>
-<p>使用HttpServletResponse对象添加响应头（Access-Control-Allow-Origin）来授权原始域，这里Origin的值也可以设置为”*” ，表示全部放行。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletResponse response)</span></span>&#123;</span><br><span class="line">    response.addHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="Nginx配置跨域"><a href="#Nginx配置跨域" class="headerlink" title="Nginx配置跨域"></a>Nginx配置跨域</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upstream server &#123;</span><br><span class="line">        server 127.0.0.1:8091;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name domain.com;</span><br><span class="line"></span><br><span class="line">        location ^~/api &#123;</span><br><span class="line">                //添加跨域请求头</span><br><span class="line">                proxy_set_header Access-Control-Allow-Origin *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Methods *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Headers *;</span><br><span class="line"></span><br><span class="line">                if ($request_method = &#x27;OPTIONS&#x27;) &#123;</span><br><span class="line">                        return 204;</span><br><span class="line">                &#125;</span><br><span class="line">                rewrite ^/api/(.+?)$ /$1 break;</span><br><span class="line">                proxy_pass http://server;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>跨域</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>发布开源项目到Jcenter</title>
     <url>/p/53809/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><blockquote>
@@ -2943,6 +2911,38 @@
       </categories>
       <tags>
         <tag>Jcenter</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>后端跨域的N种方法</title>
+    <url>/p/34331/</url>
+    <content><![CDATA[<blockquote>
+<p>简单来说，CORS是一种访问机制，英文全称是Cross-Origin Resource Sharing，即我们常说的跨域资源共享，通过在服务器端设置响应头，把发起跨域的原始域名添加到Access-Control-Allow-Origin 即可。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="返回新的CorsFilter-全局跨域"><a href="#返回新的CorsFilter-全局跨域" class="headerlink" title="返回新的CorsFilter(全局跨域)"></a>返回新的CorsFilter(全局跨域)</h1><blockquote>
+<p>在任意配置类，返回一个新的CorsFilter Bean，并添加映射路径和具体的CORS配置信息。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalCorsConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CorsFilter <span class="title">corsFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//1.添加CORS配置信息</span></span><br><span class="line">        CorsConfiguration config = <span class="keyword">new</span> CorsConfiguration();</span><br><span class="line">        <span class="comment">//放行哪些原始域</span></span><br><span class="line">        config.addAllowedOrigin(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//是否发送Cookie信息</span></span><br><span class="line">        config.setAllowCredentials(<span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(请求方式)</span></span><br><span class="line">        config.addAllowedMethod(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//放行哪些原始域(头部信息)</span></span><br><span class="line">        config.addAllowedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        <span class="comment">//暴露哪些头部信息(因为跨域访问默认不能获取全部头部信息)</span></span><br><span class="line">        config.addExposedHeader(<span class="string">&quot;*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.添加映射路径</span></span><br><span class="line">        UrlBasedCorsConfigurationSource configSource = <span class="keyword">new</span> UrlBasedCorsConfigurationSource();</span><br><span class="line">        configSource.registerCorsConfiguration(<span class="string">&quot;/**&quot;</span>, config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//3.返回新的CorsFilter.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CorsFilter(configSource);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="使用注解-局部跨域"><a href="#使用注解-局部跨域" class="headerlink" title="使用注解(局部跨域)"></a>使用注解(局部跨域)</h1><h2 id="在方法上-RequestMapping-使用注解-CrossOrigin"><a href="#在方法上-RequestMapping-使用注解-CrossOrigin" class="headerlink" title="在方法上(@RequestMapping)使用注解 @CrossOrigin"></a>在方法上(@RequestMapping)使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="meta">@CrossOrigin(&quot;http://localhost:8080&quot;)</span> </span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="在控制器-Controller-上使用注解-CrossOrigin"><a href="#在控制器-Controller-上使用注解-CrossOrigin" class="headerlink" title="在控制器(@Controller)上使用注解 @CrossOrigin"></a>在控制器(@Controller)上使用注解 <code>@CrossOrigin</code></h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="meta">@CrossOrigin(origins = &quot;http://domain.com&quot;, maxAge = 3600)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="meta">@ResponseBody</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="手工设置响应头-局部跨域"><a href="#手工设置响应头-局部跨域" class="headerlink" title="手工设置响应头(局部跨域)"></a>手工设置响应头(局部跨域)</h2><blockquote>
+<p>使用HttpServletResponse对象添加响应头（Access-Control-Allow-Origin）来授权原始域，这里Origin的值也可以设置为”*” ，表示全部放行。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/hello&quot;)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">(HttpServletResponse response)</span></span>&#123;</span><br><span class="line">    response.addHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;Hello World&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Nginx配置跨域"><a href="#Nginx配置跨域" class="headerlink" title="Nginx配置跨域"></a>Nginx配置跨域</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upstream server &#123;</span><br><span class="line">        server 127.0.0.1:8091;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name domain.com;</span><br><span class="line"></span><br><span class="line">        location ^~/api &#123;</span><br><span class="line">                //添加跨域请求头</span><br><span class="line">                proxy_set_header Access-Control-Allow-Origin *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Methods *;</span><br><span class="line">                proxy_set_header Access-Control-Allow-Headers *;</span><br><span class="line"></span><br><span class="line">                if ($request_method = &#x27;OPTIONS&#x27;) &#123;</span><br><span class="line">                        return 204;</span><br><span class="line">                &#125;</span><br><span class="line">                rewrite ^/api/(.+?)$ /$1 break;</span><br><span class="line">                proxy_pass http://server;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>跨域</tag>
       </tags>
   </entry>
   <entry>
@@ -3014,44 +3014,6 @@
       </tags>
   </entry>
   <entry>
-    <title>常用软件集合</title>
-    <url>/p/37491/</url>
-    <content><![CDATA[<p>常用软件工具收藏集，收藏了在工作生活中遇到的好用实用的软件。<span id="more"></span></p>
-<h1 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2eptwh">BeyondCompare破解版</a></li>
-<li><a href="https://www.lanzous.com/i2eptrc">Navicat Premium 12破解版</a></li>
-<li><a href="https://www.lanzous.com/b547205/">markdown pad2破解版</a> 密码:23w2</li>
-<li><a href="https://www.lanzous.com/b539472/">RedisDesktopManager 免费版</a> 密码:ciq1</li>
-<li><a href="https://www.lanzous.com/i2q4x3i">QTransate翻译工具</a></li>
-<li><a href="https://www.lanzous.com/i2epu5g">正则表达式测试工具</a></li>
-<li><a href="https://www.lanzous.com/i2epu2d">draw.io拓扑图工具</a></li>
-<li><a href="https://www.lanzous.com/i2eptdi">DevCenter cassandra管理工具</a></li>
-<li><a href="https://www.lanzous.com/i2en5xc">PostMan便携版</a></li>
-<li><a href="https://www.lanzous.com/i2q4xyj">Git</a></li>
-<li><a href="https://www.lanzous.com/i2q4y1c">SourceTree(Git Gui工具)</a></li>
-<li><a href="https://www.lanzous.com/i2v3p2d">XShell5破解版</a></li>
-</ul>
-<h1 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2q4y6h">RSS订阅工具(只限windows)</a></li>
-<li><a href="https://www.lanzous.com/b539477">科学上网ShadowSocks</a></li>
-<li><a href="https://www.lanzous.com/i2saiib">win10激活工具</a></li>
-<li><a href="https://www.lanzous.com/i2t3ukj">Office安装工具</a></li>
-<li><a href="https://www.lanzous.com/i2flrje">OCR文字识别工具</a></li>
-<li><a href="https://www.lanzous.com/i2flr6b">GIF录制工具</a></li>
-<li><a href="https://www.lanzous.com/i2fls4f">冰点文库下载器破解版</a></li>
-</ul>
-<h1 id="推荐工具"><a href="#推荐工具" class="headerlink" title="推荐工具"></a>推荐工具</h1><ul>
-<li><a href="https://www.lanzous.com/i2zaiyj">现代化Markdown编辑工具</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>工具</category>
-      </categories>
-      <tags>
-        <tag>软件</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>我的JAVA环境搭建</title>
     <url>/p/12106/</url>
     <content><![CDATA[<p>每次重装系统后的开发环境搭建，总是会花费大量的时间精力，软件下载安装啦，配置修改啦等等，索性把这些流程记录一下，毕竟时间就是金钱。<span id="more"></span></p>
@@ -3109,32 +3071,41 @@
       </tags>
   </entry>
   <entry>
-    <title>掘金解绑方案（已成功解绑微信）</title>
-    <url>/p/34461/</url>
-    <content><![CDATA[<p>掘金的绑定限制为同一个第三方账号只能绑定一个掘金账号，且必须留存一个第三方绑定。</p>
-<p>比如，我只绑定了微信，想要解绑微信，对不起，不支持。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
-<span id="more"></span>
-
-<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我突然想到，既然必须留存一个第三方绑定，那我留存一个<strong>邮箱绑定</strong>不就好了吗？</p>
-<p>思路就是<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，通过绑定一个邮箱账号，来绑定邮箱，从而将我们的账号解放出来，绑定我们的大号或者其他账号。</p>
-<h2 id="获取临时电子邮件地址"><a href="#获取临时电子邮件地址" class="headerlink" title="获取临时电子邮件地址"></a>获取临时电子邮件地址</h2><p>打开<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，你将会获取到一个临时电子邮件地址，我们将使用这个邮件绑定我们的掘金账号。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
-<h2 id="绑定临时邮箱"><a href="#绑定临时邮箱" class="headerlink" title="绑定临时邮箱"></a>绑定临时邮箱</h2><p>点击绑定邮箱，输入我们上一步获取到的临时邮件地址，返回<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>网站，耐心等待10s左右。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
-<p>你将会受到掘金的邮箱绑定验证邮件，打开并点击，直到绑定成功。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
-<h2 id="解绑"><a href="#解绑" class="headerlink" title="解绑"></a>解绑</h2><p>接下来我们就可以开心的解绑我们自己的账号了。我要解绑的是微信，试一下吧。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
-<h1 id="友情提醒"><a href="#友情提醒" class="headerlink" title="友情提醒"></a>友情提醒</h1><blockquote>
-<p>由于使用的是一次性邮件地址，该做法可能会导致你解绑的账号登录不上，请谨慎操作！</p>
-</blockquote>
+    <title>常用软件集合</title>
+    <url>/p/37491/</url>
+    <content><![CDATA[<p>常用软件工具收藏集，收藏了在工作生活中遇到的好用实用的软件。<span id="more"></span></p>
+<h1 id="开发工具"><a href="#开发工具" class="headerlink" title="开发工具"></a>开发工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2eptwh">BeyondCompare破解版</a></li>
+<li><a href="https://www.lanzous.com/i2eptrc">Navicat Premium 12破解版</a></li>
+<li><a href="https://www.lanzous.com/b547205/">markdown pad2破解版</a> 密码:23w2</li>
+<li><a href="https://www.lanzous.com/b539472/">RedisDesktopManager 免费版</a> 密码:ciq1</li>
+<li><a href="https://www.lanzous.com/i2q4x3i">QTransate翻译工具</a></li>
+<li><a href="https://www.lanzous.com/i2epu5g">正则表达式测试工具</a></li>
+<li><a href="https://www.lanzous.com/i2epu2d">draw.io拓扑图工具</a></li>
+<li><a href="https://www.lanzous.com/i2eptdi">DevCenter cassandra管理工具</a></li>
+<li><a href="https://www.lanzous.com/i2en5xc">PostMan便携版</a></li>
+<li><a href="https://www.lanzous.com/i2q4xyj">Git</a></li>
+<li><a href="https://www.lanzous.com/i2q4y1c">SourceTree(Git Gui工具)</a></li>
+<li><a href="https://www.lanzous.com/i2v3p2d">XShell5破解版</a></li>
+</ul>
+<h1 id="实用工具"><a href="#实用工具" class="headerlink" title="实用工具"></a>实用工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2q4y6h">RSS订阅工具(只限windows)</a></li>
+<li><a href="https://www.lanzous.com/b539477">科学上网ShadowSocks</a></li>
+<li><a href="https://www.lanzous.com/i2saiib">win10激活工具</a></li>
+<li><a href="https://www.lanzous.com/i2t3ukj">Office安装工具</a></li>
+<li><a href="https://www.lanzous.com/i2flrje">OCR文字识别工具</a></li>
+<li><a href="https://www.lanzous.com/i2flr6b">GIF录制工具</a></li>
+<li><a href="https://www.lanzous.com/i2fls4f">冰点文库下载器破解版</a></li>
+</ul>
+<h1 id="推荐工具"><a href="#推荐工具" class="headerlink" title="推荐工具"></a>推荐工具</h1><ul>
+<li><a href="https://www.lanzous.com/i2zaiyj">现代化Markdown编辑工具</a></li>
+</ul>
 ]]></content>
       <categories>
         <category>工具</category>
       </categories>
       <tags>
-        <tag>技巧</tag>
+        <tag>软件</tag>
       </tags>
   </entry>
   <entry>
@@ -3211,89 +3182,32 @@
       </tags>
   </entry>
   <entry>
-    <title>消息队列（三）Apache ActiveMQ</title>
-    <url>/p/32495/</url>
-    <content><![CDATA[<h1 id="在Ubuntu上安装ActiveMQ"><a href="#在Ubuntu上安装ActiveMQ" class="headerlink" title="在Ubuntu上安装ActiveMQ"></a>在Ubuntu上安装ActiveMQ</h1><h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
-
+    <title>掘金解绑方案（已成功解绑微信）</title>
+    <url>/p/34461/</url>
+    <content><![CDATA[<p>掘金的绑定限制为同一个第三方账号只能绑定一个掘金账号，且必须留存一个第三方绑定。</p>
+<p>比如，我只绑定了微信，想要解绑微信，对不起，不支持。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
 <span id="more"></span>
 
-<h2 id="搭建activemq服务"><a href="#搭建activemq服务" class="headerlink" title="搭建activemq服务"></a>搭建activemq服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /home/active-mq</span><br><span class="line">$ <span class="built_in">cd</span> /home/active-mq</span><br><span class="line">$ wget http://www.apache.org/dist/activemq/5.15.9/apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 具体版本请查看http://www.apache.org/dist/activemq</span></span><br><span class="line">$ tar -zxvf apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 如果未安装jdk，执行 sudo apt-get install openjdk-8-jdk</span></span><br><span class="line">$ ./activemq start</span><br><span class="line">INFO: Loading <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//bin/env&#x27;</span></span><br><span class="line">INFO: Using java <span class="string">&#x27;/usr/bin/java&#x27;</span></span><br><span class="line">INFO: Starting - inspect logfiles specified <span class="keyword">in</span> logging.properties and log4j.properties to get details</span><br><span class="line">INFO: pidfile created : <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//data/activemq.pid&#x27;</span> (pid <span class="string">&#x27;6356&#x27;</span>)</span><br></pre></td></tr></table></figure>
-
-<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>浏览器打开<a href="http://localhost:8161/admin/%EF%BC%8C%E8%BE%93%E5%85%A5admin%EF%BC%8Cadmin">http://localhost:8161/admin/，输入admin，admin</a></p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
-<p>至此，ActiveMQ搭建完成。</p>
-<h1 id="理解JMS-Java-Message-Service"><a href="#理解JMS-Java-Message-Service" class="headerlink" title="理解JMS( Java Message Service)"></a>理解JMS( Java Message Service)</h1><p>Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持JAVA应用程序开发。</p>
-<h2 id="JMS模型"><a href="#JMS模型" class="headerlink" title="JMS模型"></a>JMS模型</h2><ul>
-<li><p><a href="https://zh.wikipedia.org/wiki/%E7%82%B9%E5%AF%B9%E7%82%B9">点对点</a>（P2P）或队列模型</p>
-<ul>
-<li>只有一个消费者将获得消息</li>
-<li>生产者不需要在接收者消费该消息期间处于运行状态，接收者也同样不需要在消息发送时处于运行状态。</li>
-<li>每一个成功处理的消息都由接收者签收</li>
-</ul>
-</li>
-<li><p><a href="https://zh.wikipedia.org/wiki/%E5%8F%91%E5%B8%83/%E8%AE%A2%E9%98%85">发布/订阅</a>模型</p>
-<ul>
-<li>多个消费者可以获得消息</li>
-<li>在发布者和订阅者之间存在时间依赖性。发布者需要创建一个订阅（subscription），以便客户能够购订阅。订阅者必须保持持续的活动状态以接收消息，除非订阅者创建了持久的订阅。在那种情况下，在订阅者未连接时发布的消息将在订阅者重新连接时重新发布。</li>
-</ul>
-</li>
-</ul>
-<h2 id="传统API"><a href="#传统API" class="headerlink" title="传统API"></a>传统API</h2><p>传统API提供的主要接口如下：</p>
-<ul>
-<li><p>ConnectionFactory：客户端用来创建连接的受管对象。简化API也会使用此接口。</p>
-</li>
-<li><p>Connection：客户端到JMS提供者之间的活动连接。</p>
-</li>
-<li><p>Session：发送和接收消息的一个单线程上下文。</p>
-</li>
-<li><p>MessageProducer：由Session创建的对象，用于发送消息到Queue或Topic</p>
-</li>
-<li><p>MessageConsumer：由Session创建的对象，用于接收Queue或Topic中的消息</p>
-</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
-<h2 id="简化API"><a href="#简化API" class="headerlink" title="简化API"></a>简化API</h2><p>简化API与传统API提供的消息功能是一样的，但是它需要的接口更少、使用更方便。 简化API提供的主要接口如下：</p>
-<ul>
-<li>ConnectionFactory：客户端用来创建连接的受管对象。传统API也会使用此接口。</li>
-<li>JMSContext：客户端到JMS提供者之间的活动连接，以及发送和接收消息的一个单线程上下文。</li>
-<li>JMSProducer：由JMSContext创建的对象，用于发送消息到Queue或Topic</li>
-<li>JMSConsumer：由JMSContext创建的对象，用于接收Queue或Topic中的消息</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
-<p>在简化API中，一个JMSContext对象封装了传统API中Connection和Session两个对象的行为。</p>
-<h2 id="开发一个JMS客户端"><a href="#开发一个JMS客户端" class="headerlink" title="开发一个JMS客户端"></a>开发一个JMS客户端</h2><p>一个使用传统API的JMS客户端典型的使用步骤如下：</p>
-<ul>
-<li>使用JNDI查找一个ConnectionFactory对象</li>
-<li>使用JNDI查找一个或多个Destination对象</li>
-<li>使用ConnectionFactory创建一个JMS Connection对象</li>
-<li>使用Connection创建一个或多个JMS Session对象</li>
-<li>使用Session和Destination对象创建需要的MessageProducer和MessageConsumer对象</li>
-<li>通知Connection对象开始投递消息</li>
-</ul>
-<blockquote>
-<p>Active MQ是完全实现JMS规范的JMS客户端</p>
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我突然想到，既然必须留存一个第三方绑定，那我留存一个<strong>邮箱绑定</strong>不就好了吗？</p>
+<p>思路就是<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，通过绑定一个邮箱账号，来绑定邮箱，从而将我们的账号解放出来，绑定我们的大号或者其他账号。</p>
+<h2 id="获取临时电子邮件地址"><a href="#获取临时电子邮件地址" class="headerlink" title="获取临时电子邮件地址"></a>获取临时电子邮件地址</h2><p>打开<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，你将会获取到一个临时电子邮件地址，我们将使用这个邮件绑定我们的掘金账号。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
+<h2 id="绑定临时邮箱"><a href="#绑定临时邮箱" class="headerlink" title="绑定临时邮箱"></a>绑定临时邮箱</h2><p>点击绑定邮箱，输入我们上一步获取到的临时邮件地址，返回<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>网站，耐心等待10s左右。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
+<p>你将会受到掘金的邮箱绑定验证邮件，打开并点击，直到绑定成功。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
+<h2 id="解绑"><a href="#解绑" class="headerlink" title="解绑"></a>解绑</h2><p>接下来我们就可以开心的解绑我们自己的账号了。我要解绑的是微信，试一下吧。</p>
+<p><img data-src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
+<h1 id="友情提醒"><a href="#友情提醒" class="headerlink" title="友情提醒"></a>友情提醒</h1><blockquote>
+<p>由于使用的是一次性邮件地址，该做法可能会导致你解绑的账号登录不上，请谨慎操作！</p>
 </blockquote>
-<h1 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h1><h2 id="创建Hello-World项目"><a href="#创建Hello-World项目" class="headerlink" title="创建Hello World项目"></a>创建Hello World项目</h2><p>创建gradle项目，并编辑build.gradle</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile group: &#x27;org.apache.activemq&#x27;, name: &#x27;activemq-all&#x27;, version: &#x27;5.15.9&#x27;</span><br><span class="line">compile group: &#x27;com.fasterxml.jackson.core&#x27;, name: &#x27;jackson-databind&#x27;, version: &#x27;2.9.8&#x27;</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建生产者"><a href="#创建生产者" class="headerlink" title="创建生产者"></a>创建生产者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldProducer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息发布者</span></span><br><span class="line">            MessageProducer producer = session.createProducer(destination);</span><br><span class="line">            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);</span><br><span class="line">            <span class="comment">// 6. 创建并发布消息</span></span><br><span class="line">            String text = <span class="string">&quot;Hello world! From: &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + <span class="keyword">this</span>.hashCode();</span><br><span class="line">            TextMessage message = session.createTextMessage(text);</span><br><span class="line">            System.out.println(<span class="string">&quot;Sent message: &quot;</span> + message.hashCode() + <span class="string">&quot; : &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">            producer.send(message);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="创建消费者"><a href="#创建消费者" class="headerlink" title="创建消费者"></a>创建消费者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span>, <span class="title">ExceptionListener</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息消费者</span></span><br><span class="line">            MessageConsumer consumer = session.createConsumer(destination);</span><br><span class="line">            <span class="comment">// 6. 等待接收消息</span></span><br><span class="line">            Message message = consumer.receive(<span class="number">1000</span>);</span><br><span class="line">            <span class="keyword">if</span> (message <span class="keyword">instanceof</span> TextMessage) &#123;</span><br><span class="line">                TextMessage textMessage = (TextMessage) message;</span><br><span class="line">                String text = textMessage.getText();</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + text);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + message);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            consumer.close();</span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(JMSException exception)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;JMS Exception occured.  Shutting down client.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">thread</span><span class="params">(Runnable runnable, <span class="keyword">boolean</span> daemon)</span> </span>&#123;</span><br><span class="line">        Thread brokerThread = <span class="keyword">new</span> Thread(runnable);</span><br><span class="line">        brokerThread.setDaemon(daemon);</span><br><span class="line">        brokerThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>运行我们的测试程序，控制台将会打印：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sent message: 507732978 : Thread-6</span><br><span class="line">Sent message: 2056557229 : Thread-0</span><br><span class="line">Sent message: 39234146 : Thread-8</span><br><span class="line">Sent message: 1100925878 : Thread-13</span><br><span class="line">Sent message: 1566392082 : Thread-17</span><br><span class="line">Sent message: 1329793151 : Thread-1</span><br><span class="line">Sent message: 988436874 : Thread-16</span><br><span class="line">Received: Hello world! From: Thread-6 : 1442537083</span><br><span class="line">Received: Hello world! From: Thread-1 : 1531760310</span><br><span class="line">Received: Hello world! From: Thread-0 : 1817576164</span><br><span class="line">Received: Hello world! From: Thread-8 : 262381200</span><br><span class="line">Received: Hello world! From: Thread-17 : 1647178742</span><br><span class="line">Received: Hello world! From: Thread-13 : 1610404140</span><br></pre></td></tr></table></figure>
-
-
-
 ]]></content>
       <categories>
-        <category>学习</category>
+        <category>工具</category>
       </categories>
       <tags>
-        <tag>ActiveMQ</tag>
-        <tag>消息中间件</tag>
+        <tag>技巧</tag>
       </tags>
   </entry>
   <entry>
@@ -3393,8 +3307,94 @@
         <category>学习</category>
       </categories>
       <tags>
-        <tag>消息中间件</tag>
         <tag>mq</tag>
+        <tag>消息中间件</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>消息队列（三）Apache ActiveMQ</title>
+    <url>/p/32495/</url>
+    <content><![CDATA[<h1 id="在Ubuntu上安装ActiveMQ"><a href="#在Ubuntu上安装ActiveMQ" class="headerlink" title="在Ubuntu上安装ActiveMQ"></a>在Ubuntu上安装ActiveMQ</h1><h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="搭建activemq服务"><a href="#搭建activemq服务" class="headerlink" title="搭建activemq服务"></a>搭建activemq服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /home/active-mq</span><br><span class="line">$ <span class="built_in">cd</span> /home/active-mq</span><br><span class="line">$ wget http://www.apache.org/dist/activemq/5.15.9/apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 具体版本请查看http://www.apache.org/dist/activemq</span></span><br><span class="line">$ tar -zxvf apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 如果未安装jdk，执行 sudo apt-get install openjdk-8-jdk</span></span><br><span class="line">$ ./activemq start</span><br><span class="line">INFO: Loading <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//bin/env&#x27;</span></span><br><span class="line">INFO: Using java <span class="string">&#x27;/usr/bin/java&#x27;</span></span><br><span class="line">INFO: Starting - inspect logfiles specified <span class="keyword">in</span> logging.properties and log4j.properties to get details</span><br><span class="line">INFO: pidfile created : <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//data/activemq.pid&#x27;</span> (pid <span class="string">&#x27;6356&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>浏览器打开<a href="http://localhost:8161/admin/%EF%BC%8C%E8%BE%93%E5%85%A5admin%EF%BC%8Cadmin">http://localhost:8161/admin/，输入admin，admin</a></p>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
+<p>至此，ActiveMQ搭建完成。</p>
+<h1 id="理解JMS-Java-Message-Service"><a href="#理解JMS-Java-Message-Service" class="headerlink" title="理解JMS( Java Message Service)"></a>理解JMS( Java Message Service)</h1><p>Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持JAVA应用程序开发。</p>
+<h2 id="JMS模型"><a href="#JMS模型" class="headerlink" title="JMS模型"></a>JMS模型</h2><ul>
+<li><p><a href="https://zh.wikipedia.org/wiki/%E7%82%B9%E5%AF%B9%E7%82%B9">点对点</a>（P2P）或队列模型</p>
+<ul>
+<li>只有一个消费者将获得消息</li>
+<li>生产者不需要在接收者消费该消息期间处于运行状态，接收者也同样不需要在消息发送时处于运行状态。</li>
+<li>每一个成功处理的消息都由接收者签收</li>
+</ul>
+</li>
+<li><p><a href="https://zh.wikipedia.org/wiki/%E5%8F%91%E5%B8%83/%E8%AE%A2%E9%98%85">发布/订阅</a>模型</p>
+<ul>
+<li>多个消费者可以获得消息</li>
+<li>在发布者和订阅者之间存在时间依赖性。发布者需要创建一个订阅（subscription），以便客户能够购订阅。订阅者必须保持持续的活动状态以接收消息，除非订阅者创建了持久的订阅。在那种情况下，在订阅者未连接时发布的消息将在订阅者重新连接时重新发布。</li>
+</ul>
+</li>
+</ul>
+<h2 id="传统API"><a href="#传统API" class="headerlink" title="传统API"></a>传统API</h2><p>传统API提供的主要接口如下：</p>
+<ul>
+<li><p>ConnectionFactory：客户端用来创建连接的受管对象。简化API也会使用此接口。</p>
+</li>
+<li><p>Connection：客户端到JMS提供者之间的活动连接。</p>
+</li>
+<li><p>Session：发送和接收消息的一个单线程上下文。</p>
+</li>
+<li><p>MessageProducer：由Session创建的对象，用于发送消息到Queue或Topic</p>
+</li>
+<li><p>MessageConsumer：由Session创建的对象，用于接收Queue或Topic中的消息</p>
+</li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
+<h2 id="简化API"><a href="#简化API" class="headerlink" title="简化API"></a>简化API</h2><p>简化API与传统API提供的消息功能是一样的，但是它需要的接口更少、使用更方便。 简化API提供的主要接口如下：</p>
+<ul>
+<li>ConnectionFactory：客户端用来创建连接的受管对象。传统API也会使用此接口。</li>
+<li>JMSContext：客户端到JMS提供者之间的活动连接，以及发送和接收消息的一个单线程上下文。</li>
+<li>JMSProducer：由JMSContext创建的对象，用于发送消息到Queue或Topic</li>
+<li>JMSConsumer：由JMSContext创建的对象，用于接收Queue或Topic中的消息</li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
+<p>在简化API中，一个JMSContext对象封装了传统API中Connection和Session两个对象的行为。</p>
+<h2 id="开发一个JMS客户端"><a href="#开发一个JMS客户端" class="headerlink" title="开发一个JMS客户端"></a>开发一个JMS客户端</h2><p>一个使用传统API的JMS客户端典型的使用步骤如下：</p>
+<ul>
+<li>使用JNDI查找一个ConnectionFactory对象</li>
+<li>使用JNDI查找一个或多个Destination对象</li>
+<li>使用ConnectionFactory创建一个JMS Connection对象</li>
+<li>使用Connection创建一个或多个JMS Session对象</li>
+<li>使用Session和Destination对象创建需要的MessageProducer和MessageConsumer对象</li>
+<li>通知Connection对象开始投递消息</li>
+</ul>
+<blockquote>
+<p>Active MQ是完全实现JMS规范的JMS客户端</p>
+</blockquote>
+<h1 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h1><h2 id="创建Hello-World项目"><a href="#创建Hello-World项目" class="headerlink" title="创建Hello World项目"></a>创建Hello World项目</h2><p>创建gradle项目，并编辑build.gradle</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">compile group: &#x27;org.apache.activemq&#x27;, name: &#x27;activemq-all&#x27;, version: &#x27;5.15.9&#x27;</span><br><span class="line">compile group: &#x27;com.fasterxml.jackson.core&#x27;, name: &#x27;jackson-databind&#x27;, version: &#x27;2.9.8&#x27;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建生产者"><a href="#创建生产者" class="headerlink" title="创建生产者"></a>创建生产者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldProducer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息发布者</span></span><br><span class="line">            MessageProducer producer = session.createProducer(destination);</span><br><span class="line">            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);</span><br><span class="line">            <span class="comment">// 6. 创建并发布消息</span></span><br><span class="line">            String text = <span class="string">&quot;Hello world! From: &quot;</span> + Thread.currentThread().getName() + <span class="string">&quot; : &quot;</span> + <span class="keyword">this</span>.hashCode();</span><br><span class="line">            TextMessage message = session.createTextMessage(text);</span><br><span class="line">            System.out.println(<span class="string">&quot;Sent message: &quot;</span> + message.hashCode() + <span class="string">&quot; : &quot;</span> + Thread.currentThread().getName());</span><br><span class="line">            producer.send(message);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建消费者"><a href="#创建消费者" class="headerlink" title="创建消费者"></a>创建消费者</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloWorldConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span>, <span class="title">ExceptionListener</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 1. 创建连接工厂</span></span><br><span class="line">            ActiveMQConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">&quot;vm://localhost&quot;</span>);</span><br><span class="line">            <span class="comment">// 2. 创建连接</span></span><br><span class="line">            Connection connection = connectionFactory.createConnection();</span><br><span class="line">            connection.start();</span><br><span class="line">            <span class="comment">// 3. 创建会话</span></span><br><span class="line">            Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">            <span class="comment">// 4. 创建目的地（主题或队列）</span></span><br><span class="line">            Destination destination = session.createQueue(<span class="string">&quot;TEST.FOO&quot;</span>);</span><br><span class="line">            <span class="comment">// 5. 从会话创建到目的地的消息消费者</span></span><br><span class="line">            MessageConsumer consumer = session.createConsumer(destination);</span><br><span class="line">            <span class="comment">// 6. 等待接收消息</span></span><br><span class="line">            Message message = consumer.receive(<span class="number">1000</span>);</span><br><span class="line">            <span class="keyword">if</span> (message <span class="keyword">instanceof</span> TextMessage) &#123;</span><br><span class="line">                TextMessage textMessage = (TextMessage) message;</span><br><span class="line">                String text = textMessage.getText();</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + text);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;Received: &quot;</span> + message);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 7. 销毁资源</span></span><br><span class="line">            consumer.close();</span><br><span class="line">            session.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Caught: &quot;</span> + e);</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">onException</span><span class="params">(JMSException exception)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;JMS Exception occured.  Shutting down client.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试类"><a href="#测试类" class="headerlink" title="测试类"></a>测试类</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">App</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldConsumer(), <span class="keyword">false</span>);</span><br><span class="line">        thread(<span class="keyword">new</span> HelloWorldProducer(), <span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">thread</span><span class="params">(Runnable runnable, <span class="keyword">boolean</span> daemon)</span> </span>&#123;</span><br><span class="line">        Thread brokerThread = <span class="keyword">new</span> Thread(runnable);</span><br><span class="line">        brokerThread.setDaemon(daemon);</span><br><span class="line">        brokerThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行我们的测试程序，控制台将会打印：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Sent message: 507732978 : Thread-6</span><br><span class="line">Sent message: 2056557229 : Thread-0</span><br><span class="line">Sent message: 39234146 : Thread-8</span><br><span class="line">Sent message: 1100925878 : Thread-13</span><br><span class="line">Sent message: 1566392082 : Thread-17</span><br><span class="line">Sent message: 1329793151 : Thread-1</span><br><span class="line">Sent message: 988436874 : Thread-16</span><br><span class="line">Received: Hello world! From: Thread-6 : 1442537083</span><br><span class="line">Received: Hello world! From: Thread-1 : 1531760310</span><br><span class="line">Received: Hello world! From: Thread-0 : 1817576164</span><br><span class="line">Received: Hello world! From: Thread-8 : 262381200</span><br><span class="line">Received: Hello world! From: Thread-17 : 1647178742</span><br><span class="line">Received: Hello world! From: Thread-13 : 1610404140</span><br></pre></td></tr></table></figure>
+
+
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>消息中间件</tag>
+        <tag>ActiveMQ</tag>
       </tags>
   </entry>
   <entry>
@@ -3715,53 +3715,6 @@
       </tags>
   </entry>
   <entry>
-    <title>记一次Postgres CPU爆满故障</title>
-    <url>/p/7877/</url>
-    <content><![CDATA[<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>公司项目测试环境调用某些接口的时候，服务器立即崩溃，并一定时间内无法提供服务。<span id="more"></span></p>
-<h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="服务器配置不够"><a href="#服务器配置不够" class="headerlink" title="服务器配置不够"></a>服务器配置不够</h2><p>第一反应是服务器需要升配啦，花钱解决一切！毕竟测试服务器配置确实不高，2CPU + 4Gib，能干啥？不过问题是今天突然发生的，而且说崩就崩。凭着严谨的态度，还是要刨根问底地找下问题。</p>
-<h2 id="查看服务器负载"><a href="#查看服务器负载" class="headerlink" title="查看服务器负载"></a>查看服务器负载</h2><ul>
-<li><code>free -m</code></li>
-</ul>
-<p>内存占用并不大，忘记截图了，反正看下来不是内存过高导致的崩溃</p>
-<ul>
-<li><code>top</code></li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
-<h2 id="数据库占用CPU过高"><a href="#数据库占用CPU过高" class="headerlink" title="数据库占用CPU过高"></a>数据库占用CPU过高</h2><h3 id="连接数过多"><a href="#连接数过多" class="headerlink" title="连接数过多"></a>连接数过多</h3><blockquote>
-<p>业务高峰活跃连接陡增，活跃的连接数是否比平时多很多</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT </span><br><span class="line">  COUNT(*) </span><br><span class="line">FROM </span><br><span class="line">  pg_stat_activity </span><br><span class="line">WHERE </span><br><span class="line">  STATE NOT LIKE &#x27;%idle&#x27;;</span><br></pre></td></tr></table></figure>
-
-<p>查询下来只有3个连接，所以不是连接数导致的CPU过高</p>
-<h3 id="慢SQL"><a href="#慢SQL" class="headerlink" title="慢SQL"></a>慢SQL</h3><blockquote>
-<p>如果活跃连接数的变化处于正常范围，则可能是当时有性能很差的SQL被大量执行。</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select </span><br><span class="line">  datname, </span><br><span class="line">  usename, </span><br><span class="line">  client_addr, </span><br><span class="line">  application_name, </span><br><span class="line">  state, </span><br><span class="line">  backend_start, </span><br><span class="line">  xact_start, </span><br><span class="line">  xact_stay, </span><br><span class="line">  query_start, </span><br><span class="line">  query_stay, </span><br><span class="line">  replace(</span><br><span class="line">    query, </span><br><span class="line">    chr(10), </span><br><span class="line">    &#x27; &#x27;</span><br><span class="line">  ) as query </span><br><span class="line">from </span><br><span class="line">  (</span><br><span class="line">    select </span><br><span class="line">      pgsa.datname as datname, </span><br><span class="line">      pgsa.usename as usename, </span><br><span class="line">      pgsa.client_addr client_addr, </span><br><span class="line">      pgsa.application_name as application_name, </span><br><span class="line">      pgsa.state as state, </span><br><span class="line">      pgsa.backend_start as backend_start, </span><br><span class="line">      pgsa.xact_start as xact_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.xact_start)</span><br><span class="line">      ) as xact_stay, </span><br><span class="line">      pgsa.query_start as query_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.query_start)</span><br><span class="line">      ) as query_stay, </span><br><span class="line">      pgsa.query as query </span><br><span class="line">    from </span><br><span class="line">      pg_stat_activity as pgsa </span><br><span class="line">    where </span><br><span class="line">      pgsa.state != &#x27;idle&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction (aborted)&#x27;</span><br><span class="line">  ) idleconnections </span><br><span class="line">order by </span><br><span class="line">  query_stay desc </span><br><span class="line">limit </span><br><span class="line">  5;</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
-<p>可以看到，确实有一条慢SQL，而且属于奇慢无比，执行了接近1分钟还没执行完毕，基本可以定位，是慢SQL导致的CPU占用陡增。</p>
-<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>对于上面的方法查出来的慢SQL，首先需要做的是Kill掉他们，使业务先恢复。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select pg_cancel_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br><span class="line">select pg_terminate_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br></pre></td></tr></table></figure>
-
-<p>如果这些SQL确实是业务上必需的，则需要对他们做如下优化：</p>
-<ol>
-<li>对查询涉及的表，执行<code>ANALYZE &lt;table&gt;</code>或<code>VACUUM ANZLYZE &lt;table&gt;</code>，更新表的统计信息，使查询计划更准确。为避免对业务影响，最好在业务低峰执行。</li>
-<li>执行<code>explain &lt;query text&gt;</code>或<code>explain (buffers true, analyze true, verbose true) &lt;query text&gt;</code>命令，查看SQL的执行计划（前者不会实际执行SQL，后者会实际执行而且能得到详细的执行信息），对其中的Table Scan涉及的表，建立索引。</li>
-<li>重新编写SQL，去除掉不必要的子查询、改写UNION ALL、使用JOIN CLAUSE固定连接顺序等，都是进一步深度优化SQL的手段，这里不再深入说明。</li>
-</ol>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在查询语句中，尽量减少不必要的子查询，公司使用的ORM框架是Spring JPA，针对一些特别慢的HQL，可以采用直接执行SQL的方式来优化查询效率。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(value = &quot;select count(*) from example_table where example_id = :exampleId&quot;, nativeQuery = true)</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">exampleNativeQuery</span><span class="params">(<span class="meta">@Param(&quot;exampleId&quot;)</span> Long exampleId)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://help.aliyun.com/knowledge_detail/43562.html">PostgreSQL/PPAS CPU使用率高的原因及解决办法</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>记一次生产事故--磁盘被占满</title>
     <url>/p/58700/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>今天，跑在阿里云ECS上的生产环境，突然间访问异常，接口各种报错，无奈公司没有专业的运维人员，只能硬着头皮解决一下。<span id="more"></span></p>
@@ -3824,6 +3777,53 @@
       </categories>
       <tags>
         <tag>运维</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>记一次Postgres CPU爆满故障</title>
+    <url>/p/7877/</url>
+    <content><![CDATA[<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>公司项目测试环境调用某些接口的时候，服务器立即崩溃，并一定时间内无法提供服务。<span id="more"></span></p>
+<h1 id="问题排查"><a href="#问题排查" class="headerlink" title="问题排查"></a>问题排查</h1><h2 id="服务器配置不够"><a href="#服务器配置不够" class="headerlink" title="服务器配置不够"></a>服务器配置不够</h2><p>第一反应是服务器需要升配啦，花钱解决一切！毕竟测试服务器配置确实不高，2CPU + 4Gib，能干啥？不过问题是今天突然发生的，而且说崩就崩。凭着严谨的态度，还是要刨根问底地找下问题。</p>
+<h2 id="查看服务器负载"><a href="#查看服务器负载" class="headerlink" title="查看服务器负载"></a>查看服务器负载</h2><ul>
+<li><code>free -m</code></li>
+</ul>
+<p>内存占用并不大，忘记截图了，反正看下来不是内存过高导致的崩溃</p>
+<ul>
+<li><code>top</code></li>
+</ul>
+<p><img data-src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
+<h2 id="数据库占用CPU过高"><a href="#数据库占用CPU过高" class="headerlink" title="数据库占用CPU过高"></a>数据库占用CPU过高</h2><h3 id="连接数过多"><a href="#连接数过多" class="headerlink" title="连接数过多"></a>连接数过多</h3><blockquote>
+<p>业务高峰活跃连接陡增，活跃的连接数是否比平时多很多</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SELECT </span><br><span class="line">  COUNT(*) </span><br><span class="line">FROM </span><br><span class="line">  pg_stat_activity </span><br><span class="line">WHERE </span><br><span class="line">  STATE NOT LIKE &#x27;%idle&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>查询下来只有3个连接，所以不是连接数导致的CPU过高</p>
+<h3 id="慢SQL"><a href="#慢SQL" class="headerlink" title="慢SQL"></a>慢SQL</h3><blockquote>
+<p>如果活跃连接数的变化处于正常范围，则可能是当时有性能很差的SQL被大量执行。</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select </span><br><span class="line">  datname, </span><br><span class="line">  usename, </span><br><span class="line">  client_addr, </span><br><span class="line">  application_name, </span><br><span class="line">  state, </span><br><span class="line">  backend_start, </span><br><span class="line">  xact_start, </span><br><span class="line">  xact_stay, </span><br><span class="line">  query_start, </span><br><span class="line">  query_stay, </span><br><span class="line">  replace(</span><br><span class="line">    query, </span><br><span class="line">    chr(10), </span><br><span class="line">    &#x27; &#x27;</span><br><span class="line">  ) as query </span><br><span class="line">from </span><br><span class="line">  (</span><br><span class="line">    select </span><br><span class="line">      pgsa.datname as datname, </span><br><span class="line">      pgsa.usename as usename, </span><br><span class="line">      pgsa.client_addr client_addr, </span><br><span class="line">      pgsa.application_name as application_name, </span><br><span class="line">      pgsa.state as state, </span><br><span class="line">      pgsa.backend_start as backend_start, </span><br><span class="line">      pgsa.xact_start as xact_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.xact_start)</span><br><span class="line">      ) as xact_stay, </span><br><span class="line">      pgsa.query_start as query_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.query_start)</span><br><span class="line">      ) as query_stay, </span><br><span class="line">      pgsa.query as query </span><br><span class="line">    from </span><br><span class="line">      pg_stat_activity as pgsa </span><br><span class="line">    where </span><br><span class="line">      pgsa.state != &#x27;idle&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction (aborted)&#x27;</span><br><span class="line">  ) idleconnections </span><br><span class="line">order by </span><br><span class="line">  query_stay desc </span><br><span class="line">limit </span><br><span class="line">  5;</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
+<p>可以看到，确实有一条慢SQL，而且属于奇慢无比，执行了接近1分钟还没执行完毕，基本可以定位，是慢SQL导致的CPU占用陡增。</p>
+<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>对于上面的方法查出来的慢SQL，首先需要做的是Kill掉他们，使业务先恢复。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select pg_cancel_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br><span class="line">select pg_terminate_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br></pre></td></tr></table></figure>
+
+<p>如果这些SQL确实是业务上必需的，则需要对他们做如下优化：</p>
+<ol>
+<li>对查询涉及的表，执行<code>ANALYZE &lt;table&gt;</code>或<code>VACUUM ANZLYZE &lt;table&gt;</code>，更新表的统计信息，使查询计划更准确。为避免对业务影响，最好在业务低峰执行。</li>
+<li>执行<code>explain &lt;query text&gt;</code>或<code>explain (buffers true, analyze true, verbose true) &lt;query text&gt;</code>命令，查看SQL的执行计划（前者不会实际执行SQL，后者会实际执行而且能得到详细的执行信息），对其中的Table Scan涉及的表，建立索引。</li>
+<li>重新编写SQL，去除掉不必要的子查询、改写UNION ALL、使用JOIN CLAUSE固定连接顺序等，都是进一步深度优化SQL的手段，这里不再深入说明。</li>
+</ol>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>在查询语句中，尽量减少不必要的子查询，公司使用的ORM框架是Spring JPA，针对一些特别慢的HQL，可以采用直接执行SQL的方式来优化查询效率。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Query(value = &quot;select count(*) from example_table where example_id = :exampleId&quot;, nativeQuery = true)</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">exampleNativeQuery</span><span class="params">(<span class="meta">@Param(&quot;exampleId&quot;)</span> Long exampleId)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://help.aliyun.com/knowledge_detail/43562.html">PostgreSQL/PPAS CPU使用率高的原因及解决办法</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>

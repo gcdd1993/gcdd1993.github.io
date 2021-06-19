@@ -903,9 +903,9 @@
     <category term="学习" scheme="https://gcdd1993.github.io/categories/%E5%AD%A6%E4%B9%A0/"/>
     
     
-    <category term="ActiveMQ" scheme="https://gcdd1993.github.io/tags/ActiveMQ/"/>
-    
     <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="ActiveMQ" scheme="https://gcdd1993.github.io/tags/ActiveMQ/"/>
     
   </entry>
   
@@ -953,9 +953,9 @@
     <category term="学习" scheme="https://gcdd1993.github.io/categories/%E5%AD%A6%E4%B9%A0/"/>
     
     
-    <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
-    
     <category term="mq" scheme="https://gcdd1993.github.io/tags/mq/"/>
+    
+    <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
     
   </entry>
   
