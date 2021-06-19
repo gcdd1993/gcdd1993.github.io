@@ -95,40 +95,6 @@
       </tags>
   </entry>
   <entry>
-    <title>EntityManager的Clear方法的使用</title>
-    <url>/p/12153/</url>
-    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
-<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>关联了两张表:</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
-
-<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
-<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
-<li>保存完毕后，执行entityManager.clear();</li>
-<li>然后再次查询该对象，即可完整返回该对象。</li>
-</ol>
-<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
-<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
-<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
-<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
-</ol>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>Spring</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>FastDFS 单机部署指南</title>
     <url>/p/56864/</url>
     <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>FastDFS是一个开源的分布式文件系统，<a href="https://www.oschina.net/p/fastdfs">官方介绍</a>有详细的介绍，不多赘述。本文主要是FastDFS的搭建及采坑指南。</p>
@@ -221,6 +187,40 @@
       </categories>
       <tags>
         <tag>FastDFS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EntityManager的Clear方法的使用</title>
+    <url>/p/12153/</url>
+    <content><![CDATA[<p>在日常开发中，如果使用hibernate的话，常常会被hibernate的事务搞得焦头烂额。今天解决了之前项目中一直存在的问题，记录一下。<span id="more"></span></p>
+<h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>有一张表TemplateCopy,如下</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplateCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@GeneratedValue(strategy = GenerationType.IDENTITY)</span></span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String description;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;SubDomainWeightsCopy&gt; subDomainWeights;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@OneToMany(mappedBy = &quot;template&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> Set&lt;QuestionWeightsCopy&gt; questionWeights;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关联了两张表:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SubDomainWeightsCopy</span> </span>&#123;</span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;sub_domain_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> SubDomainCopy subDomain;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights; <span class="comment">//权重</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer subDomain;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionWeightsCopy</span> <span class="keyword">implements</span> <span class="title">IWeightsValue</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JsonIgnore</span></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;template_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> TemplateCopy template;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Id</span></span><br><span class="line">    <span class="meta">@ManyToOne</span></span><br><span class="line">    <span class="meta">@JoinColumn(name = &quot;question_id&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> QuestionCopy question;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal weights;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> BigDecimal score;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RelationId</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> Integer template;</span><br><span class="line">        <span class="keyword">private</span> Integer question;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单的看一下，TemplateCopy中有一堆SubDomainWeightsCopy，和一堆QuestionWeightsCopy，我们在保存TemplateCopy的时候，通常按照如下来保存</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> templateCopy = save(TemplateCopy)</span><br><span class="line"><span class="number">2.</span> QuestionWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">3.</span> save(QuestionWeightsCopy)</span><br><span class="line"><span class="number">4.</span> SubDomainWeightsCopy.setTemplateCopy(templateCopy)</span><br><span class="line"><span class="number">5.</span> save(SubDomainWeightsCopy)</span><br></pre></td></tr></table></figure>
+
+<p>到这就好了，数据库已经保存了关联关系。但是，这时候如果返回save好的templateCopy，subDomainWeights和questionWeights将会是null。</p>
+<h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><h2 id="使用EntityManager的clear方法"><a href="#使用EntityManager的clear方法" class="headerlink" title="使用EntityManager的clear方法"></a>使用EntityManager的clear方法</h2><ol>
+<li>保存完毕后，执行entityManager.clear();</li>
+<li>然后再次查询该对象，即可完整返回该对象。</li>
+</ol>
+<h3 id="EntityManager-clear的作用？"><a href="#EntityManager-clear的作用？" class="headerlink" title="EntityManager clear的作用？"></a>EntityManager clear的作用？</h3><p>EntityManager clear方法会清空其关联的缓存，从而强制在事务中稍后执行新的数据库查询。</p>
+<h3 id="什么时候使用EntityManager-clear"><a href="#什么时候使用EntityManager-clear" class="headerlink" title="什么时候使用EntityManager clear"></a>什么时候使用EntityManager clear</h3><ol>
+<li>在进行批处理时，为了避免巨大的缓存占用内存并因长时间的脏检查而增加刷新的时间</li>
+<li>在进行DML或SQL查询时，它将完全绕过实体管理器缓存。在这种情况下，由于缓存，将不会实际去数据库查，会直接将缓存返回。所以造成了数据库已经保存了，但是查出来还是未保存的状态。这时候需要清除缓存以避免这种不一致。(本案例就是这种情况的实际例子)</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://stackoverflow.com/questions/13886608/when-to-use-entitymanager-clear" title="StackOverFlow大神回答">StackOverFlow大神回答</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -625,86 +625,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java设计模式（四）工厂方法模式</title>
-    <url>/p/30626/</url>
-    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
-<li>定义：定义一个创建对象的接口，但让实现这个接口的类来决定实例化哪个类，工厂方法<strong>让类的实例化推迟到子类中进行。</strong></li>
-<li>类型：创建型</li>
-</ul>
-<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
-<li>创建对象需要大量重复的代码</li>
-<li>客户端(应用层)不依赖于产品类实例如何被创建、实现等细节</li>
-<li>一个类通过其子类来指定创建哪个对象</li>
-</ul>
-<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><ul>
-<li>用户只需要关心所需产品对应的工厂，无须关心创建细节</li>
-<li>加入新产品符合开闭原则，提高可扩展性</li>
-</ul>
-<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><ul>
-<li>类的个数容易过多，增加复杂度</li>
-<li>增加了系统的抽象性和理解难度</li>
-</ul>
-<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>工厂方法模式从一定意义上讲是从简单工厂模式衍生过来的，创建产品抽象类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建具体产品</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建产品工厂方法抽象类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> Video <span class="title">getVideo</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>创建产品工厂方法实现类（每个产品都有对应的实现类）</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>测试类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory javaVideoFactory = <span class="keyword">new</span> JavaVideoFactory();</span><br><span class="line">        VideoFactory pythonVideoFactory = <span class="keyword">new</span> PythonVideoFactory();</span><br><span class="line">        Video video = javaVideoFactory.getVideo();</span><br><span class="line">        video.produce();</span><br><span class="line"></span><br><span class="line">        video = pythonVideoFactory.getVideo();</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>控制台输出</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br><span class="line">录制Python视频</span><br></pre></td></tr></table></figure>
-
-<p>如果我们现在新增一个产品–前端课程，我们需要创建产品类，产品工厂类，但是无需改动其他代码，做到了对扩展开放，对修改关闭，符合开闭原则。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FEVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制前端课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FEVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> FEVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>但是，我们也不难看出工厂方法模式的缺点–类的个数容易过多，增加复杂度。</p>
-<p>因为一旦我们需要现在产品，就需要创建产品对应的产品实现类，以及产品工厂方法类，无疑增加了类的个数和系统的复杂度。</p>
-<p>完整的UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcbfabe70f65083.png"></p>
-<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="Collection源码"><a href="#Collection源码" class="headerlink" title="Collection源码"></a><code>Collection</code>源码</h2><p>jdk中典型的工厂方法模式体现为<code>java.util.Collection</code></p>
-<p>抽象产品为<code>java.util.Iterator</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>抽象工厂定义了创建产品族的方法<code>java.util.Collection.#iterator</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>由子类来定义具体创建产品的逻辑，如<code>java.util.ArrayList.#iterator</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Itr();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>而具体的产品定义为<code>java.util.ArrayList$Itr</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Itr</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcda8d25df62223.png"></p>
-<h2 id="URLStreamHandlerFactory源码"><a href="#URLStreamHandlerFactory源码" class="headerlink" title="URLStreamHandlerFactory源码"></a><code>URLStreamHandlerFactory</code>源码</h2><p>再来看一个典型例子，<code>java.net.URLStreamHandlerFactory</code>作为工厂方法抽象类，定义了创建产品的抽象方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    <span class="function">URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String protocol)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>产品抽象类就是<code>java.net.URLStreamHandler</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">URLStreamHandler</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>产品的工厂方法实现类为<code>sun.misc.Launcher$Factory</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Factory</span> <span class="keyword">implements</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> String PREFIX = <span class="string">&quot;sun.net.www.protocol&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">Factory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">            String var2 = PREFIX + <span class="string">&quot;.&quot;</span> + var1 + <span class="string">&quot;.Handler&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 通过反射创建指定类型的产品</span></span><br><span class="line">                Class var3 = Class.forName(var2);</span><br><span class="line">                <span class="keyword">return</span> (URLStreamHandler)var3.newInstance();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ReflectiveOperationException var4) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;could not load &quot;</span> + var1 + <span class="string">&quot;system protocol handler&quot;</span>， var4);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以发现，工厂实现类通过反射类创建具体的产品实现类，而产品实现类非常多</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcf7262c4150474.png"></p>
-<p>这样满足了开闭原则，也没有过多的增加类的数量，值得我们学习。</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java设计模式（二）设计模式原则</title>
     <url>/p/64818/</url>
     <content><![CDATA[<p>学习Java设计模式之前，有必要先了解设计模式原则。<span id="more"></span></p>
@@ -884,6 +804,146 @@
       </tags>
   </entry>
   <entry>
+    <title>Java设计模式（四）工厂方法模式</title>
+    <url>/p/30626/</url>
+    <content><![CDATA[<h1 id="定义与类型"><a href="#定义与类型" class="headerlink" title="定义与类型"></a>定义与类型</h1><ul>
+<li>定义：定义一个创建对象的接口，但让实现这个接口的类来决定实例化哪个类，工厂方法<strong>让类的实例化推迟到子类中进行。</strong></li>
+<li>类型：创建型</li>
+</ul>
+<h1 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h1><ul>
+<li>创建对象需要大量重复的代码</li>
+<li>客户端(应用层)不依赖于产品类实例如何被创建、实现等细节</li>
+<li>一个类通过其子类来指定创建哪个对象</li>
+</ul>
+<h1 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h1><ul>
+<li>用户只需要关心所需产品对应的工厂，无须关心创建细节</li>
+<li>加入新产品符合开闭原则，提高可扩展性</li>
+</ul>
+<h1 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h1><ul>
+<li>类的个数容易过多，增加复杂度</li>
+<li>增加了系统的抽象性和理解难度</li>
+</ul>
+<h1 id="Coding"><a href="#Coding" class="headerlink" title="Coding"></a>Coding</h1><p>工厂方法模式从一定意义上讲是从简单工厂模式衍生过来的，创建产品抽象类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建具体产品</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Java课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制Python视频&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建产品工厂方法抽象类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> Video <span class="title">getVideo</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建产品工厂方法实现类（每个产品都有对应的实现类）</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> JavaVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PythonVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PythonVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        VideoFactory javaVideoFactory = <span class="keyword">new</span> JavaVideoFactory();</span><br><span class="line">        VideoFactory pythonVideoFactory = <span class="keyword">new</span> PythonVideoFactory();</span><br><span class="line">        Video video = javaVideoFactory.getVideo();</span><br><span class="line">        video.produce();</span><br><span class="line"></span><br><span class="line">        video = pythonVideoFactory.getVideo();</span><br><span class="line">        video.produce();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制台输出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">录制Java课程</span><br><span class="line">录制Python视频</span><br></pre></td></tr></table></figure>
+
+<p>如果我们现在新增一个产品–前端课程，我们需要创建产品类，产品工厂类，但是无需改动其他代码，做到了对扩展开放，对修改关闭，符合开闭原则。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FEVideo</span> <span class="keyword">extends</span> <span class="title">Video</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">produce</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;录制前端课程&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FEVideoFactory</span> <span class="keyword">extends</span> <span class="title">VideoFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Video <span class="title">getVideo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> FEVideo();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，我们也不难看出工厂方法模式的缺点–类的个数容易过多，增加复杂度。</p>
+<p>因为一旦我们需要现在产品，就需要创建产品对应的产品实现类，以及产品工厂方法类，无疑增加了类的个数和系统的复杂度。</p>
+<p>完整的UML类图</p>
+<p><img data-src="https://i.loli.net/2019/07/29/5d3dcbfabe70f65083.png"></p>
+<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="Collection源码"><a href="#Collection源码" class="headerlink" title="Collection源码"></a><code>Collection</code>源码</h2><p>jdk中典型的工厂方法模式体现为<code>java.util.Collection</code></p>
+<p>抽象产品为<code>java.util.Iterator</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>抽象工厂定义了创建产品族的方法<code>java.util.Collection.#iterator</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>由子类来定义具体创建产品的逻辑，如<code>java.util.ArrayList.#iterator</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Iterator&lt;E&gt; <span class="title">iterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Itr();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而具体的产品定义为<code>java.util.ArrayList$Itr</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Itr</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>UML类图</p>
+<p><img data-src="https://i.loli.net/2019/07/29/5d3dcda8d25df62223.png"></p>
+<h2 id="URLStreamHandlerFactory源码"><a href="#URLStreamHandlerFactory源码" class="headerlink" title="URLStreamHandlerFactory源码"></a><code>URLStreamHandlerFactory</code>源码</h2><p>再来看一个典型例子，<code>java.net.URLStreamHandlerFactory</code>作为工厂方法抽象类，定义了创建产品的抽象方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    <span class="function">URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String protocol)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>产品抽象类就是<code>java.net.URLStreamHandler</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">URLStreamHandler</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>产品的工厂方法实现类为<code>sun.misc.Launcher$Factory</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Factory</span> <span class="keyword">implements</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> String PREFIX = <span class="string">&quot;sun.net.www.protocol&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">Factory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">            String var2 = PREFIX + <span class="string">&quot;.&quot;</span> + var1 + <span class="string">&quot;.Handler&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 通过反射创建指定类型的产品</span></span><br><span class="line">                Class var3 = Class.forName(var2);</span><br><span class="line">                <span class="keyword">return</span> (URLStreamHandler)var3.newInstance();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ReflectiveOperationException var4) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;could not load &quot;</span> + var1 + <span class="string">&quot;system protocol handler&quot;</span>， var4);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以发现，工厂实现类通过反射类创建具体的产品实现类，而产品实现类非常多</p>
+<p><img data-src="https://i.loli.net/2019/07/29/5d3dcf7262c4150474.png"></p>
+<p>这样满足了开闭原则，也没有过多的增加类的数量，值得我们学习。</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MacOs科学上网</title>
+    <url>/p/709/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
+<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
+<span id="more"></span>
+
+<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
+<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
+</blockquote>
+<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
+<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
+<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
+<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
+<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
+</blockquote>
+<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
+<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
+<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
+<li>点击Proxies</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
+<ol start="2">
+<li>点击Add，添加代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
+<ol start="3">
+<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
+<ol start="4">
+<li>测试</li>
+</ol>
+<p>打开ITerm2测试下，在终端输入</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
+
+<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
+<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
+<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
+<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
+<ol>
+<li>在Rules标签中点击Add，新建一个规则</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
+<ol start="2">
+<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
+</ol>
+<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
+<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
+<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
+<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
+</ul>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>科学上网</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Lombok 详解</title>
     <url>/p/12232/</url>
     <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>lombok是一个编译级别的插件，它可以在项目编译的时候生成一些代码。通俗的说，lombok可以通过注解来标示生成<code>getter</code> <code>settter</code>等代码。</p>
@@ -980,63 +1040,37 @@
       </tags>
   </entry>
   <entry>
-    <title>MacOs科学上网</title>
-    <url>/p/709/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>之前使用Windows的时候，有非常优秀的全局代理软件<a href="https://www.sockscap64.com/forums/forum/sstap/">SSTap</a>用来翻墙，但是到了MacOs上，没有找到类似SSTap的全局翻墙神器。</p>
-<p>最终采取的方案是<a href="https://github.com/shadowsocks/ShadowsocksX-NG">ShadowsocksX-NG R8</a>+<a href="">Proxifier</a>的方式来实现。</p>
-<span id="more"></span>
-
-<h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
-<p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
-</blockquote>
-<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
-<p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
-<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
-<h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
-<p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
-</blockquote>
-<p>软件本身是收费的，当然了，在<code>Xclient.info</code>上可以找到破解版：<a href="https://xclient.info/s/proxifier.html">https://xclient.info/s/proxifier.html</a></p>
-<p>安装完毕之后，我们只需要简单的配置一下，就可以实现全局科学上网了！</p>
-<h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
-<li>点击Proxies</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
-<ol start="2">
-<li>点击Add，添加代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
-<ol start="3">
-<li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
-<ol start="4">
-<li>测试</li>
-</ol>
-<p>打开ITerm2测试下，在终端输入</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
-
-<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
-<p>同时，Proxifier也打印出了ITerm2的流量信息</p>
-<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
-<p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
-<ol>
-<li>在Rules标签中点击Add，新建一个规则</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
-<ol start="2">
-<li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
-</ol>
-<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
-<h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
-<li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
-<li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
+    <title>PG数据库常用操作</title>
+    <url>/p/59866/</url>
+    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
+<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
+<li>备份数据</li>
 </ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>正式迁移</li>
+</ul>
+<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
+
+<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
+<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
+
+<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
+
+<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
-        <category>随笔</category>
+        <category>学习</category>
       </categories>
       <tags>
-        <tag>科学上网</tag>
+        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -1099,40 +1133,6 @@
       </categories>
       <tags>
         <tag>Nginx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PG数据库常用操作</title>
-    <url>/p/59866/</url>
-    <content><![CDATA[<p>记录一下，在开发过程中接触到的一些PG数据库常用操作，以备不时之需。<span id="more"></span></p>
-<h1 id="全量迁移"><a href="#全量迁移" class="headerlink" title="全量迁移"></a>全量迁移</h1><ul>
-<li>备份数据</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_dump -h 172.19.235.145 -U &lt;username&gt; -d &lt;database&gt; &gt; 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>正式迁移</li>
-</ul>
-<p>首先要修改备份文件*.sql的owner，防止权限出现错误。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ psql -h &lt;ip&gt; -U &lt;username&gt; -d &lt;database&gt; -f 20180704_dbpe.sql</span><br></pre></td></tr></table></figure>
-
-<p>【注意点】该迁移操作会覆盖原来的数据库，所以最好创建一个新库。</p>
-<h1 id="列出所有表名和数据库名"><a href="#列出所有表名和数据库名" class="headerlink" title="列出所有表名和数据库名"></a>列出所有表名和数据库名</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> tablename <span class="keyword">from</span> pg_tables <span class="keyword">where</span> schemaname <span class="operator">=</span><span class="string">&#x27;public&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”"><a href="#PostgreSQL-中-有时候想删除数据库（drop-database-swiftliveqaapi-），发现提示“ERROR-database-“xxxxxx”-is-being-accessed-by-other-users-DETAIL-There-are-30-other-sessions-using-the-database-”" class="headerlink" title="PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”"></a>PostgreSQL 中 有时候想删除数据库（drop database swiftliveqaapi;），发现提示“ERROR:  database “xxxxxx” is being accessed by other users DETAIL:  There are 30 other sessions using the database.”</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">用psql 登录进入， 执行语句：</span><br><span class="line">SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname=<span class="string">&#x27;数据库名&#x27;</span> AND pid&lt;&gt;pg_backend_pid();</span><br><span class="line">然后就可以删除数据库了</span><br></pre></td></tr></table></figure>
-
-<h1 id="修改表的序列为id最大值"><a href="#修改表的序列为id最大值" class="headerlink" title="修改表的序列为id最大值"></a>修改表的序列为id最大值</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">SELECT setval(<span class="string">&#x27;表名_id_seq&#x27;</span>, (SELECT MAX(id) FROM 表名));</span><br></pre></td></tr></table></figure>
-
-<h1 id="查询表结构"><a href="#查询表结构" class="headerlink" title="查询表结构"></a>查询表结构</h1><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> </span><br><span class="line">	COLUMN_NAME <span class="keyword">AS</span> 列名,</span><br><span class="line">	DATA_TYPE <span class="keyword">AS</span> 字段类型,</span><br><span class="line">	CHARACTER_MAXIMUM_LENGTH <span class="keyword">AS</span> 长度,</span><br><span class="line">	IS_NULLABLE <span class="keyword">AS</span> 是否为空,</span><br><span class="line">	COLUMN_DEFAULT <span class="keyword">AS</span> 默认值 </span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">	INFORMATION_SCHEMA.COLUMNS </span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">	table_schema <span class="operator">=</span> <span class="string">&#x27;public&#x27;</span> </span><br><span class="line">	<span class="keyword">AND</span> TABLE_NAME <span class="operator">=</span> <span class="string">&#x27;表名&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h1 id="PG-数据库状态，启动，停止"><a href="#PG-数据库状态，启动，停止" class="headerlink" title="PG 数据库状态，启动，停止"></a>PG 数据库状态，启动，停止</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pg_ctlcluster 9.5 main status</span><br><span class="line">$ pg_ctlcluster 9.5 main start</span><br><span class="line">$ pg_ctlcluster 9.5 main stop</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
       </tags>
   </entry>
   <entry>
@@ -1269,28 +1269,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Spring Cloud feign使用okhttp3</title>
-    <url>/p/7382/</url>
-    <content><![CDATA[<p>spring cloud feign使用okhttp3<span id="more"></span></p>
-<h1 id="指南"><a href="#指南" class="headerlink" title="指南"></a>指南</h1><p>maven</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.github.openfeign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-okhttp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>配置文件</p>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">feign.httpclient.enabled</span>=<span class="string">false</span></span><br><span class="line"><span class="meta">feign.okhttp.enabled</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
-
-<p>配置</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ConditionalOnClass(Feign.class)</span></span><br><span class="line"><span class="meta">@AutoConfigureBefore(FeignAutoConfiguration.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignOkHttpConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    OkHttpLoggingInterceptor okHttpLoggingInterceptor;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> okhttp3.<span class="function">OkHttpClient <span class="title">okHttpClient</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> okhttp3.OkHttpClient.Builder()</span><br><span class="line">            .readTimeout(<span class="number">60</span>, TimeUnit.SECONDS) </span><br><span class="line">            .connectTimeout(<span class="number">60</span>, TimeUnit.SECONDS) </span><br><span class="line">            .writeTimeout(<span class="number">120</span>, TimeUnit.SECONDS) </span><br><span class="line">            .connectionPool(<span class="keyword">new</span> ConnectionPool())</span><br><span class="line">            <span class="comment">// .addInterceptor();</span></span><br><span class="line">            .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><p>不需要额外编写FeignOkHttpConfig，feign本身已经存在FeignOkHttpAutoConfiguration了，不需要额外配置。</p>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>Spring-Cloud</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Scala学习笔记</title>
     <url>/p/37757/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>Scala是一门优秀的编程语言，它是一门纯面向对象的语言，且支持函数式编程。</p>
@@ -1381,6 +1359,28 @@
       </categories>
       <tags>
         <tag>Scala</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Spring Cloud feign使用okhttp3</title>
+    <url>/p/7382/</url>
+    <content><![CDATA[<p>spring cloud feign使用okhttp3<span id="more"></span></p>
+<h1 id="指南"><a href="#指南" class="headerlink" title="指南"></a>指南</h1><p>maven</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.github.openfeign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-okhttp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>配置文件</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">feign.httpclient.enabled</span>=<span class="string">false</span></span><br><span class="line"><span class="meta">feign.okhttp.enabled</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
+
+<p>配置</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@ConditionalOnClass(Feign.class)</span></span><br><span class="line"><span class="meta">@AutoConfigureBefore(FeignAutoConfiguration.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignOkHttpConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    OkHttpLoggingInterceptor okHttpLoggingInterceptor;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> okhttp3.<span class="function">OkHttpClient <span class="title">okHttpClient</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> okhttp3.OkHttpClient.Builder()</span><br><span class="line">            .readTimeout(<span class="number">60</span>, TimeUnit.SECONDS) </span><br><span class="line">            .connectTimeout(<span class="number">60</span>, TimeUnit.SECONDS) </span><br><span class="line">            .writeTimeout(<span class="number">120</span>, TimeUnit.SECONDS) </span><br><span class="line">            .connectionPool(<span class="keyword">new</span> ConnectionPool())</span><br><span class="line">            <span class="comment">// .addInterceptor();</span></span><br><span class="line">            .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><p>不需要额外编写FeignOkHttpConfig，feign本身已经存在FeignOkHttpAutoConfiguration了，不需要额外配置。</p>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>Spring-Cloud</tag>
       </tags>
   </entry>
   <entry>
