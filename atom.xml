@@ -6,7 +6,7 @@
   <link href="https://gcdd1993.github.io/atom.xml" rel="self"/>
   
   <link href="https://gcdd1993.github.io/"/>
-  <updated>2021-06-19T19:15:56.198Z</updated>
+  <updated>2021-06-23T07:56:48.626Z</updated>
   <id>https://gcdd1993.github.io/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Apereo CAS修改登录页样式</title>
+    <link href="https://gcdd1993.github.io/p/63354/"/>
+    <id>https://gcdd1993.github.io/p/63354/</id>
+    <published>2021-06-23T02:42:17.000Z</published>
+    <updated>2021-06-23T07:56:48.626Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文介绍单点登录系统<a href="https://apereo.github.io/cas">CAS</a>自定义登录页样式。</p><blockquote><p>本文基于<code>CAS 6.3.4</code>，并基于<a href="https://github.com/apereo/cas-overlay-template">cas-overlay-template</a>搭建的<code>cas</code>项目</p></blockquote><span id="more"></span><h1 id="1、下载源码"><a href="#1、下载源码" class="headerlink" title="1、下载源码"></a>1、下载源码</h1><p>去<a href="https://github.com/apereo/cas">官网</a>下载<code>cas</code>源码</p><p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623104839468.png" alt="image-20210623104839468"></p><p>国内的朋友，可以试试这款<code>Github</code><a href="https://github.com/fhefh2015/Fast-GitHub">加速插件</a></p><h1 id="2、解压源码，找到cas-server-support-thymeleaf"><a href="#2、解压源码，找到cas-server-support-thymeleaf" class="headerlink" title="2、解压源码，找到cas-server-support-thymeleaf"></a>2、解压源码，找到<code>cas-server-support-thymeleaf</code></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> cas-master</span><br><span class="line">$ ls</span><br><span class="line">api/          core/  gradle/            gradlew.bat    NOTICE       settings.gradle  testcas.sh*</span><br><span class="line">build.gradle  docs/  gradle.properties  LICENSE        README.md    style/           webapp/</span><br><span class="line">ci/           etc/   gradlew*           lombok.config  release.sh*  support/</span><br><span class="line">$ <span class="built_in">cd</span> support/cas-server-support-thymeleaf/src/main/resources/</span><br><span class="line">cas-theme-default.properties --&gt; cas主题配置</span><br><span class="line">messages_fr.properties --&gt; </span><br><span class="line">...</span><br><span class="line">META-INF/ </span><br><span class="line">static/ --&gt; 静态内容</span><br><span class="line">templates/ --&gt; thymeleaf模板</span><br><span class="line">$ <span class="built_in">cd</span> static</span><br><span class="line">css/  favicon.ico  images/  js/</span><br><span class="line">$ <span class="built_in">cd</span> ../templates/</span><br><span class="line">...</span><br><span class="line">layout.html</span><br><span class="line">error.html</span><br></pre></td></tr></table></figure><p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623105623581.png" alt="image-20210623105623581"></p><h1 id="3、复制到项目，修改"><a href="#3、复制到项目，修改" class="headerlink" title="3、复制到项目，修改"></a>3、复制到项目，修改</h1><blockquote><p>修改的时候，遵循以下原则</p><ul><li>只复制需要修改的文件到<code>src/main/resources/</code>，避免项目冗余和向上兼容</li><li>尽量不更改模板文件结构，例如<code>id</code>，<code>class</code>元素</li><li>不使用的部分，用注释代替删除，方便还原</li></ul></blockquote><p>一般来说，我们只需要修改以下几个文件即可</p><ul><li><code>cas-master/support/cas-server-support-thymeleafsrc/main/resources/static/css/cas.css</code>\</li><li><code>cas-master/support/cas-server-support-thymeleaf/src/main/resources/templates/layout.html</code></li><li><code>cas-master/support/cas-server-support-thymeleaf/src/main/resources/templates/login/casLoginView.html</code></li></ul><p>注意，虽然<code>login/casLoginView.html</code>位于<code>login</code>目录下，但是复制到<code>cas-overlay</code>时，需要位于<code>src/main/resources</code></p><p>最终<code>cas-overlay</code>的目录结构</p><p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623154807590.png" alt="image-20210623154807590"></p><h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul><li><a href="https://apereo.github.io/cas/6.3.x/ux/User-Interface-Customization.html">User-Interface-Customization</a></li><li><a href="https://www.thymeleaf.org/">Thymeleaf</a></li></ul>]]></content>
+    
+    
+    <summary type="html">&lt;p&gt;本文介绍单点登录系统&lt;a href=&quot;https://apereo.github.io/cas&quot;&gt;CAS&lt;/a&gt;自定义登录页样式。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本文基于&lt;code&gt;CAS 6.3.4&lt;/code&gt;，并基于&lt;a href=&quot;https://github.com/apereo/cas-overlay-template&quot;&gt;cas-overlay-template&lt;/a&gt;搭建的&lt;code&gt;cas&lt;/code&gt;项目&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="学习" scheme="https://gcdd1993.github.io/categories/%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+    <category term="SSO" scheme="https://gcdd1993.github.io/tags/SSO/"/>
+    
+    <category term="Java" scheme="https://gcdd1993.github.io/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>Kubernetes部署csi-driver</title>
@@ -903,9 +929,9 @@
     <category term="学习" scheme="https://gcdd1993.github.io/categories/%E5%AD%A6%E4%B9%A0/"/>
     
     
-    <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
-    
     <category term="ActiveMQ" scheme="https://gcdd1993.github.io/tags/ActiveMQ/"/>
+    
+    <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
     
   </entry>
   
@@ -953,9 +979,9 @@
     <category term="学习" scheme="https://gcdd1993.github.io/categories/%E5%AD%A6%E4%B9%A0/"/>
     
     
-    <category term="mq" scheme="https://gcdd1993.github.io/tags/mq/"/>
-    
     <category term="消息中间件" scheme="https://gcdd1993.github.io/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/"/>
+    
+    <category term="mq" scheme="https://gcdd1993.github.io/tags/mq/"/>
     
   </entry>
   
