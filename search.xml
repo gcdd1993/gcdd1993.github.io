@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Apereo CAS修改登录页样式</title>
+    <title>Apereo CAS | Rest API实践</title>
+    <url>/p/2526/</url>
+    <content><![CDATA[<p>本文整理了单点登录系统 <a href="https://apereo.github.io/cas">CAS</a> 提供的<code>Rest API</code>，并给出了示例。</p>
+<blockquote>
+<p>本文基于<code>CAS 6.3.4</code>，并基于<a href="https://github.com/apereo/cas-overlay-template">cas-overlay-template</a>搭建的<code>cas</code>项目</p>
+</blockquote>
+<span id="more"></span>
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>SSO</tag>
+        <tag>CAS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Apereo CAS | 修改登录页样式</title>
     <url>/p/63354/</url>
     <content><![CDATA[<p>本文介绍单点登录系统<a href="https://apereo.github.io/cas">CAS</a>自定义登录页样式。</p>
 <blockquote>
@@ -10,11 +28,11 @@
 <span id="more"></span>
 
 <h1 id="1、下载源码"><a href="#1、下载源码" class="headerlink" title="1、下载源码"></a>1、下载源码</h1><p>去<a href="https://github.com/apereo/cas">官网</a>下载<code>cas</code>源码</p>
-<p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623104839468.png" alt="image-20210623104839468"></p>
+<p><img src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623104839468.png" alt="image-20210623104839468"></p>
 <p>国内的朋友，可以试试这款<code>Github</code><a href="https://github.com/fhefh2015/Fast-GitHub">加速插件</a></p>
 <h1 id="2、解压源码，找到cas-server-support-thymeleaf"><a href="#2、解压源码，找到cas-server-support-thymeleaf" class="headerlink" title="2、解压源码，找到cas-server-support-thymeleaf"></a>2、解压源码，找到<code>cas-server-support-thymeleaf</code></h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> cas-master</span><br><span class="line">$ ls</span><br><span class="line">api/          core/  gradle/            gradlew.bat    NOTICE       settings.gradle  testcas.sh*</span><br><span class="line">build.gradle  docs/  gradle.properties  LICENSE        README.md    style/           webapp/</span><br><span class="line">ci/           etc/   gradlew*           lombok.config  release.sh*  support/</span><br><span class="line">$ <span class="built_in">cd</span> support/cas-server-support-thymeleaf/src/main/resources/</span><br><span class="line">cas-theme-default.properties --&gt; cas主题配置</span><br><span class="line">messages_fr.properties --&gt; </span><br><span class="line">...</span><br><span class="line">META-INF/ </span><br><span class="line">static/ --&gt; 静态内容</span><br><span class="line">templates/ --&gt; thymeleaf模板</span><br><span class="line">$ <span class="built_in">cd</span> static</span><br><span class="line">css/  favicon.ico  images/  js/</span><br><span class="line">$ <span class="built_in">cd</span> ../templates/</span><br><span class="line">...</span><br><span class="line">layout.html</span><br><span class="line">error.html</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623105623581.png" alt="image-20210623105623581"></p>
+<p><img src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623105623581.png" alt="image-20210623105623581"></p>
 <h1 id="3、复制到项目，修改"><a href="#3、复制到项目，修改" class="headerlink" title="3、复制到项目，修改"></a>3、复制到项目，修改</h1><blockquote>
 <p>修改的时候，遵循以下原则</p>
 <ul>
@@ -31,17 +49,18 @@
 </ul>
 <p>注意，虽然<code>login/casLoginView.html</code>位于<code>login</code>目录下，但是复制到<code>cas-overlay</code>时，需要位于<code>src/main/resources</code></p>
 <p>最终<code>cas-overlay</code>的目录结构</p>
-<p><img data-src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623154807590.png" alt="image-20210623154807590"></p>
+<p><img src="/asserts/images/Apereo-CAS%E4%BF%AE%E6%94%B9%E7%99%BB%E5%BD%95%E9%A1%B5%E6%A0%B7%E5%BC%8F/image-20210623154807590.png" alt="image-20210623154807590"></p>
 <h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
 <li><a href="https://apereo.github.io/cas/6.3.x/ux/User-Interface-Customization.html">User-Interface-Customization</a></li>
 <li><a href="https://www.thymeleaf.org/">Thymeleaf</a></li>
 </ul>
 ]]></content>
       <categories>
-        <category>学习</category>
+        <category>工作</category>
       </categories>
       <tags>
         <tag>SSO</tag>
+        <tag>CAS</tag>
         <tag>Java</tag>
       </tags>
   </entry>
@@ -49,13 +68,13 @@
     <title>Dell 工作站M4800 安装macOs Mojave</title>
     <url>/p/62106/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近，入手了一台二手Dell工作站M4800，价格为3600，配置如下</p>
-<p><img data-src="https://i.loli.net/2019/10/01/Fhne1JBNAqUXGmM.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/Fhne1JBNAqUXGmM.png"></p>
 <span id="more"></span>
 
 <p>个人感觉还是很好用的，配置够用，关键是用料真的足！虽然是16年的机器，但是做工吊打一众游戏本。</p>
 <p>然后，重点来了，我安装上了黑苹果macOs Mojave，等于说花了3600买了台MBP，而且是非常的高配。</p>
-<p><img data-src="https://i.loli.net/2019/10/01/dUagmkJoTqQic5P.png"></p>
-<p><img data-src="https://i.loli.net/2019/10/01/YqyRE68VKmMgtSe.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/dUagmkJoTqQic5P.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/YqyRE68VKmMgtSe.png"></p>
 <p>目前使用上基本完美，除了无线网卡（买了免驱内置无线网卡在路上），HDMI（暂时不怎么用，不过不是无解）。</p>
 <h1 id="黑苹果安装记录"><a href="#黑苹果安装记录" class="headerlink" title="黑苹果安装记录"></a>黑苹果安装记录</h1><blockquote>
 <p>以下内容仅作记录，不保证能安装成功。</p>
@@ -106,24 +125,24 @@
 <ul>
 <li>打开Clover Configurator，选择挂载分区，然后打开分区</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/10/01/HMcTaAL9jCvGUEN.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/HMcTaAL9jCvGUEN.png"></p>
 <ul>
 <li>替换EFI文件夹（先移除原先的，将大佬们提供的EFI复制进去）</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/10/01/uNq51A3lDJMpx2d.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/uNq51A3lDJMpx2d.png"></p>
 <ul>
 <li>替换驱动文件（kexts）</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/10/01/49IG2XpBxtQWdOR.png"></p>
-<p><img data-src="https://i.loli.net/2019/10/01/wmtiFH9qBCfQWpv.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/49IG2XpBxtQWdOR.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/wmtiFH9qBCfQWpv.png"></p>
 <p>最后重启试下吧，可以摆脱U盘了</p>
 <h1 id="Clover主题修改"><a href="#Clover主题修改" class="headerlink" title="Clover主题修改"></a>Clover主题修改</h1><p>黑苹果每次开机都会进入Clover引导界面，但是默认的Clover主题是黑黑的，丑丑的，所以我们要替换掉，换一个高大上的引导界面。</p>
 <p>这里推荐工具<a href="https://mac.softpedia.com/get/System-Utilities/Clover-Theme-Manager.shtml">CloverThemeManager</a></p>
-<p><img data-src="https://i.loli.net/2019/10/01/FqUTSyxY3QncR2H.png"></p>
-<p><img data-src="https://i.loli.net/2019/10/01/ZKd3kNiwYc4EnWz.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/FqUTSyxY3QncR2H.png"></p>
+<p><img src="https://i.loli.net/2019/10/01/ZKd3kNiwYc4EnWz.png"></p>
 <hr>
 <h1 id="WIFI"><a href="#WIFI" class="headerlink" title="WIFI"></a>WIFI</h1><p>网卡已安装上，使用的是BCM43224，不带蓝牙，免驱，淘宝25块钱左右，mSata接口，使用无异常。</p>
-<p><img data-src="https://i.loli.net/2019/10/11/Q1Wzw83uKBlkaod.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/Q1Wzw83uKBlkaod.png"></p>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
 <li><a href="https://zuiyu1818.cn/posts/Hac_Clover.html">Clover 更新和界面美化</a></li>
 <li><a href="https://osxlatitude.com/forums/topic/11182-final-dell-precision-m6800-m4800-fully-working-high-sierra-or-mojave/">macOs Mojave on M4800</a></li>
@@ -216,101 +235,6 @@
       </tags>
   </entry>
   <entry>
-    <title>FastDFS 单机部署指南</title>
-    <url>/p/56864/</url>
-    <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>FastDFS是一个开源的分布式文件系统，<a href="https://www.oschina.net/p/fastdfs">官方介绍</a>有详细的介绍，不多赘述。本文主要是FastDFS的搭建及采坑指南。</p>
-<span id="more"></span>
-
-<h1 id="Step-By-Step-Guide"><a href="#Step-By-Step-Guide" class="headerlink" title="Step By Step Guide"></a>Step By Step Guide</h1><h2 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h2><ul>
-<li>阿里云ECS Ubuntu 16.04</li>
-</ul>
-<h2 id="编译环境"><a href="#编译环境" class="headerlink" title="编译环境"></a>编译环境</h2><p>按需安装，这里是针对新的ubuntu系统</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ apt-get install git gcc gcc-c++ make automake autoconf libtool pcre pcre-devel zlib zlib-devel openssl-devel wget vim</span><br></pre></td></tr></table></figure>
-
-<h2 id="磁盘目录"><a href="#磁盘目录" class="headerlink" title="磁盘目录"></a>磁盘目录</h2><table>
-<thead>
-<tr>
-<th>说明</th>
-<th>位置</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>所有安装包</td>
-<td>/usr/local/src</td>
-</tr>
-<tr>
-<td>数据存储位置</td>
-<td>/data/dfs/</td>
-</tr>
-</tbody></table>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /data/dfs <span class="comment">#创建数据存储目录（对于阿里云ECS，最好建立在数据盘上，是用来存放文件的）</span></span><br><span class="line">$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src <span class="comment">#切换到安装目录准备下载安装包</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="安装libfatscommon"><a href="#安装libfatscommon" class="headerlink" title="安装libfatscommon"></a>安装libfatscommon</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget https://github.com/happyfish100/libfastcommon/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br><span class="line">$ <span class="built_in">cd</span> libfastcommon-1.0.39/</span><br><span class="line">$ ./make.sh &amp;&amp; ./make.sh install <span class="comment">#编译安装</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="安装FastDFS"><a href="#安装FastDFS" class="headerlink" title="安装FastDFS"></a>安装FastDFS</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ../ <span class="comment">#返回上一级目录</span></span><br><span class="line">$ wget https://github.com/happyfish100/fastdfs/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br><span class="line">$ <span class="built_in">cd</span> fastdfs-master/</span><br><span class="line">$ ./make.sh &amp;&amp; ./make.sh install <span class="comment">#编译安装</span></span><br><span class="line"><span class="comment">#配置文件准备</span></span><br><span class="line">$ cp /etc/fdfs/tracker.conf.sample /etc/fdfs/tracker.conf</span><br><span class="line">$ cp /etc/fdfs/storage.conf.sample /etc/fdfs/storage.conf</span><br><span class="line">$ cp /etc/fdfs/client.conf.sample /etc/fdfs/client.conf <span class="comment">#客户端文件，测试用</span></span><br><span class="line">$ cp /usr/<span class="built_in">local</span>/src/fastdfs-master/conf/http.conf /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br><span class="line">$ cp /etc/nginx/mime.types /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="安装fastdfs-nginx-module"><a href="#安装fastdfs-nginx-module" class="headerlink" title="安装fastdfs-nginx-module"></a>安装fastdfs-nginx-module</h2><p>官网的文档，是针对没有安装过Nginx的机器，重新编译了一遍Nginx，把module直接编译进Nginx了。但是针对已经安装Nginx的服务器来说，显然是不好的。</p>
-<p>根据<a href="https://www.nginx.com/blog/compiling-dynamic-modules-nginx-plus/">Nginx官方文档-编译第三方动态模块</a>，编译了<code>fastdfs-nginx-module</code>，以供已存在的Nginx使用。</p>
-<p>我已经编译好了<code>fastdfs-nginx-module</code>，可以<a href="https://github.com/gcdd1993/fastDFS-ubuntu-guide/blob/master/ngx_http_fastdfs_module.so">直接下载</a>，并跳到<a href="#use-module">加载并使用模块</a>，如果想知其所以然，可以往下看。</p>
-<h3 id="准备fastdfs-nginx-module源码包"><a href="#准备fastdfs-nginx-module源码包" class="headerlink" title="准备fastdfs-nginx-module源码包"></a>准备<code>fastdfs-nginx-module</code>源码包</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ../ <span class="comment">#返回上一级目录</span></span><br><span class="line">$ wget https://github.com/happyfish100/fastdfs-nginx-module/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br></pre></td></tr></table></figure>
-
-<h3 id="获取对应版本的Nginx源码包"><a href="#获取对应版本的Nginx源码包" class="headerlink" title="获取对应版本的Nginx源码包"></a>获取对应版本的Nginx源码包</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ nginx -v <span class="comment"># 确认服务器的Nginx版本</span></span><br><span class="line">nginx version: nginx/1.14.2</span><br><span class="line">$ wget http://nginx.org/download/nginx-1.14.2.tar.gz</span><br><span class="line">$ tar -xzvf nginx-1.14.2.tar.gz</span><br></pre></td></tr></table></figure>
-
-<h3 id="编译动态模块"><a href="#编译动态模块" class="headerlink" title="编译动态模块"></a>编译动态模块</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> nginx-1.14.2/</span><br><span class="line">$ ./configure --with-compat --add-dynamic-module=/usr/<span class="built_in">local</span>/src/fastdfs-nginx-module-master/src</span><br><span class="line">$ make modules</span><br></pre></td></tr></table></figure>
-
-<h3 id="将模块库（-so文件）复制到-etc-nginx-modules"><a href="#将模块库（-so文件）复制到-etc-nginx-modules" class="headerlink" title="将模块库（.so文件）复制到/etc/nginx/modules"></a>将模块库（.so文件）复制到/etc/nginx/modules</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cp ngx_http_fastdfs_module.so /etc/nginx/modules/</span><br></pre></td></tr></table></figure>
-
-<h3 id="加载并使用模块"><a href="#加载并使用模块" class="headerlink" title="加载并使用模块"></a>加载并使用模块<a name="use-module"/></h3><p>Tips: 要将模块加载到Nginx,在nginx.conf文件开头添加<code>load_module</code>命令</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/nginx/nginx.conf</span><br><span class="line"><span class="comment"># 添加如下命令</span></span><br><span class="line">load_module modules/ngx_http_fastdfs_module.so;</span><br><span class="line"><span class="comment"># 保存退出</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="添加FastDFS配置使模块生效"><a href="#添加FastDFS配置使模块生效" class="headerlink" title="添加FastDFS配置使模块生效"></a>添加FastDFS配置使模块生效</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/nginx/conf.d/fastdfs.conf</span><br><span class="line"><span class="comment"># 添加如下配置</span></span><br><span class="line">server &#123;</span><br><span class="line">    listen 8888;    <span class="comment">## 该端口为storage.conf中的http.server_port相同</span></span><br><span class="line">    server_name &#123;your_domain&#125;;</span><br><span class="line">    location ~/group[0-9]/ &#123;</span><br><span class="line">        ngx_fastdfs_module;</span><br><span class="line">    &#125;</span><br><span class="line">    error_page 500 502 503 504 /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="单机部署"><a href="#单机部署" class="headerlink" title="单机部署"></a>单机部署</h2><p>这里只描述下单机环境的部署方式，集群在官方文档有，没有实际使用过。</p>
-<h3 id="tracker配置"><a href="#tracker配置" class="headerlink" title="tracker配置"></a>tracker配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/tracker.conf</span><br><span class="line"><span class="comment"># 建议修改以下内容</span></span><br><span class="line">bind_addr=&#123;你的内网IP&#125;</span><br><span class="line">base_path=/data/dfs <span class="comment"># 建议修改为数据盘位置</span></span><br><span class="line"><span class="comment"># 可选修改</span></span><br><span class="line">port=22122  <span class="comment"># tracker服务器端口</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="storage配置"><a href="#storage配置" class="headerlink" title="storage配置"></a>storage配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/storage.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">base_path=/data/dfs  <span class="comment"># 数据和日志文件存储根目录（建议修改为数据盘位置）</span></span><br><span class="line">store_path0=/data/dfs  <span class="comment"># 第一个存储目录（建议修改为数据盘位置）</span></span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line">http.server_port=8888  <span class="comment"># http访问文件的端口（默认8888,看情况修改,和nginx中保持一致）</span></span><br><span class="line"><span class="comment"># 可选修改</span></span><br><span class="line">port=23000  <span class="comment"># storage服务端口（默认23000,一般不修改）</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="client测试"><a href="#client测试" class="headerlink" title="client测试"></a>client测试</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/client.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">base_path=/data/dfs</span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line"><span class="comment"># 保存后测试</span></span><br><span class="line">$ fdfs_upload_file /etc/fdfs/client.conf /usr/<span class="built_in">local</span>/src/nginx-1.14.2.tar.gz</span><br><span class="line">group1/M00/00/00/CgoKvlyUmi-AMVKDAA9-WL9wzEw.tar.gz <span class="comment"># 下载时通过该ID下载</span></span><br><span class="line"><span class="comment"># 返回ID表示成功 如：group1/M00/00/00/xx.tar.gz</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="配置nginx访问"><a href="#配置nginx访问" class="headerlink" title="配置nginx访问"></a>配置nginx访问</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/fdfs/mod_fastdfs.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line">url_have_group_name=<span class="literal">true</span></span><br><span class="line">store_path0=/data/dfs</span><br><span class="line"><span class="comment"># 修改完保存</span></span><br><span class="line">$ nginx -s reload</span><br><span class="line">ngx_http_fastdfs_set pid=8364 <span class="comment"># 看见这条消息说明nginx模块启动成功了</span></span><br><span class="line">$ lsof -i:8888 <span class="comment"># 查看Nginx下载端口是否正常启动</span></span><br><span class="line">nginx   31061  root   10u  IPv4 20389985      0t0  TCP *:8888 (LISTEN)</span><br></pre></td></tr></table></figure>
-
-<h3 id="测试下载"><a href="#测试下载" class="headerlink" title="测试下载"></a>测试下载</h3><p>在浏览器输入</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://&#123;IP&#125;:8888/group1/M00/00/00/CgoKvlyUmi-AMVKDAA9-WL9wzEw.tar.gz?filename=nginx-1.14.2.tar.gz //刚才上传返回的ID</span><br></pre></td></tr></table></figure>
-
-<p>弹出下载文件框，说明部署成功！</p>
-<p><img data-src="https://i.loli.net/2019/03/22/5c94a6b526a52.png"></p>
-<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><h3 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo ufw <span class="built_in">enable</span>|<span class="built_in">disable</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="tracker"><a href="#tracker" class="headerlink" title="tracker"></a>tracker</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ /etc/init.d/fdfs_trackerd start <span class="comment"># 启动tracker服务</span></span><br><span class="line">$ /etc/init.d/fdfs_trackerd restart <span class="comment"># 重启动tracker服务</span></span><br><span class="line">$ /etc/init.d/fdfs_trackerd stop <span class="comment"># 停止tracker服务</span></span><br><span class="line">$ update-rc.d fdfs_trackerd <span class="built_in">enable</span> <span class="comment"># 自启动tracker服务</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="storage"><a href="#storage" class="headerlink" title="storage"></a>storage</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ /etc/init.d/fdfs_storaged start <span class="comment"># 启动storage服务</span></span><br><span class="line">$ /etc/init.d/fdfs_storaged restart <span class="comment"># 重动storage服务</span></span><br><span class="line">$ /etc/init.d/fdfs_storaged stop <span class="comment"># 停止动storage服务</span></span><br><span class="line">$ update-rc.d fdfs_storaged <span class="built_in">enable</span> <span class="comment"># 自启动storage服务</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ service nginx start <span class="comment"># 启动nginx</span></span><br><span class="line">$ nginx -s reload <span class="comment"># 重启nginx</span></span><br><span class="line">$ nginx -s stop <span class="comment"># 停止nginx</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="执行nginx-s-reload-后，访问502"><a href="#执行nginx-s-reload-后，访问502" class="headerlink" title="执行nginx -s reload 后，访问502"></a>执行nginx -s reload 后，访问502</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看nginx日志</span></span><br><span class="line">$ vim /var/<span class="built_in">log</span>/nginx/error.log</span><br></pre></td></tr></table></figure>
-
-<p>如果发现错误日志：<code>include file &quot;http.conf&quot; not exists, line: &quot;#include http.conf&quot;</code>，fastdfs nginx模块缺少配置文件，执行以下命令补全配置文件即可。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cp /usr/<span class="built_in">local</span>/src/fastdfs-master/conf/http.conf /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br><span class="line">$ cp /etc/nginx/mime.types /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br></pre></td></tr></table></figure>
-
-
-
-
-
-
-
-
-
-
-
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>FastDFS</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Gradle 配置片段</title>
     <url>/p/9306/</url>
     <content><![CDATA[<p>本文介绍<code>Gradle</code>常用配置，本人很早就开始使用<code>Gradle</code>代替<code>Maven</code>作为项目构建工具，<code>Gradle</code>相较于<code>Maven</code>繁琐的XML配置来说，确实更为先进，依托于<code>Groovy</code>脚本的强大，也更加灵活。</p>
@@ -319,7 +243,7 @@
 <h1 id="1、Jetbrains-IDEA设置Gradle不自动创建模块"><a href="#1、Jetbrains-IDEA设置Gradle不自动创建模块" class="headerlink" title="1、Jetbrains IDEA设置Gradle不自动创建模块"></a>1、<code>Jetbrains IDEA</code>设置<code>Gradle</code>不自动创建模块</h1><blockquote>
 <p>在IDEA某个版本之后，创建或导入Gradle项目的时候，无法再取消勾选<code>Create separate module per source set</code>，多少有点强加的意思，因为自动为每个资源文件夹创建一个目录，模块多了以后，会出现意料之外的错误，比如某个依赖无法加载等问题</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2021/06/20/B7wOGUqHK62mQ9C.png"></p>
+<p><img src="https://i.loli.net/2021/06/20/B7wOGUqHK62mQ9C.png"></p>
 <p>编辑<code>.idea/gradle.xml</code>，加上一行<code>&lt;option name=&quot;resolveModulePerSourceSet&quot; value=&quot;false&quot; /&gt;</code>就行</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">version</span>=<span class="string">&quot;4&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">component</span> <span class="attr">name</span>=<span class="string">&quot;GradleMigrationSettings&quot;</span> <span class="attr">migrationVersion</span>=<span class="string">&quot;1&quot;</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">component</span> <span class="attr">name</span>=<span class="string">&quot;GradleSettings&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;linkedExternalProjectsSettings&quot;</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">GradleProjectSettings</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;delegatedBuild&quot;</span> <span class="attr">value</span>=<span class="string">&quot;true&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;testRunner&quot;</span> <span class="attr">value</span>=<span class="string">&quot;GRADLE&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;distributionType&quot;</span> <span class="attr">value</span>=<span class="string">&quot;LOCAL&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;externalProjectPath&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$PROJECT_DIR$&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;gradleHome&quot;</span> <span class="attr">value</span>=<span class="string">&quot;$PROJECT_DIR$/../../../../DevTools/Gradle/gradle-6.8.3&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;gradleJvm&quot;</span> <span class="attr">value</span>=<span class="string">&quot;#JAVA_HOME&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">option</span> <span class="attr">name</span>=<span class="string">&quot;resolveModulePerSourceSet&quot;</span> <span class="attr">value</span>=<span class="string">&quot;false&quot;</span> /&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">GradleProjectSettings</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">option</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">component</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
@@ -379,7 +303,7 @@
 
 <h1 id="散列函数"><a href="#散列函数" class="headerlink" title="散列函数"></a>散列函数</h1><p>Java提供了一个名为<code>MessageDigest</code>的类，它属于<code>java.security</code>包。 此类支持诸如<code>SHA-1</code>，<code>SHA 256</code>，<code>MD5</code>之类的算法，以将任意长度的消息转换为信息摘要。</p>
 <p>散列函数返回的值称为信息摘要或简称散列值。 下图说明了散列函数。</p>
-<p><img data-src="https://i.loli.net/2019/04/10/5cade05f6faf5.png"></p>
+<p><img src="https://i.loli.net/2019/04/10/5cade05f6faf5.png"></p>
 <p>要使用散列函数加密数据，我们通常按照以下步骤执行：</p>
 <h2 id="创建MessageDigest对象"><a href="#创建MessageDigest对象" class="headerlink" title="创建MessageDigest对象"></a>创建MessageDigest对象</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">MessageDigest md = MessageDigest.getInstance(<span class="string">&quot;MD5&quot;</span>);</span><br></pre></td></tr></table></figure>
 
@@ -397,7 +321,7 @@
 </blockquote>
 <p>实质上，MAC是在基础消息上生成的加密校验和，它与消息一起发送以确保消息验证。</p>
 <p>使用MAC进行身份验证的过程如下图所示</p>
-<p><img data-src="https://i.loli.net/2019/04/10/5cade5aaeaede.png"></p>
+<p><img src="https://i.loli.net/2019/04/10/5cade5aaeaede.png"></p>
 <p>在Java中，<code>javax.crypto</code>包的Mac类提供了消息认证代码的功能。按照以下步骤使用此类创建消息身份验证代码。</p>
 <h2 id="创建KeyGenerator对象"><a href="#创建KeyGenerator对象" class="headerlink" title="创建KeyGenerator对象"></a>创建KeyGenerator对象</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">KeyGenerator keyGen = KeyGenerator.getInstance(<span class="string">&quot;DES&quot;</span>);</span><br></pre></td></tr></table></figure>
 
@@ -432,7 +356,7 @@
 <h1 id="数字签名"><a href="#数字签名" class="headerlink" title="数字签名"></a>数字签名</h1><blockquote>
 <p>数字签名允许验证签名的作者，日期和时间，验证消息内容。 它还包括用于其他功能的身份验证功能。</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2019/04/10/5cade8c25ab4c.png"></p>
+<p><img src="https://i.loli.net/2019/04/10/5cade8c25ab4c.png"></p>
 <h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
 <li><p>认证</p>
 <blockquote>
@@ -628,19 +552,19 @@
 <li>只有知道对方信息时才能指向对方</li>
 <li>所以箭头方向是<strong>从子类指向父类</strong></li>
 </ul>
-<h3 id="实线-继承-虚线-实现"><a href="#实线-继承-虚线-实现" class="headerlink" title="实线-继承|虚线-实现"></a>实线-继承|虚线-实现</h3><p><img data-src="https://i.loli.net/2019/07/28/5d3c7b0d81dbf76419.png"></p>
+<h3 id="实线-继承-虚线-实现"><a href="#实线-继承-虚线-实现" class="headerlink" title="实线-继承|虚线-实现"></a>实线-继承|虚线-实现</h3><p><img src="https://i.loli.net/2019/07/28/5d3c7b0d81dbf76419.png"></p>
 <ul>
 <li>空心三角箭头:继承或实现</li>
 <li>实线继承， is a关系，扩展目的，不虚，很结实</li>
 <li>虚线-实现，虚线代表“虚”，无实体</li>
 </ul>
-<h3 id="实线-关联-虚线-依赖"><a href="#实线-关联-虚线-依赖" class="headerlink" title="实线-关联|虚线-依赖"></a>实线-关联|虚线-依赖</h3><p><img data-src="https://i.loli.net/2019/07/28/5d3c7b7e556e646414.png"></p>
+<h3 id="实线-关联-虚线-依赖"><a href="#实线-关联-虚线-依赖" class="headerlink" title="实线-关联|虚线-依赖"></a>实线-关联|虚线-依赖</h3><p><img src="https://i.loli.net/2019/07/28/5d3c7b7e556e646414.png"></p>
 <ul>
 <li>实线-关联关系:关系稳定，实打实的关系，铁哥们</li>
 <li>表示一个类对象和另一个类对象有关联</li>
 <li>通常是一个类中有另一个类对象做为属性</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c7b8f3d0d786176.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c7b8f3d0d786176.png"></p>
 <ul>
 <li>虚线-依赖关系:临时用一下，若即若离，虚无缥缈，若有若无</li>
 <li>表示一种使用关系，一个类需要借助另一个类来实现功能</li>
@@ -651,13 +575,13 @@
 <li>聚合:代表空器皿里可以放很多相同东西，聚在一起(箭头方向所指的类)</li>
 <li>组合:代表满器皿里已经有实体结构的存在，生死与共</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c7eaf0d25040127.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c7eaf0d25040127.png"></p>
 <ul>
 <li>整体和局部的关系，两者有着独立的生命周期，是has a的关系</li>
 <li>弱关系</li>
 <li>消极的词:弱-空</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c7ed2ce90136239.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c7ed2ce90136239.png"></p>
 <ul>
 <li>整体与局部的关系，和聚合的关系相比，关系更加强烈</li>
 <li>两者有相同的生命周期， contains-a的关系</li>
@@ -671,7 +595,7 @@
 <li>1:只能有一个实例.</li>
 <li>1..*:至少有一个实例.</li>
 </ul>
-<h2 id="类图详解"><a href="#类图详解" class="headerlink" title="类图详解"></a>类图详解</h2><p><img data-src="https://i.loli.net/2019/07/28/5d3c82bc3713e90509.png"></p>
+<h2 id="类图详解"><a href="#类图详解" class="headerlink" title="类图详解"></a>类图详解</h2><p><img src="https://i.loli.net/2019/07/28/5d3c82bc3713e90509.png"></p>
 <p>类图从上到下包含：</p>
 <ul>
 <li>类名：抽象类使用斜体表示，接口用&lt;<interface xxx>&gt;表示</li>
@@ -694,7 +618,7 @@
 </li>
 </ul>
 <p>典型的类图表示：</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c8422bfd5d69590.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c8422bfd5d69590.png"></p>
 <h1 id="UML时序图"><a href="#UML时序图" class="headerlink" title="UML时序图"></a>UML时序图</h1><p>Sequence Diagram :是显示对象之间交互的图，这些对象是按时间顺序排列的。</p>
 <p>时序图中包括的建模元素主要有:</p>
 <ul>
@@ -704,7 +628,7 @@
 <li>消息(Message)等</li>
 </ul>
 <p>典型的一个时序图如下：</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c82384ae5224680.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c82384ae5224680.png"></p>
 ]]></content>
       <categories>
         <category>学习</category>
@@ -750,7 +674,7 @@
 
 <p>这样一来，添加产品的时候不用再修改我们的工厂类，而是直接添加产品即可。</p>
 <p>最终的UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3dc0457904825584.png"></p>
 <h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="JDK源码"><a href="#JDK源码" class="headerlink" title="JDK源码"></a><code>JDK</code>源码</h2><p>在JDK中，使用简单工厂模式的例子如<code>java.util.Calendar</code>，一组<code>getInstance</code>的重载方法，提供了创建<code>Calendar</code>产品的简单工厂方法。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(Locale aLocale)</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Calendar <span class="title">getInstance</span><span class="params">(TimeZone zone，Locale aLocale)</span></span></span><br></pre></td></tr></table></figure>
 
@@ -759,7 +683,7 @@
 
 <p>源码较长，不贴了，有兴趣的可以去看下源码。</p>
 <p><code>Calendar</code>的UML类图如下</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3dc14d34d8244148.png"></p>
 <h2 id="Logback源码"><a href="#Logback源码" class="headerlink" title="Logback源码"></a><code>Logback</code>源码</h2><p><code>logback</code>类中的简单工厂模式主要体现在<code>ch.qos.logback.classic.LoggerContext#getLogger(String)</code></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Logger <span class="title">getLogger</span><span class="params">(<span class="keyword">final</span> String name)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;name argument cannot be null&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 判断log类型返回root节点的logger</span></span><br><span class="line">    <span class="keyword">if</span> (Logger.ROOT_LOGGER_NAME.equalsIgnoreCase(name)) &#123;</span><br><span class="line">        <span class="keyword">return</span> root;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">    Logger logger = root;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果缓存中已经存在的指定的logger，直接返回childLogger</span></span><br><span class="line">    Logger childLogger = (Logger) loggerCache.get(name);</span><br><span class="line">    <span class="comment">// if we have the child， then let us return it without wasting time</span></span><br><span class="line">    <span class="keyword">if</span> (childLogger != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> childLogger;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 以下是创建logger的逻辑</span></span><br><span class="line">    String childName;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = LoggerNameUtil.getSeparatorIndexOf(name， i);</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            childName = name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            childName = name.substring(<span class="number">0</span>， h);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// move i left of the last point</span></span><br><span class="line">        i = h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (logger) &#123;</span><br><span class="line">            childLogger = logger.getChildByName(childName);</span><br><span class="line">            <span class="keyword">if</span> (childLogger == <span class="keyword">null</span>) &#123;</span><br><span class="line">                childLogger = logger.createChildByName(childName);</span><br><span class="line">                loggerCache.put(childName， childLogger);</span><br><span class="line">                incSize();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        logger = childLogger;</span><br><span class="line">        <span class="keyword">if</span> (h == -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> childLogger;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -770,6 +694,101 @@
       </categories>
       <tags>
         <tag>设计模式</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>FastDFS 单机部署指南</title>
+    <url>/p/56864/</url>
+    <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>FastDFS是一个开源的分布式文件系统，<a href="https://www.oschina.net/p/fastdfs">官方介绍</a>有详细的介绍，不多赘述。本文主要是FastDFS的搭建及采坑指南。</p>
+<span id="more"></span>
+
+<h1 id="Step-By-Step-Guide"><a href="#Step-By-Step-Guide" class="headerlink" title="Step By Step Guide"></a>Step By Step Guide</h1><h2 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h2><ul>
+<li>阿里云ECS Ubuntu 16.04</li>
+</ul>
+<h2 id="编译环境"><a href="#编译环境" class="headerlink" title="编译环境"></a>编译环境</h2><p>按需安装，这里是针对新的ubuntu系统</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ apt-get install git gcc gcc-c++ make automake autoconf libtool pcre pcre-devel zlib zlib-devel openssl-devel wget vim</span><br></pre></td></tr></table></figure>
+
+<h2 id="磁盘目录"><a href="#磁盘目录" class="headerlink" title="磁盘目录"></a>磁盘目录</h2><table>
+<thead>
+<tr>
+<th>说明</th>
+<th>位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>所有安装包</td>
+<td>/usr/local/src</td>
+</tr>
+<tr>
+<td>数据存储位置</td>
+<td>/data/dfs/</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /data/dfs <span class="comment">#创建数据存储目录（对于阿里云ECS，最好建立在数据盘上，是用来存放文件的）</span></span><br><span class="line">$ <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/src <span class="comment">#切换到安装目录准备下载安装包</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="安装libfatscommon"><a href="#安装libfatscommon" class="headerlink" title="安装libfatscommon"></a>安装libfatscommon</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ wget https://github.com/happyfish100/libfastcommon/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br><span class="line">$ <span class="built_in">cd</span> libfastcommon-1.0.39/</span><br><span class="line">$ ./make.sh &amp;&amp; ./make.sh install <span class="comment">#编译安装</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="安装FastDFS"><a href="#安装FastDFS" class="headerlink" title="安装FastDFS"></a>安装FastDFS</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ../ <span class="comment">#返回上一级目录</span></span><br><span class="line">$ wget https://github.com/happyfish100/fastdfs/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br><span class="line">$ <span class="built_in">cd</span> fastdfs-master/</span><br><span class="line">$ ./make.sh &amp;&amp; ./make.sh install <span class="comment">#编译安装</span></span><br><span class="line"><span class="comment">#配置文件准备</span></span><br><span class="line">$ cp /etc/fdfs/tracker.conf.sample /etc/fdfs/tracker.conf</span><br><span class="line">$ cp /etc/fdfs/storage.conf.sample /etc/fdfs/storage.conf</span><br><span class="line">$ cp /etc/fdfs/client.conf.sample /etc/fdfs/client.conf <span class="comment">#客户端文件，测试用</span></span><br><span class="line">$ cp /usr/<span class="built_in">local</span>/src/fastdfs-master/conf/http.conf /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br><span class="line">$ cp /etc/nginx/mime.types /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="安装fastdfs-nginx-module"><a href="#安装fastdfs-nginx-module" class="headerlink" title="安装fastdfs-nginx-module"></a>安装fastdfs-nginx-module</h2><p>官网的文档，是针对没有安装过Nginx的机器，重新编译了一遍Nginx，把module直接编译进Nginx了。但是针对已经安装Nginx的服务器来说，显然是不好的。</p>
+<p>根据<a href="https://www.nginx.com/blog/compiling-dynamic-modules-nginx-plus/">Nginx官方文档-编译第三方动态模块</a>，编译了<code>fastdfs-nginx-module</code>，以供已存在的Nginx使用。</p>
+<p>我已经编译好了<code>fastdfs-nginx-module</code>，可以<a href="https://github.com/gcdd1993/fastDFS-ubuntu-guide/blob/master/ngx_http_fastdfs_module.so">直接下载</a>，并跳到<a href="#use-module">加载并使用模块</a>，如果想知其所以然，可以往下看。</p>
+<h3 id="准备fastdfs-nginx-module源码包"><a href="#准备fastdfs-nginx-module源码包" class="headerlink" title="准备fastdfs-nginx-module源码包"></a>准备<code>fastdfs-nginx-module</code>源码包</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ../ <span class="comment">#返回上一级目录</span></span><br><span class="line">$ wget https://github.com/happyfish100/fastdfs-nginx-module/archive/master.zip</span><br><span class="line">$ unzip master.zip</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取对应版本的Nginx源码包"><a href="#获取对应版本的Nginx源码包" class="headerlink" title="获取对应版本的Nginx源码包"></a>获取对应版本的Nginx源码包</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ nginx -v <span class="comment"># 确认服务器的Nginx版本</span></span><br><span class="line">nginx version: nginx/1.14.2</span><br><span class="line">$ wget http://nginx.org/download/nginx-1.14.2.tar.gz</span><br><span class="line">$ tar -xzvf nginx-1.14.2.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译动态模块"><a href="#编译动态模块" class="headerlink" title="编译动态模块"></a>编译动态模块</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> nginx-1.14.2/</span><br><span class="line">$ ./configure --with-compat --add-dynamic-module=/usr/<span class="built_in">local</span>/src/fastdfs-nginx-module-master/src</span><br><span class="line">$ make modules</span><br></pre></td></tr></table></figure>
+
+<h3 id="将模块库（-so文件）复制到-etc-nginx-modules"><a href="#将模块库（-so文件）复制到-etc-nginx-modules" class="headerlink" title="将模块库（.so文件）复制到/etc/nginx/modules"></a>将模块库（.so文件）复制到/etc/nginx/modules</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cp ngx_http_fastdfs_module.so /etc/nginx/modules/</span><br></pre></td></tr></table></figure>
+
+<h3 id="加载并使用模块"><a href="#加载并使用模块" class="headerlink" title="加载并使用模块"></a>加载并使用模块<a name="use-module"/></h3><p>Tips: 要将模块加载到Nginx,在nginx.conf文件开头添加<code>load_module</code>命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/nginx/nginx.conf</span><br><span class="line"><span class="comment"># 添加如下命令</span></span><br><span class="line">load_module modules/ngx_http_fastdfs_module.so;</span><br><span class="line"><span class="comment"># 保存退出</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="添加FastDFS配置使模块生效"><a href="#添加FastDFS配置使模块生效" class="headerlink" title="添加FastDFS配置使模块生效"></a>添加FastDFS配置使模块生效</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/nginx/conf.d/fastdfs.conf</span><br><span class="line"><span class="comment"># 添加如下配置</span></span><br><span class="line">server &#123;</span><br><span class="line">    listen 8888;    <span class="comment">## 该端口为storage.conf中的http.server_port相同</span></span><br><span class="line">    server_name &#123;your_domain&#125;;</span><br><span class="line">    location ~/group[0-9]/ &#123;</span><br><span class="line">        ngx_fastdfs_module;</span><br><span class="line">    &#125;</span><br><span class="line">    error_page 500 502 503 504 /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="单机部署"><a href="#单机部署" class="headerlink" title="单机部署"></a>单机部署</h2><p>这里只描述下单机环境的部署方式，集群在官方文档有，没有实际使用过。</p>
+<h3 id="tracker配置"><a href="#tracker配置" class="headerlink" title="tracker配置"></a>tracker配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/tracker.conf</span><br><span class="line"><span class="comment"># 建议修改以下内容</span></span><br><span class="line">bind_addr=&#123;你的内网IP&#125;</span><br><span class="line">base_path=/data/dfs <span class="comment"># 建议修改为数据盘位置</span></span><br><span class="line"><span class="comment"># 可选修改</span></span><br><span class="line">port=22122  <span class="comment"># tracker服务器端口</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="storage配置"><a href="#storage配置" class="headerlink" title="storage配置"></a>storage配置</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/storage.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">base_path=/data/dfs  <span class="comment"># 数据和日志文件存储根目录（建议修改为数据盘位置）</span></span><br><span class="line">store_path0=/data/dfs  <span class="comment"># 第一个存储目录（建议修改为数据盘位置）</span></span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line">http.server_port=8888  <span class="comment"># http访问文件的端口（默认8888,看情况修改,和nginx中保持一致）</span></span><br><span class="line"><span class="comment"># 可选修改</span></span><br><span class="line">port=23000  <span class="comment"># storage服务端口（默认23000,一般不修改）</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="client测试"><a href="#client测试" class="headerlink" title="client测试"></a>client测试</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim /etc/fdfs/client.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">base_path=/data/dfs</span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line"><span class="comment"># 保存后测试</span></span><br><span class="line">$ fdfs_upload_file /etc/fdfs/client.conf /usr/<span class="built_in">local</span>/src/nginx-1.14.2.tar.gz</span><br><span class="line">group1/M00/00/00/CgoKvlyUmi-AMVKDAA9-WL9wzEw.tar.gz <span class="comment"># 下载时通过该ID下载</span></span><br><span class="line"><span class="comment"># 返回ID表示成功 如：group1/M00/00/00/xx.tar.gz</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置nginx访问"><a href="#配置nginx访问" class="headerlink" title="配置nginx访问"></a>配置nginx访问</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/fdfs/mod_fastdfs.conf</span><br><span class="line"><span class="comment"># 建议修改</span></span><br><span class="line">tracker_server=&#123;tracker.bind_addr&#125;:&#123;tracker.port&#125;  <span class="comment"># tracker服务器IP和端口</span></span><br><span class="line">url_have_group_name=<span class="literal">true</span></span><br><span class="line">store_path0=/data/dfs</span><br><span class="line"><span class="comment"># 修改完保存</span></span><br><span class="line">$ nginx -s reload</span><br><span class="line">ngx_http_fastdfs_set pid=8364 <span class="comment"># 看见这条消息说明nginx模块启动成功了</span></span><br><span class="line">$ lsof -i:8888 <span class="comment"># 查看Nginx下载端口是否正常启动</span></span><br><span class="line">nginx   31061  root   10u  IPv4 20389985      0t0  TCP *:8888 (LISTEN)</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试下载"><a href="#测试下载" class="headerlink" title="测试下载"></a>测试下载</h3><p>在浏览器输入</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">http://&#123;IP&#125;:8888/group1/M00/00/00/CgoKvlyUmi-AMVKDAA9-WL9wzEw.tar.gz?filename=nginx-1.14.2.tar.gz //刚才上传返回的ID</span><br></pre></td></tr></table></figure>
+
+<p>弹出下载文件框，说明部署成功！</p>
+<p><img src="https://i.loli.net/2019/03/22/5c94a6b526a52.png"></p>
+<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><h3 id="防火墙"><a href="#防火墙" class="headerlink" title="防火墙"></a>防火墙</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo ufw <span class="built_in">enable</span>|<span class="built_in">disable</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="tracker"><a href="#tracker" class="headerlink" title="tracker"></a>tracker</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ /etc/init.d/fdfs_trackerd start <span class="comment"># 启动tracker服务</span></span><br><span class="line">$ /etc/init.d/fdfs_trackerd restart <span class="comment"># 重启动tracker服务</span></span><br><span class="line">$ /etc/init.d/fdfs_trackerd stop <span class="comment"># 停止tracker服务</span></span><br><span class="line">$ update-rc.d fdfs_trackerd <span class="built_in">enable</span> <span class="comment"># 自启动tracker服务</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="storage"><a href="#storage" class="headerlink" title="storage"></a>storage</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ /etc/init.d/fdfs_storaged start <span class="comment"># 启动storage服务</span></span><br><span class="line">$ /etc/init.d/fdfs_storaged restart <span class="comment"># 重动storage服务</span></span><br><span class="line">$ /etc/init.d/fdfs_storaged stop <span class="comment"># 停止动storage服务</span></span><br><span class="line">$ update-rc.d fdfs_storaged <span class="built_in">enable</span> <span class="comment"># 自启动storage服务</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ service nginx start <span class="comment"># 启动nginx</span></span><br><span class="line">$ nginx -s reload <span class="comment"># 重启nginx</span></span><br><span class="line">$ nginx -s stop <span class="comment"># 停止nginx</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h3 id="执行nginx-s-reload-后，访问502"><a href="#执行nginx-s-reload-后，访问502" class="headerlink" title="执行nginx -s reload 后，访问502"></a>执行nginx -s reload 后，访问502</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 查看nginx日志</span></span><br><span class="line">$ vim /var/<span class="built_in">log</span>/nginx/error.log</span><br></pre></td></tr></table></figure>
+
+<p>如果发现错误日志：<code>include file &quot;http.conf&quot; not exists, line: &quot;#include http.conf&quot;</code>，fastdfs nginx模块缺少配置文件，执行以下命令补全配置文件即可。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cp /usr/<span class="built_in">local</span>/src/fastdfs-master/conf/http.conf /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br><span class="line">$ cp /etc/nginx/mime.types /etc/fdfs/ <span class="comment">#供nginx访问使用</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>FastDFS</tag>
       </tags>
   </entry>
   <entry>
@@ -933,7 +952,7 @@
 
 <p>我们仔细分析一下，其实老板并不需要知道课程的细节，只需要问一下项目经理，有多少课程，项目经理直接告诉老板有20节在线课程。而不是老板将课程列出，让项目经理统计。</p>
 <p>我们看下UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c9e390ca6837252.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c9e390ca6837252.png"></p>
 <h3 id="正例-3"><a href="#正例-3" class="headerlink" title="正例"></a>正例</h3><p>项目经理类修改为</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TeamLeader</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkNumberOfCourse</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        List&lt;Course&gt; courseList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">            courseList.add(<span class="keyword">new</span> Course());</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;在线课程的数量是 ：&quot;</span> + courseList.size());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -941,7 +960,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Boss</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">commandCheckNumber</span><span class="params">(TeamLeader teamLeader)</span> </span>&#123;</span><br><span class="line">        teamLeader.checkNumberOfCourse();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这时候运行一下，结果一样。但是从UML类图上来看，是有很大的优化的。</p>
-<p><img data-src="https://i.loli.net/2019/07/28/5d3c9cf88cb0392036.png"></p>
+<p><img src="https://i.loli.net/2019/07/28/5d3c9cf88cb0392036.png"></p>
 ]]></content>
       <categories>
         <category>学习</category>
@@ -995,7 +1014,7 @@
 <p>但是，我们也不难看出工厂方法模式的缺点–类的个数容易过多，增加复杂度。</p>
 <p>因为一旦我们需要现在产品，就需要创建产品对应的产品实现类，以及产品工厂方法类，无疑增加了类的个数和系统的复杂度。</p>
 <p>完整的UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcbfabe70f65083.png"></p>
+<p><img src="https://i.loli.net/2019/07/29/5d3dcbfabe70f65083.png"></p>
 <h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><h2 id="Collection源码"><a href="#Collection源码" class="headerlink" title="Collection源码"></a><code>Collection</code>源码</h2><p>jdk中典型的工厂方法模式体现为<code>java.util.Collection</code></p>
 <p>抽象产品为<code>java.util.Iterator</code></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1010,7 +1029,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">Itr</span> <span class="keyword">implements</span> <span class="title">Iterator</span>&lt;<span class="title">E</span>&gt; </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>UML类图</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcda8d25df62223.png"></p>
+<p><img src="https://i.loli.net/2019/07/29/5d3dcda8d25df62223.png"></p>
 <h2 id="URLStreamHandlerFactory源码"><a href="#URLStreamHandlerFactory源码" class="headerlink" title="URLStreamHandlerFactory源码"></a><code>URLStreamHandlerFactory</code>源码</h2><p>再来看一个典型例子，<code>java.net.URLStreamHandlerFactory</code>作为工厂方法抽象类，定义了创建产品的抽象方法</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    <span class="function">URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String protocol)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1021,7 +1040,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Factory</span> <span class="keyword">implements</span> <span class="title">URLStreamHandlerFactory</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> String PREFIX = <span class="string">&quot;sun.net.www.protocol&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="title">Factory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> URLStreamHandler <span class="title">createURLStreamHandler</span><span class="params">(String var1)</span> </span>&#123;</span><br><span class="line">            String var2 = PREFIX + <span class="string">&quot;.&quot;</span> + var1 + <span class="string">&quot;.Handler&quot;</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 通过反射创建指定类型的产品</span></span><br><span class="line">                Class var3 = Class.forName(var2);</span><br><span class="line">                <span class="keyword">return</span> (URLStreamHandler)var3.newInstance();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ReflectiveOperationException var4) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InternalError(<span class="string">&quot;could not load &quot;</span> + var1 + <span class="string">&quot;system protocol handler&quot;</span>， var4);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>可以发现，工厂实现类通过反射类创建具体的产品实现类，而产品实现类非常多</p>
-<p><img data-src="https://i.loli.net/2019/07/29/5d3dcf7262c4150474.png"></p>
+<p><img src="https://i.loli.net/2019/07/29/5d3dcf7262c4150474.png"></p>
 <p>这样满足了开闭原则，也没有过多的增加类的数量，值得我们学习。</p>
 ]]></content>
       <categories>
@@ -1052,7 +1071,7 @@
 <p>安装<code>nfs-csi-driver</code></p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -skSL https://gitee.com/qq1398371419/csi-driver-nfs/raw/master/deploy/install-driver.sh | bash -s master --</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2021/06/20/lLBaReX3HkDdiur.png" alt="Image"></p>
+<p><img src="https://i.loli.net/2021/06/20/lLBaReX3HkDdiur.png" alt="Image"></p>
 <h2 id="3、安装StorageClass"><a href="#3、安装StorageClass" class="headerlink" title="3、安装StorageClass"></a>3、安装<code>StorageClass</code></h2><p><code>nfs-sc.yaml</code></p>
 <figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">storage.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">StorageClass</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">nfs-csi</span></span><br><span class="line"><span class="attr">provisioner:</span> <span class="string">nfs.csi.k8s.io</span></span><br><span class="line"><span class="attr">parameters:</span></span><br><span class="line">  <span class="attr">server:</span> <span class="number">172.16</span><span class="number">.1</span><span class="number">.23</span> <span class="comment"># 这里改成自己的内网IP</span></span><br><span class="line">  <span class="attr">share:</span> <span class="string">/data/nfs</span> <span class="comment"># 这里改成自己的nfs共享目录</span></span><br><span class="line"><span class="attr">reclaimPolicy:</span> <span class="string">Retain</span></span><br><span class="line"><span class="attr">volumeBindingMode:</span> <span class="string">Immediate</span></span><br><span class="line"><span class="attr">mountOptions:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hard</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">nfsvers=4.1</span></span><br></pre></td></tr></table></figure>
 
@@ -1060,11 +1079,11 @@
 
 <h2 id="4、测试部署Redis"><a href="#4、测试部署Redis" class="headerlink" title="4、测试部署Redis"></a>4、测试部署<code>Redis</code></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vim redis-test.yaml</span><br><span class="line">---</span><br><span class="line">master:</span><br><span class="line">  persistence:</span><br><span class="line">    storageClass: nfs-csi</span><br><span class="line">  service:</span><br><span class="line">    nodePort: 30001</span><br><span class="line">    <span class="built_in">type</span>: NodePort</span><br><span class="line">replica:</span><br><span class="line">  persistence:</span><br><span class="line">    storageClass: nfs-csi</span><br><span class="line">auth:</span><br><span class="line">  enabled: <span class="literal">false</span></span><br><span class="line">$ helm repo add bitnami https://charts.bitnami.com/bitnami</span><br><span class="line">$ helm install my-release bitnami/redis -f redis-test.yaml</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2021/06/20/dDX954OPA3nBKmi.png" alt="image-20210620031253181"></p>
+<p><img src="https://i.loli.net/2021/06/20/dDX954OPA3nBKmi.png" alt="image-20210620031253181"></p>
 <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><blockquote>
 <p>前面提到的设置anonuid和anongid，是因为部署<code>bitnami</code>提供的<code>helm charts</code>遇到了无法写入文件的问题，之所以设置为1001，因为bitnami默认的uid是1001</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2021/06/20/ybG6rDFjchtZHla.png" alt="Image"></p>
+<p><img src="https://i.loli.net/2021/06/20/ybG6rDFjchtZHla.png" alt="Image"></p>
 <p>容器对于mount的路径的访问权限问题，可以参考<a href="https://www.cnblogs.com/sammyliu/p/10129670.html">https://www.cnblogs.com/sammyliu/p/10129670.html</a></p>
 <h1 id="相关资料"><a href="#相关资料" class="headerlink" title="相关资料"></a>相关资料</h1><ul>
 <li><a href="https://kubernetes-csi.github.io/docs/drivers.html">Kubernetes CSI Developer Documentation</a></li>
@@ -1186,9 +1205,9 @@
 <h1 id="软件"><a href="#软件" class="headerlink" title="软件"></a>软件</h1><h2 id="ShadowsocksX-NG-R8"><a href="#ShadowsocksX-NG-R8" class="headerlink" title="ShadowsocksX-NG R8"></a>ShadowsocksX-NG R8</h2><blockquote>
 <p>ShadowsocksX-NG是Mac下的SSR工具，具有和Windows下同样的体验，使用起来也非常方便，支持服务器订阅。</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
+<p><img src="https://i.loli.net/2019/10/06/FZbVImyYedEHQvl.png"></p>
 <p>配置就不多说了，唯一要注意的是，Socks5的监听地址是：<code>127.0.0.1:1086</code>，这个我们一会要用到。</p>
-<p><img data-src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/cCX4p8debKNvYrG.png"></p>
 <h2 id="Proxifier"><a href="#Proxifier" class="headerlink" title="Proxifier"></a>Proxifier</h2><blockquote>
 <p>Proxifier是Mac下的全局代理工具，可以将流量统统都转到代理上，配合ShadowsocksX-NG，我们很轻松的就可以实现全局翻墙</p>
 </blockquote>
@@ -1197,33 +1216,33 @@
 <h2 id="添加Socks5代理"><a href="#添加Socks5代理" class="headerlink" title="添加Socks5代理"></a>添加Socks5代理</h2><ol>
 <li>点击Proxies</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/tebRvEfDKZN16JA.png"></p>
 <ol start="2">
 <li>点击Add，添加代理</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/iLXBoKFwah4HuWP.png"></p>
 <ol start="3">
 <li>添加完毕后，回到主界面，点击Rules，修改默认规则，将动作指向我们新添加的Socks5代理</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/JRd6ekxHYwan4um.png"></p>
 <ol start="4">
 <li>测试</li>
 </ol>
 <p>打开ITerm2测试下，在终端输入</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ curl www.google.com</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/xEgSoUw9Bk6ODT5.png"></p>
 <p>同时，Proxifier也打印出了ITerm2的流量信息</p>
-<p><img data-src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/WNVMbpnF3OiZmkQ.png"></p>
 <p>另外，Proxifier也支持指定软件走代理，具体步骤如下</p>
 <ol>
 <li>在Rules标签中点击Add，新建一个规则</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/u2keChKzrvGdoZF.png"></p>
 <ol start="2">
 <li>添加完成后勾选使用，同时，不要忘记把Default规则的动作设置为Direct，不然的话，还是全局都走代理的。</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/6z2jaPkOGN4QVnc.png"></p>
 <h1 id="相关软件"><a href="#相关软件" class="headerlink" title="相关软件"></a>相关软件</h1><ul>
 <li>ShadowsocksX-NG：链接:<a href="https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA">https://pan.baidu.com/s/10i6PZZIParFRkvaVu5KhxA</a>  密码:jvzx</li>
 <li>Proxifier：链接:<a href="https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w">https://pan.baidu.com/s/1ymZZRDJrjrIXXFrYfIxV_w</a>  密码:exns</li>
@@ -1243,29 +1262,29 @@
 <h1 id="申请SSL证书"><a href="#申请SSL证书" class="headerlink" title="申请SSL证书"></a>申请SSL证书</h1><blockquote>
 <p>你可以从任何证书提供商处申请证书，这里以<a href="https://console.aliyun.com/">阿里云</a>为例。</p>
 </blockquote>
-<h2 id="打开阿里云SSL证书控制台，点击购买证书"><a href="#打开阿里云SSL证书控制台，点击购买证书" class="headerlink" title="打开阿里云SSL证书控制台，点击购买证书"></a>打开阿里云SSL证书控制台，点击购买证书</h2><p><img data-src="https://i.loli.net/2019/07/24/5d381c3210a9e21599.png"></p>
+<h2 id="打开阿里云SSL证书控制台，点击购买证书"><a href="#打开阿里云SSL证书控制台，点击购买证书" class="headerlink" title="打开阿里云SSL证书控制台，点击购买证书"></a>打开阿里云SSL证书控制台，点击购买证书</h2><p><img src="https://i.loli.net/2019/07/24/5d381c3210a9e21599.png"></p>
 <h2 id="选择免费型一年期的证书，点击立即购买"><a href="#选择免费型一年期的证书，点击立即购买" class="headerlink" title="选择免费型一年期的证书，点击立即购买"></a>选择免费型一年期的证书，点击立即购买</h2><div class="note warning"><p>注意，1年到期后别忘记重新申请证书！</p>
 </div>
 
-<p><img data-src="https://i.loli.net/2019/07/24/5d381c61c4d0546560.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d381c61c4d0546560.png"></p>
 <h2 id="支付"><a href="#支付" class="headerlink" title="支付"></a>支付</h2><p>放心大胆的支付吧，不用钱！</p>
-<p><img data-src="https://i.loli.net/2019/07/24/5d381d0b2668081706.png"></p>
-<h1 id="验证SSL证书"><a href="#验证SSL证书" class="headerlink" title="验证SSL证书"></a>验证SSL证书</h1><h2 id="购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请"><a href="#购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请" class="headerlink" title="购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请"></a>购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请</h2><p><img data-src="https://i.loli.net/2019/07/24/5d381d59ca32b79031.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d381d0b2668081706.png"></p>
+<h1 id="验证SSL证书"><a href="#验证SSL证书" class="headerlink" title="验证SSL证书"></a>验证SSL证书</h1><h2 id="购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请"><a href="#购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请" class="headerlink" title="购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请"></a>购买完成之后，返回SSL证书控制台，你应该会看到刚才购买的证书。我们点击申请</h2><p><img src="https://i.loli.net/2019/07/24/5d381d59ca32b79031.png"></p>
 <h2 id="填写域名（必须是你自己的或者有管理权的域名）和相关信息，完成后点击下一步。"><a href="#填写域名（必须是你自己的或者有管理权的域名）和相关信息，完成后点击下一步。" class="headerlink" title="填写域名（必须是你自己的或者有管理权的域名）和相关信息，完成后点击下一步。"></a>填写域名（必须是你自己的或者有管理权的域名）和相关信息，完成后点击下一步。</h2><div class="note warning"><p>注意，免费型证书只支持单个域名！例如你要为<a href="http://www.example.com申请证书,你必须填写www.example.com,而不能是example.com./">www.example.com申请证书，你必须填写www.example.com，而不能是example.com。</a></p>
 </div>
 
-<p><img data-src="https://i.loli.net/2019/07/24/5d381dd8a4b6091205.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d381dd8a4b6091205.png"></p>
 <h2 id="在DNS服务商处配置阿里云提供的验证信息。"><a href="#在DNS服务商处配置阿里云提供的验证信息。" class="headerlink" title="在DNS服务商处配置阿里云提供的验证信息。"></a>在DNS服务商处配置阿里云提供的验证信息。</h2><p>例如<a href="https://www.dnspod.cn/console/dashboard">DNSPod</a>，填写主机记录，记录值和记录类型，然后点击保存。</p>
-<p><img data-src="https://i.loli.net/2019/07/24/5d381f607ee9d69062.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d381f607ee9d69062.png"></p>
 <div class="note info"><p>耐心等待TTL刷新（一般为10分钟，也可能花不了10分钟）。</p>
 </div>
 
 <p>回到阿里云SSL证书申请页面，点击验证。</p>
-<p><img data-src="https://i.loli.net/2019/07/24/5d381ebc2cb3f86338.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d381ebc2cb3f86338.png"></p>
 <h2 id="签发域名"><a href="#签发域名" class="headerlink" title="签发域名"></a>签发域名</h2><p>验证通过后，证书提供商将会为你的域名颁发证书。在阿里云SSL证书控制台的已签发列表下可以找到你的域名对应的SSL证书。</p>
-<p><img data-src="https://i.loli.net/2019/07/24/5d382048c586e43053.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d382048c586e43053.png"></p>
 <h2 id="下载证书"><a href="#下载证书" class="headerlink" title="下载证书"></a>下载证书</h2><p>下载Nginx对应的SSL证书<code>xx_nginx.zip</code>，准备配置Nginx。</p>
-<p><img data-src="https://i.loli.net/2019/07/24/5d3821f82182787100.png"></p>
+<p><img src="https://i.loli.net/2019/07/24/5d3821f82182787100.png"></p>
 <h1 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h1><div class="note info"><p>如果你还没有安装Nginx，可以参考<a href="https://gcdd1993.github.io/p/8505/#Nginx">部署Nginx</a></p>
 </div>
 
@@ -1480,7 +1499,7 @@
 <li><p>在PATH环境变量中，配置$SCALA_HOME/bin目录。</p>
 </li>
 </ol>
-<p><img data-src="https://i.loli.net/2020/02/02/Zmrv5iPFe2N3hwu.png"></p>
+<p><img src="https://i.loli.net/2020/02/02/Zmrv5iPFe2N3hwu.png"></p>
 <ol start="2">
 <li>在windows命令行内即可直接键入scala，打开scala命令行，进行scala编程。</li>
 </ol>
@@ -1656,7 +1675,7 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Hello gcdd1993, good evening</span><br></pre></td></tr></table></figure>
 
 <h1 id="为配置类添加提示"><a href="#为配置类添加提示" class="headerlink" title="为配置类添加提示"></a>为配置类添加提示</h1><p>我们知道，在Idea中，编写配置文件的时候，有智能提示</p>
-<p><img data-src="https://i.loli.net/2019/08/06/MD7ZeTC6HVtYy3R.png"></p>
+<p><img src="https://i.loli.net/2019/08/06/MD7ZeTC6HVtYy3R.png"></p>
 <p>其实这不是Idea搞的鬼，是由<code>META-INF/spring-configuration-metadata.json</code>文件配置好的，Idea只是负责解析这个文件，提供我们智能化的提示信息。</p>
 <p>想要达到这个目的很简单，添加依赖<code>org.springframework.boot:spring-boot-configuration-processor</code>就行了。</p>
 <p>Maven</p>
@@ -1729,7 +1748,7 @@
 
 <p>可以看到，两个发布者几乎同时运行，证明监听器是异步执行的，没有阻塞住发布者的代码。准确的说，监听器将在一个单独的线程中异步处理事件。</p>
 <h1 id="Spring自带的事件类型"><a href="#Spring自带的事件类型" class="headerlink" title="Spring自带的事件类型"></a>Spring自带的事件类型</h1><p>事件驱动在Spring中是被广泛采用的，我们查看ApplicationEvent的子类可以发现许多Event事件，在此不赘述。</p>
-<p><img data-src="https://i.loli.net/2019/03/14/5c8a206832ffd.png"></p>
+<p><img src="https://i.loli.net/2019/03/14/5c8a206832ffd.png"></p>
 <h1 id="注解驱动的监听器"><a href="#注解驱动的监听器" class="headerlink" title="注解驱动的监听器"></a>注解驱动的监听器</h1><p>从Spring 4.2开始，事件监听器不需要是实现<code>ApplicationListener</code>接口的bean，它可以通过<code>@EventListener</code>注解在任何被Spring容器管理的bean的公共方法上。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AnnotationDrivenContextStartedListener</span> </span>&#123;</span><br><span class="line">    <span class="meta">@EventListener</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleContextStart</span><span class="params">(CustomSpringEvent cse)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Handling Custom Spring Event.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -1838,7 +1857,7 @@
 <p>解析bean定义，有几个bean就有几个BeanDefinition。注意，Spring并不是拿到配置就直接用反射实例化bean，而是先将bean配置解析为BeanDefinition。</p>
 </blockquote>
 <p>BeanDefinition保存了实例化bean需要的一切信息，包括属性，依赖等。以<code>ConcurrentHashMap&lt;String, BeanDefinition&gt;</code>保存在DefaultListableBeanFactory的beanDefinitionMap里。</p>
-<p><img data-src="https://i.loli.net/2019/03/29/5c9dbcecdf9e1.png"></p>
+<p><img src="https://i.loli.net/2019/03/29/5c9dbcecdf9e1.png"></p>
 <h2 id="prepareBeanFactory-beanFactory"><a href="#prepareBeanFactory-beanFactory" class="headerlink" title="prepareBeanFactory(beanFactory)"></a>prepareBeanFactory(beanFactory)</h2><blockquote>
 <p>设置beanFactory的其余属性</p>
 </blockquote>
@@ -1906,7 +1925,7 @@
 <h2 id="finishRefresh"><a href="#finishRefresh" class="headerlink" title="finishRefresh()"></a>finishRefresh()</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finishRefresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 初始化生命周期处理器</span></span><br><span class="line">    initLifecycleProcessor();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 刷新生命周期处理器状态 running = true</span></span><br><span class="line">    getLifecycleProcessor().onRefresh();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 发布上下文初始化完成事件ContextRefreshedEvent</span></span><br><span class="line">    publishEvent(<span class="keyword">new</span> ContextRefreshedEvent(<span class="keyword">this</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果处于活动状态，将自己注册到LiveBeans</span></span><br><span class="line">    LiveBeansView.registerApplicationContext(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Spring IoC Container时序图</p>
-<p><img data-src="https://i.loli.net/2019/03/29/5c9dd9c73cbe4.jpg"></p>
+<p><img src="https://i.loli.net/2019/03/29/5c9dd9c73cbe4.jpg"></p>
 ]]></content>
       <categories>
         <category>学习</category>
@@ -1920,11 +1939,11 @@
     <url>/p/6604/</url>
     <content><![CDATA[<p>如果遇到了Spring MVC报错400，而且没有返回任何信息的情况下该如何排查问题？<span id="more"></span></p>
 <h1 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h1><p>一直都没毛病的接口，今天测试的时候突然报错<code>400 Bad Request</code>，而且Response没有返回任何信息。</p>
-<p><img data-src="https://i.loli.net/2019/07/26/5d3ae61b24ab372943.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/26/5d3ad97a0da2b22891.png"></p>
+<p><img src="https://i.loli.net/2019/07/26/5d3ae61b24ab372943.png"></p>
+<p><img src="https://i.loli.net/2019/07/26/5d3ad97a0da2b22891.png"></p>
 <h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>尝试了一下午，终于找到了排查这类问题的办法。</p>
 <p>我们知道，在Spring MVC里面，<br><code>org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler</code><br>负责所有异常的统一处理。我们只要在方法<code>handleException</code>打上断点即可。</p>
-<p><img data-src="https://i.loli.net/2019/07/26/5d3ada319940784853.png"></p>
+<p><img src="https://i.loli.net/2019/07/26/5d3ada319940784853.png"></p>
 <p>点开发现，原来是Lombok的问题。报错如下</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Could not read JSON document: Can not construct instance of xxx: no suitable constructor found, can not deserialize from Object value (missing default constructor or creator, or perhaps need to add/enable type information?)</span><br><span class="line"> at [Source: java.io.PushbackInputStream@12544acd; line: 2, column: 5]</span><br></pre></td></tr></table></figure>
 
@@ -1979,11 +1998,11 @@
 <h3 id="如果密码错误，应该执行"><a href="#如果密码错误，应该执行" class="headerlink" title="如果密码错误，应该执行"></a>如果密码错误，应该执行</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">catch</span> (BadCredentialsException e) &#123;</span><br><span class="line">    <span class="keyword">return</span> forbidden(LOGIN_PASSWORD_ERROR, request);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>实际上，不管是抛出什么错，最后抓到的都是BadCredentialsException</p>
-<h1 id="问题定位"><a href="#问题定位" class="headerlink" title="问题定位"></a>问题定位</h1><h2 id="debug大法"><a href="#debug大法" class="headerlink" title="debug大法"></a>debug大法</h2><h3 id="断点"><a href="#断点" class="headerlink" title="断点"></a>断点</h3><p><img data-src="https://i.imgur.com/eRNlVGd.png"></p>
+<h1 id="问题定位"><a href="#问题定位" class="headerlink" title="问题定位"></a>问题定位</h1><h2 id="debug大法"><a href="#debug大法" class="headerlink" title="debug大法"></a>debug大法</h2><h3 id="断点"><a href="#断点" class="headerlink" title="断点"></a>断点</h3><p><img src="https://i.imgur.com/eRNlVGd.png"></p>
 <h3 id="跟踪"><a href="#跟踪" class="headerlink" title="跟踪"></a>跟踪</h3><p>经过步进法跟踪代码，发现问题所在，位于</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">AbstractUserDetailsAuthenticationProvider</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span></span></span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.imgur.com/7somN4i.png"></p>
+<p><img src="https://i.imgur.com/7somN4i.png"></p>
 <h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><ol>
 <li>loadUserByUsername方法确实抛出了UsernameNotFoundException</li>
 <li>走到AbstractUserDetailsAuthenticationProvider的authenticate方法的时候，如果hideUserNotFoundExceptions = true，直接就覆盖了UsernameNotFoundException异常并抛出BadCredentialsException异常，这也就解释了，为什么总是捕捉到BadCredentialsException异常</li>
@@ -2055,8 +2074,8 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Codegen</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">generate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">new</span> CodeGenerator(<span class="string">&quot;src/test/resources/codegen.properties&quot;</span>)</span><br><span class="line">                .registerRender(<span class="string">&quot;repository&quot;</span>)</span><br><span class="line">                .generate();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>然后运行<code>generate()</code>，在项目目录下将会生成</p>
-<p><img data-src="https://i.imgur.com/WTg4qMx.png" alt="Imgur"></p>
-<p><img data-src="https://i.imgur.com/yJJ1d59.png" alt="Imgur"></p>
+<p><img src="https://i.imgur.com/WTg4qMx.png" alt="Imgur"></p>
+<p><img src="https://i.imgur.com/yJJ1d59.png" alt="Imgur"></p>
 <p>生成的代码完全由模板以及实体类信息决定。</p>
 <h1 id="如何编写模板？"><a href="#如何编写模板？" class="headerlink" title="如何编写模板？"></a>如何编写模板？</h1><p>模板完全基于<code>FreeMarker</code>以及实体类信息，<code>FreeMarker</code>参考<a href="https://freemarker.apache.org/docs/index.html">FreeMarker Docs</a></p>
 <p>支持的元素定义如下</p>
@@ -2279,32 +2298,32 @@
 </div>
 
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装非常简单，打开<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=zh-CN">Chrome商店</a>，点击”添加到Chrome”</p>
-<p><img data-src="https://i.loli.net/2019/10/07/KqbsVxP5To4HdQC.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/KqbsVxP5To4HdQC.png"></p>
 <h2 id="安装脚本"><a href="#安装脚本" class="headerlink" title="安装脚本"></a>安装脚本</h2><ol>
 <li>点击”获取新脚本”</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/XLHZqzFdVToacyE.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/XLHZqzFdVToacyE.png"></p>
 <ol start="2">
 <li>选择合适的脚本源，这里推荐GreasyFork</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/gkvSFHfrldBV5pD.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/gkvSFHfrldBV5pD.png"></p>
 <ol start="3">
 <li>安装脚本，以VIP视频解析为例</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/10/07/yMhfdDBZJegvxE1.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/yMhfdDBZJegvxE1.png"></p>
 <p>我们点击第一个脚本（有时候会比较慢，请耐心等待下），点击”安装此脚本”</p>
-<p><img data-src="https://i.loli.net/2019/10/07/z9NQ21heM4YXJpT.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/z9NQ21heM4YXJpT.png"></p>
 <p>点击安装</p>
-<p><img data-src="https://i.loli.net/2019/10/07/Ffz6a1P7YehwcsS.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/Ffz6a1P7YehwcsS.png"></p>
 <p>下面可以直接看到脚本的源码，有能力的话，可以自己修改或者编写脚本。</p>
 <ol start="4">
 <li>看看脚本的效果</li>
 </ol>
 <p>我们打开爱奇艺，找个vip电影，比如最近热播的银河补习班</p>
-<p><img data-src="https://i.loli.net/2019/10/07/bmUQz5aGqKrCu3L.png"></p>
-<p><img data-src="https://i.loli.net/2019/10/07/Mqw8XZ1WeOpnYRA.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/bmUQz5aGqKrCu3L.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/Mqw8XZ1WeOpnYRA.png"></p>
 <h1 id="TamperMonkey脚本推荐"><a href="#TamperMonkey脚本推荐" class="headerlink" title="TamperMonkey脚本推荐"></a>TamperMonkey脚本推荐</h1><p>在TamperMonkey的管理面板中，可以看到已经安装的所有脚本</p>
-<p><img data-src="https://i.loli.net/2019/10/07/ctFHYj9ERJTg4eu.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/ctFHYj9ERJTg4eu.png"></p>
 <p>下面列举出我常用的脚本</p>
 <ul>
 <li><p><a href="https://greasyfork.org/zh-CN/scripts/373956-52pojie%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3%E8%AE%BA%E5%9D%9B%E8%87%AA%E5%8A%A8%E7%AD%BE%E5%88%B0%E5%8A%A9%E6%89%8B-%E5%85%8D%E6%89%93%E6%89%B0">52pojie吾爱破解论坛自动签到助手-免打扰</a></p>
@@ -2331,7 +2350,7 @@
 </li>
 </ul>
 <h1 id="TamperMonkey脚本同步"><a href="#TamperMonkey脚本同步" class="headerlink" title="TamperMonkey脚本同步"></a>TamperMonkey脚本同步</h1><p>TamperMonkey提供了非常方便的方法让我们同步脚本，从而避免每次安装都要重新安装脚本的烦恼。</p>
-<p><img data-src="https://i.loli.net/2019/10/07/yRtBhKbsLzGdTXP.png"></p>
+<p><img src="https://i.loli.net/2019/10/07/yRtBhKbsLzGdTXP.png"></p>
 <ol>
 <li>进入TamperMonkey插件设置页</li>
 <li>配置模式选择”初学者”</li>
@@ -2361,13 +2380,13 @@
 
 <p><code>bind_ip = 127.0.0.1</code> 修改为<code>bind_ip = 0.0.0.0</code></p>
 <h1 id="连接mongodb"><a href="#连接mongodb" class="headerlink" title="连接mongodb"></a>连接mongodb</h1><p>使用工具<a href="https://robomongo.org/">robo 3t</a>，添加连接信息</p>
-<p><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
+<p><img src="https://i.loli.net/2019/03/15/5c8b2c0d28653.png"></p>
 <h1 id="启用密码访问"><a href="#启用密码访问" class="headerlink" title="启用密码访问"></a>启用密码访问</h1><p>mongodb默认是不开启密码登录的，如果要开启，修改mongodb配置文件：</p>
 <p>取消<code>#auth = true</code>前面的注释，并重启mongodb<code>service mongodb restart</code></p>
 <p>添加用户信息:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">use test_db;</span><br><span class="line">db.createUser(&#123;user:<span class="string">&#x27;cool&#x27;</span>, <span class="built_in">pwd</span>:<span class="string">&#x27;cool&#x27;</span>, roles: [ &#123; role: <span class="string">&quot;readWrite&quot;</span>, db: <span class="string">&quot;test_db&quot;</span> &#125; ]&#125;);</span><br></pre></td></tr></table></figure>
 
-<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img data-src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
+<h1 id="连接"><a href="#连接" class="headerlink" title="连接"></a>连接</h1><p>连接方式跟上面类似，唯一不同的是要添加authentication，指定database，username，password，以及选择Mongodb-CR验证方式<br><img src="https://i.loli.net/2019/03/15/5c8b2c0d0f52e.png"></p>
 ]]></content>
       <categories>
         <category>工作</category>
@@ -2402,7 +2421,7 @@
 <li>默认www目录：<code>/var/www/html</code></li>
 </ul>
 <p>这一点跟其他的不一样，我也是看到配置文件才知道是这个目录的</p>
-<p><img data-src="https://i.loli.net/2019/06/24/5d109f0e7b96224648.png"></p>
+<p><img src="https://i.loli.net/2019/06/24/5d109f0e7b96224648.png"></p>
 <p>/etc/apache2/apache2.conf</p>
 ]]></content>
       <categories>
@@ -2505,23 +2524,23 @@
     <title>MacOs使用CleanMyMac X清除可清除空间</title>
     <url>/p/46997/</url>
     <content><![CDATA[<h1 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h1><p>本文介绍如何使用<code>CleanMyMac X</code>清除可清除的空间</p>
-<p><img data-src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/GdSBlzQMhTfY2Ha.png"></p>
 <span id="more"></span>
 
 <p>可以看到，可清除的空间达到了125.79GB，虽然说不影响系统的使用，但是在使用时间机器进行备份的时候，仍然会将可清除空间当成备份的一部分，造成备份文件过大，首次备份时间过长。</p>
 <h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><p>清除可清除空间，你只需要<strong>CleanMyMac X</strong>这个工具即可，我分享下我使用的版本，当然有能力的建议使用正版。</p>
 <p><a href="https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw">https://pan.baidu.com/s/1L05kBwZIghM73IRC8rMpMw</a></p>
 <h1 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h1><p>安装完毕后，打开<strong>CleanMyMac X</strong></p>
-<p><img data-src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/E8BRFzlvLo4bcZU.png"></p>
 <p>点击”维护“，你可以使用“<strong>释放可清除空间</strong>”或者是“<strong>时间机器快照瘦身</strong>”，我使用的是“时间机器快照瘦身”</p>
 <div class="note warning"><p>建议先使用“时间机器快照瘦身”，如果不行，再释放可清除空间，因为释放可清除空间耗时较长</p>
 </div>
 
-<p><img data-src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/VTihB8LqlUebrJY.png"></p>
 <p>点击运行，稍作等待即可</p>
-<p><img data-src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/tUKvGurohTwY4fV.png"></p>
 <p>这时候，我们回到磁盘工具，再次查看可清除空间，可以发现，可清除空间小了不少！</p>
-<p><img data-src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
+<p><img src="https://i.loli.net/2019/10/11/fPV35Zvj8oznWqm.png"></p>
 ]]></content>
       <categories>
         <category>工具</category>
@@ -2537,13 +2556,13 @@
 <h1 id="Postman安装"><a href="#Postman安装" class="headerlink" title="Postman安装"></a>Postman安装</h1><h2 id="官网下载-翻墙"><a href="#官网下载-翻墙" class="headerlink" title="官网下载(翻墙)"></a>官网下载(翻墙)</h2><p><a href="https://www.getpostman.com/downloads/">https://www.getpostman.com/downloads/</a></p>
 <h2 id="蓝奏云"><a href="#蓝奏云" class="headerlink" title="蓝奏云"></a>蓝奏云</h2><p><a href="https://www.lanzous.com/i2en5xc">https://www.lanzous.com/i2en5xc</a></p>
 <h1 id="Postman常用功能"><a href="#Postman常用功能" class="headerlink" title="Postman常用功能"></a>Postman常用功能</h1><p>安装好之后，我们先打开Postman，可以看到界面分成左右两个部分，右边是我们后头要讲的collection，左边是现在要讲的request builder。在request builder中，我们可以通过Postman快速的随意组装出我们希望的request。一般来说，所有的HTTP Request都分成4个部分，URL, method, headers和body。而Postman针对这几部分都有针对性的工具。</p>
-<p><img data-src="https://i.imgur.com/JHqfDbU.png"></p>
+<p><img src="https://i.imgur.com/JHqfDbU.png"></p>
 <h2 id="URL"><a href="#URL" class="headerlink" title="URL"></a>URL</h2><p>要组装一条Request, URL永远是你首先要填的内容，在Postman里面你曾输入过的URL是可以通过下拉自动补全的哦。如果你点击Params按钮，Postman会弹出一个键值编辑器，你可以在哪里输入URL的Parameter，Postman会帮你自动加入到URL当中，反之，如果你的URL当中已经有了参数，那Postman会在你打开键值编辑器的时候把参数自动载入</p>
-<p><img data-src="https://i.imgur.com/OyiHdls.png"></p>
+<p><img src="https://i.imgur.com/OyiHdls.png"></p>
 <h2 id="Headers"><a href="#Headers" class="headerlink" title="Headers"></a>Headers</h2><p>点击’Headers’按钮，Postman同样会弹出一个键值编辑器。在这里，你可以随意添加你想要的Header attribute，同样Postman为我们通过了很贴心的auto-complete功能，敲入一个字母，你可以从下拉菜单里选择你想要的标准atrribute</p>
-<p><img data-src="https://i.imgur.com/N0KHlcZ.png"></p>
+<p><img src="https://i.imgur.com/N0KHlcZ.png"></p>
 <h2 id="Method"><a href="#Method" class="headerlink" title="Method"></a>Method</h2><p>要选择Request的Method是很简单的，Postman支持所有的Method，而一旦你选择了Method，Postman的request body编辑器会根据的你选择，自动的发生改变。</p>
-<p><img data-src="https://i.imgur.com/vJl711X.png"></p>
+<p><img src="https://i.imgur.com/vJl711X.png"></p>
 <h2 id="Request-Body"><a href="#Request-Body" class="headerlink" title="Request Body"></a>Request Body</h2><p>如果我们要创建的request是类似于POST，那我们就需要编辑Request Body，Postman根据body type的不同，提供了4中编辑方式：</p>
 <ul>
 <li>form-data</li>
@@ -2551,34 +2570,34 @@
 <li>raw</li>
 <li>binary</li>
 </ul>
-<p><img data-src="https://i.imgur.com/dgaY012.png"></p>
+<p><img src="https://i.imgur.com/dgaY012.png"></p>
 <p>（我们这里是可以传文件的哦）</p>
 <h1 id="postman高级用法"><a href="#postman高级用法" class="headerlink" title="postman高级用法"></a>postman高级用法</h1><h2 id="colletions-接口集合"><a href="#colletions-接口集合" class="headerlink" title="colletions(接口集合)"></a>colletions(接口集合)</h2><p>在开发过程中，可能会遇到多项目同时开发维护的情况，Postman友好的提供了colletions功能，类似与项目文件夹一样，可以把归属于同一类的接口分类到一起，便于管理维护。</p>
 <ol>
 <li>点击NEW -&gt; 选择collection，创建一个项目空间。</li>
 </ol>
-<p><img data-src="https://i.imgur.com/RcYq3Ba.png"></p>
+<p><img src="https://i.imgur.com/RcYq3Ba.png"></p>
 <ol start="2">
 <li>输入项目名称，点击create。</li>
 </ol>
-<p><img data-src="https://i.imgur.com/zGFYC1F.png"></p>
+<p><img src="https://i.imgur.com/zGFYC1F.png"></p>
 <h2 id="colletions-folder-集合中的文件夹"><a href="#colletions-folder-集合中的文件夹" class="headerlink" title="colletions folder(集合中的文件夹)"></a>colletions folder(集合中的文件夹)</h2><p>每个项目会有多个接口，有些是一类功能，例如，用户管理接口，文章列表接口，Postman提供folder目录来进行细致的分类。</p>
 <ol>
 <li>选择一个项目，点击Add Folder</li>
 </ol>
-<p><img data-src="https://i.imgur.com/v2qY1uW.png"></p>
+<p><img src="https://i.imgur.com/v2qY1uW.png"></p>
 <ol start="2">
 <li>输入目录名称，点击create</li>
 </ol>
-<p><img data-src="https://i.imgur.com/exymkyT.png"></p>
+<p><img src="https://i.imgur.com/exymkyT.png"></p>
 <p>每个接口都可以归类到某个项目，或某个项目的子目录中。</p>
-<p><img data-src="https://i.imgur.com/pRltLVX.png"></p>
+<p><img src="https://i.imgur.com/pRltLVX.png"></p>
 <h2 id="Environment-环境变量"><a href="#Environment-环境变量" class="headerlink" title="Environment(环境变量)"></a>Environment(环境变量)</h2><p>Postman允许定义自己的环境变量（Environment），最常见的是将测试 URL 进行定义成变量的形式，这样随着你的域名怎么变，URL 就不用变更，非常方便。除此之外，也可以将一些敏感的测试值定义为环境变量，比如密码。接下来，来看下怎么新建一组环境变量，如下操作打开环境变量的管理入口：</p>
-<p><img data-src="https://i.imgur.com/G8b6kTl.png"></p>
+<p><img src="https://i.imgur.com/G8b6kTl.png"></p>
 <p>打开管理环境变量的窗口，输入名称，添加一组键值对，如下图所示：</p>
-<p><img data-src="https://i.imgur.com/5oJhjWe.png"></p>
+<p><img src="https://i.imgur.com/5oJhjWe.png"></p>
 <p>环境变量要以双大括号的方式来引用，可以在右上方下拉框处选择相应的环境变量，我们实测一下刚才添加的Url的变量：</p>
-<p><img data-src="https://i.imgur.com/FAc6qME.png"></p>
+<p><img src="https://i.imgur.com/FAc6qME.png"></p>
 <h2 id="通过脚本设置变量"><a href="#通过脚本设置变量" class="headerlink" title="通过脚本设置变量"></a>通过脚本设置变量</h2><p>Postman允许用户自定义脚本，并提供了两种类型的脚本：</p>
 <ul>
 <li>Pre-request Script：执行request请求前先运行，可以在里面预先设置些所需变量</li>
@@ -2590,9 +2609,9 @@
 <p>在Tests中对user_id值进行提取并赋值成全局变量:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">// 判断是否存在<span class="string">&#x27;user_id&#x27;</span>值</span><br><span class="line">tests[<span class="string">&quot;Body contains user_id&quot;</span>] = responseBody.has(<span class="string">&quot;user_id&quot;</span>);</span><br><span class="line"><span class="keyword">if</span>(tests[<span class="string">&quot;Body contains user_id&quot;</span>])&#123;</span><br><span class="line">    // 将返回信息解析成对象</span><br><span class="line">    var responseData = JSON.parse(responseBody);</span><br><span class="line">    tests[<span class="string">&quot;value_user_id&quot;</span>]=responseData.token.user_id</span><br><span class="line">    // 设置全局变量</span><br><span class="line">    postman.setGlobalVariable(<span class="string">&quot;user_id&quot;</span>,tests[<span class="string">&quot;value_user_id&quot;</span>]);</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    postman.setGlobalVariable(<span class="string">&quot;user_id&quot;</span>,<span class="string">&quot;默认user_id&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h1 id="实践案例"><a href="#实践案例" class="headerlink" title="实践案例"></a>实践案例</h1><h2 id="项目接口分类管理"><a href="#项目接口分类管理" class="headerlink" title="项目接口分类管理"></a>项目接口分类管理</h2><p><img data-src="https://i.imgur.com/LXxBYdq.png"></p>
-<h2 id="登录获取token并设置为全局变量"><a href="#登录获取token并设置为全局变量" class="headerlink" title="登录获取token并设置为全局变量"></a>登录获取token并设置为全局变量</h2><p><img data-src="https://i.imgur.com/gIXLd5c.png"></p>
-<h2 id="接口使用登录后的token"><a href="#接口使用登录后的token" class="headerlink" title="接口使用登录后的token"></a>接口使用登录后的token</h2><p><img data-src="https://i.imgur.com/1RCOliR.png"></p>
+<h1 id="实践案例"><a href="#实践案例" class="headerlink" title="实践案例"></a>实践案例</h1><h2 id="项目接口分类管理"><a href="#项目接口分类管理" class="headerlink" title="项目接口分类管理"></a>项目接口分类管理</h2><p><img src="https://i.imgur.com/LXxBYdq.png"></p>
+<h2 id="登录获取token并设置为全局变量"><a href="#登录获取token并设置为全局变量" class="headerlink" title="登录获取token并设置为全局变量"></a>登录获取token并设置为全局变量</h2><p><img src="https://i.imgur.com/gIXLd5c.png"></p>
+<h2 id="接口使用登录后的token"><a href="#接口使用登录后的token" class="headerlink" title="接口使用登录后的token"></a>接口使用登录后的token</h2><p><img src="https://i.imgur.com/1RCOliR.png"></p>
 ]]></content>
       <categories>
         <category>工作</category>
@@ -2669,7 +2688,7 @@
 </ol>
 <figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">DISM /Online /<span class="built_in">Enable-Feature</span> /All /FeatureName:Microsoft<span class="literal">-Hyper</span><span class="literal">-V</span></span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2019/07/19/5d316faceaaa555921.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d316faceaaa555921.png"></p>
 <h3 id="通过“设置”启用-Hyper-V-角色"><a href="#通过“设置”启用-Hyper-V-角色" class="headerlink" title="通过“设置”启用 Hyper-V 角色"></a>通过“设置”启用 Hyper-V 角色</h3><p>推荐使用这种方式</p>
 <ol>
 <li>右键单击 Windows 按钮并选择“应用和功能”。</li>
@@ -2677,37 +2696,37 @@
 <li>选择“<strong>打开或关闭 Windows 功能</strong>”。</li>
 <li>选择 <strong>Hyper-V</strong>，然后单击<strong>确定</strong>。</li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/07/19/5d317018d187515264.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d317018d187515264.png"></p>
 <div class="note warning"><p>同样的，安装完成后，请重启。</p>
 </div>
 
 <h2 id="创建虚拟机"><a href="#创建虚拟机" class="headerlink" title="创建虚拟机"></a>创建虚拟机</h2><p>在开始菜单找到并打开<strong>Hyper-V管理器</strong>，它应该位于Windows管理工具文件夹下面。</p>
 <p>或者直接搜索<code>Hyper-V</code></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d317163c37fc46784.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d317163c37fc46784.png"></p>
 <p>打开后界面如下，我觉得比VMware界面好看点。</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d3171f62f3db74558.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d3171f62f3db74558.png"></p>
 <h3 id="快速创建"><a href="#快速创建" class="headerlink" title="快速创建"></a>快速创建</h3><p>点击快速创建，你将会看到</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31724c78a8053748.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31724c78a8053748.png"></p>
 <p>类似于在线安装，比较简单。</p>
 <p>我尝试了导入本地安装源安装Ubuntu 16.04，但是启动报错，找不到Boot信息。</p>
 <div class="note info"><p>可能原因是：我的电脑不支持第二代虚拟机世代（是一种较新的虚拟化功能）</p>
 </div>
 
 <h3 id="新建虚拟机"><a href="#新建虚拟机" class="headerlink" title="新建虚拟机"></a>新建虚拟机</h3><p>点击新建虚拟机，你将会进入一下界面</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31739e288e621269.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31739e288e621269.png"></p>
 <p>跟着一步步来吧，首先你得准备好一个系统镜像（ISO结尾的系统镜像文件）</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31745826fc036003.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d317487c047867319.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d3174d7987ff97371.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d317516e579835760.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d317561c1c2357128.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31745826fc036003.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d317487c047867319.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d3174d7987ff97371.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d317516e579835760.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d317561c1c2357128.png"></p>
 <p>点击下一步，完成。</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31761f0c16026230.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31761f0c16026230.png"></p>
 <p>接着，就进入了Ubuntu系统安装环节，省略了，大家应该都会装的。</p>
 <h3 id="导入虚拟机"><a href="#导入虚拟机" class="headerlink" title="导入虚拟机"></a>导入虚拟机</h3><p>除了自己创建，我们还可以导入别人创建好的虚拟机</p>
 <p>点击导入虚拟机</p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31781f6a53f37502.png"></p>
-<p><img data-src="https://i.loli.net/2019/07/19/5d31785537ce278225.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31781f6a53f37502.png"></p>
+<p><img src="https://i.loli.net/2019/07/19/5d31785537ce278225.png"></p>
 <p>以下是我创建的Ubuntu 16.04虚拟机，你可以直接导入使用。</p>
 <p><a href="https://1drv.ms/f/s!AjfBPvEeW2r2hukqwAdOrPSMPpKZ4A">https://1drv.ms/f/s!AjfBPvEeW2r2hukqwAdOrPSMPpKZ4A</a></p>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://docs.microsoft.com/zh-cn/virtualization/hyper-v-on-windows/about/">Windows 10 上的 Hyper-V 简介</a></p>
@@ -2740,7 +2759,7 @@
 <h2 id="导入traineddata"><a href="#导入traineddata" class="headerlink" title="导入traineddata"></a>导入traineddata</h2><p><code>traineddata</code>是使用<code>Tesseract-Ocr</code>训练好的数据文件，可以直接使用。这些文件你可以去<a href="https://github.com/tesseract-ocr/tessdata">tessdata存储库</a>查找，也可以去谷歌搜索，当然了，你也可以自己训练😂。</p>
 <p><code>traineddata</code>通常以<code>*.traineddata</code>命名，其中*指的是支持的语言类型。在<a href="https://github.com/tesseract-ocr/tesseract/wiki/Data-Files#data-files-for-version-400-november-29-2016">这里</a>你可以看到4.0.0版本支持的语言以及<code>traineddata</code>列表。</p>
 <p>这次，我们选择<code>eng.traineddata</code>进行测试。下载<a href="https://www.lanzous.com/i4en81a">eng.traineddata</a>放入<code>/resources/traineddata</code>目录，如下图所示。</p>
-<p><img data-src="https://i.loli.net/2019/06/02/5cf2c4189371f48480.png"></p>
+<p><img src="https://i.loli.net/2019/06/02/5cf2c4189371f48480.png"></p>
 <h2 id="编写测试代码"><a href="#编写测试代码" class="headerlink" title="编写测试代码"></a>编写测试代码</h2><h3 id="初始化Tesseract引擎"><a href="#初始化Tesseract引擎" class="headerlink" title="初始化Tesseract引擎"></a>初始化Tesseract引擎</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TesseractTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ITesseract tesseract;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        tesseract = <span class="keyword">new</span> Tesseract();</span><br><span class="line">        System.out.println(<span class="string">&quot;tesseract init done...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>实际上，上面的代码是无法正常运行的，因为找不到指定语言版本的<code>traineddata</code>文件。</p>
@@ -2756,7 +2775,7 @@
 <p>可以看出，<code>doOcr</code>方法支持多种图片识别方式，如图片文件、多个图片文件、图片文件局部处理等等方式。</p>
 <p>为了方便测试，我们选取最简单的图片文件方式测试。</p>
 <p><a href="http://static8.ziroom.com/phoenix/pc/images/price/aacd14fbc53a106c7f0f0d667535683as.png">图片</a>是个URL链接，如下所示</p>
-<p><img data-src="https://i.loli.net/2019/06/02/5cf2c992174bd56164.png"></p>
+<p><img src="https://i.loli.net/2019/06/02/5cf2c992174bd56164.png"></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testOcr</span><span class="params">()</span> <span class="keyword">throws</span> IOException, TesseractException </span>&#123;</span><br><span class="line">    BufferedImage image = ImageIO.read(<span class="keyword">new</span> URL(<span class="string">&quot;http://static8.ziroom.com/phoenix/pc/images/price/aacd14fbc53a106c7f0f0d667535683as.png&quot;</span>));</span><br><span class="line">    String ocr = tesseract.doOCR(image);</span><br><span class="line">    System.out.println(<span class="string">&quot;ocr result : &quot;</span> + ocr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>控制台输出：</p>
@@ -2838,6 +2857,63 @@
       </tags>
   </entry>
   <entry>
+    <title>分布式任务调度XXL-JOB初体验</title>
+    <url>/p/29085/</url>
+    <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><a href="http://www.xuxueli.com/xxl-job/#/">XXL-JOB</a>是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。<span id="more"></span></p>
+<p>官方文档很完善，不多赘述。本文主要是搭建<code>XXL-JOB</code>和简单使用的记录。</p>
+<h1 id="搭建xxl-job-admin管理端"><a href="#搭建xxl-job-admin管理端" class="headerlink" title="搭建xxl-job-admin管理端"></a>搭建xxl-job-admin管理端</h1><h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><ul>
+<li>Ubuntu 16.04 64位</li>
+<li>Mysql 5.7</li>
+</ul>
+<h3 id="安装Mysql"><a href="#安装Mysql" class="headerlink" title="安装Mysql"></a>安装Mysql</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install mysql-server</span><br><span class="line"></span><br><span class="line"><span class="comment">## 设置mysql，主要是安全方面的，密码策略等</span></span><br><span class="line">$ mysql_secure_installation</span><br><span class="line"><span class="comment">## 配置远程访问</span></span><br><span class="line">$ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">bind-address = 0.0.0.0</span><br><span class="line">$ sudo service mysql restart</span><br><span class="line">$ sudo service mysql status</span><br><span class="line">● mysql.service - MySQL Community Server</span><br><span class="line">   Loaded: loaded (/lib/systemd/system/mysql.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Wed 2019-06-05 13:23:41 HKT; 45s ago</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mysql -u root -p</span><br><span class="line">mysql&gt; CREATE database <span class="keyword">if</span> NOT EXISTS `xxl-job` default character <span class="built_in">set</span> utf8 collate utf8_general_ci;</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mysql -u root -p</span><br><span class="line">mysql&gt; CREATE USER <span class="string">&#x27;xxl-job&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED BY <span class="string">&#x27;xxlJob2019@&#x27;</span>;</span><br><span class="line">mysql&gt; GRANT ALL PRIVILEGES ON `xxl-job`.* TO <span class="string">&#x27;xxl-job&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="本地测试xxl-job-admin"><a href="#本地测试xxl-job-admin" class="headerlink" title="本地测试xxl-job-admin"></a>本地测试xxl-job-admin</h2><h3 id="拉取最新源码"><a href="#拉取最新源码" class="headerlink" title="拉取最新源码"></a>拉取最新源码</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@github.com:xuxueli/xxl-job.git</span><br><span class="line">$ <span class="built_in">cd</span> xxl-job</span><br></pre></td></tr></table></figure>
+
+<h3 id="导入项目"><a href="#导入项目" class="headerlink" title="导入项目"></a>导入项目</h3><p>我比较熟悉<code>Idea</code>开发工具，所以这里使用<code>Idea</code>的<code>Gradle</code>项目进行演示。</p>
+<p>打开<code>xxl-job</code>，项目结构如下</p>
+<p><img src="https://i.loli.net/2019/06/05/5cf75c6d3250b91960.png"></p>
+<h3 id="测试项目"><a href="#测试项目" class="headerlink" title="测试项目"></a>测试项目</h3><p>打开<code>xxl-job-admin/resources/application.properties</code>，修改mysql连接信息</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="comment">### xxl-job, datasource</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:mysql://192.168.32.129:3306/xxl-job?Unicode=true&amp;characterEncoding=UTF-8</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">xxl-job</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">xxlJob2019@</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>/xxl-job/doc/db/tables_xxl_job.sql</code>初始化数据库，初始化完应该如下图</p>
+<p><img src="https://i.loli.net/2019/06/05/5cf75ee24c52a19926.png"></p>
+<p>准备就绪后，就可以启动项目了，然后打开地址<a href="http://localhost:8080/xxl-job-admin%E5%B0%86%E4%BC%9A%E7%9C%8B%E5%88%B0%E9%A6%96%E9%A1%B5">http://localhost:8080/xxl-job-admin将会看到首页</a></p>
+<p><img src="https://i.loli.net/2019/06/05/5cf77d0844d8895768.png"></p>
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><h3 id="打包调度中心"><a href="#打包调度中心" class="headerlink" title="打包调度中心"></a>打包调度中心</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /xxl-job</span><br><span class="line">$ mvn install</span><br><span class="line">...</span><br><span class="line">[INFO] xxl-job ............................................ SUCCESS [  0.513 s]</span><br><span class="line">[INFO] xxl-job-core ....................................... SUCCESS [  4.258 s]</span><br><span class="line">[INFO] xxl-job-admin ...................................... SUCCESS [  5.525 s]</span><br><span class="line">[INFO] xxl-job-executor-samples ........................... SUCCESS [  0.016 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-spring ..................... SUCCESS [  2.188 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-springboot ................. SUCCESS [  0.892 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-jfinal ..................... SUCCESS [  1.753 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-nutz ....................... SUCCESS [  1.316 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-frameless .................. SUCCESS [  0.358 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-jboot ...................... SUCCESS [  1.279 s]</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  18.549 s</span><br><span class="line">[INFO] Finished at: 2019-06-05T14:40:25+08:00</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+
+<p>看到以上信息，说明我们打包成功了，在<code>/xxl-job/xxl-job-admin</code>目录下会存在jar文件：<code>xxl-job-admin-2.1.0-SNAPSHOT.jar</code></p>
+<h3 id="部署到服务器"><a href="#部署到服务器" class="headerlink" title="部署到服务器"></a>部署到服务器</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt install openjdk-8-jdk</span><br><span class="line">$ java -version</span><br><span class="line">openjdk version <span class="string">&quot;1.8.0_212&quot;</span></span><br><span class="line">OpenJDK Runtime Environment (build 1.8.0_212-8u212-b03-0ubuntu1.16.04.1-b03)</span><br><span class="line">OpenJDK 64-Bit Server VM (build 25.212-b03, mixed mode)</span><br><span class="line"></span><br><span class="line">$ sudo mkdir -p /data/xxl-job</span><br><span class="line">$ sudo <span class="built_in">cd</span> /data/xxl-job</span><br><span class="line"><span class="comment">## 上传我们打包好的jar至此目录，并添加软连接</span></span><br><span class="line">$ sudo ln -s xxl-job-admin-2.1.0-SNAPSHOT.jar current.jar</span><br><span class="line"></span><br><span class="line"><span class="comment">## 注册为system服务，可以达到异常重启，开机自启等目的</span></span><br><span class="line">$ sudo vim /etc/systemd/system/xxl-job.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=xxl-job Service Daemon</span><br><span class="line">After=mysql.service</span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;JAVA_OPTS= -Xmx1024m -Xms1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:NewRatio=3 -Dserver.port=8081&quot;</span></span><br><span class="line"><span class="comment"># java要写绝对路径</span></span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/jdk/bin/java -jar /data/xxl-job/current.jar</span><br><span class="line">Restart=always</span><br><span class="line">WorkingDirectory=/data/xxl-job/</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> xxl-job.service</span><br><span class="line">$ sudo service xxl-job start</span><br><span class="line">$ sudo service xxl-job status</span><br><span class="line">● xxl-job.service - xxl-job Service Daemon</span><br><span class="line">   Loaded: loaded (/etc/systemd/system/xxl-job.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2019-07-18 18:19:08 CST; 2min 19s ago</span><br><span class="line"> Main PID: 27572 (java)</span><br><span class="line">   CGroup: /system.slice/xxl-job.service</span><br><span class="line">           └─27572 /usr/<span class="built_in">local</span>/jdk/bin/java -jar /data/xxl-job/current.jar</span><br></pre></td></tr></table></figure>
+
+<p>我们访问一下<a href="http://192.168.32.129:8080/xxl-job-admin%EF%BC%9A">http://192.168.32.129:8080/xxl-job-admin：</a></p>
+<p><img src="https://i.loli.net/2019/06/05/5cf7706901fb080448.png"></p>
+<h1 id="测试任务调度"><a href="#测试任务调度" class="headerlink" title="测试任务调度"></a>测试任务调度</h1><p>以上，我们的任务调度管理端已经搭建完成，接下来，让我们测试下任务调度。</p>
+<p>直接使用自带的<code>SpringBoot</code>测试项目<code>xxl-job-executor-sample-springboot</code>进行测试，修改配置文件</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">xxl-job-executor-sample-springboot</span>=<span class="string">http://192.168.32.129:8080/xxl-job-admin</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义任务"><a href="#自定义任务" class="headerlink" title="自定义任务"></a>自定义任务</h2><p>编写一个简单的任务，打印100次当前序列</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.xxl.job.executor.service.jobhandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.biz.model.ReturnT;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.handler.IJobHandler;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.handler.annotation.JobHandler;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.log.XxlJobLogger;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * TODO</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> gaochen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2019/6/5</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@JobHandler(value=&quot;gcddJobHandler&quot;)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GcddJobHandler</span> <span class="keyword">extends</span> <span class="title">IJobHandler</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">execute</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            XxlJobLogger.log(<span class="string">&quot;XXL-JOB, print &quot;</span> + i);</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="启动执行器"><a href="#启动执行器" class="headerlink" title="启动执行器"></a>启动执行器</h2><p>然后启动执行器，启动完成后，我们会发现管理页面的执行器列表会多出我们刚才启动的执行器</p>
+<p><img src="https://i.loli.net/2019/06/05/5cf7737de7cad58644.png"></p>
+<h2 id="添加任务"><a href="#添加任务" class="headerlink" title="添加任务"></a>添加任务</h2><p><img src="https://i.loli.net/2019/06/05/5cf776088e84c40188.png"></p>
+<p><img src="https://i.loli.net/2019/06/05/5cf77809c3c2d16509.png"></p>
+<h2 id="查看任务执行日志"><a href="#查看任务执行日志" class="headerlink" title="查看任务执行日志"></a>查看任务执行日志</h2><p><img src="https://i.loli.net/2019/06/05/5cf7782580be085791.png"></p>
+<p>可以看到，任务已经按照我们的规划执行成功了，非常的方便。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>想要了解更详细的内容，请访问<a href="http://www.xuxueli.com/xxl-job/#/">xxl-job官网</a></p>
+]]></content>
+      <categories>
+        <category>工作</category>
+      </categories>
+      <tags>
+        <tag>xxl-job</tag>
+        <tag>分布式</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>发布开源项目到Jcenter</title>
     <url>/p/53809/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><blockquote>
@@ -2845,20 +2921,20 @@
 </blockquote>
 <span id="more"></span>
 
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe1b03c61ee37109.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe1b03c61ee37109.png"></p>
 <p>现在记录下踩过的坑。</p>
 <h1 id="注册Jcenter账号"><a href="#注册Jcenter账号" class="headerlink" title="注册Jcenter账号"></a>注册Jcenter账号</h1><p>要注意的地方，Jcenter账号跟国内一样分为社区版和企业版，企业版当然是要付费的，而且很坑的是点进Bintray官网，首先映入眼帘的就是大大的<code>Start Your Free Trial</code>（开始免费试用），一开始我就注册了企业版账号，后来删号重建了😂。我们应该点这里：</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe1c155f37b42837.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe1c155f37b42837.png"></p>
 <p>填写信息后注册，我是直接使用的Github账号注册。</p>
 <h1 id="创建Repository"><a href="#创建Repository" class="headerlink" title="创建Repository"></a>创建Repository</h1><p>点击右上角<code>View Profile</code></p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe1cd1576dc26645.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe1cd1576dc26645.png"></p>
 <p>在账号信息下方，我们点击<code>Add New Repository</code>，创建新的仓库。</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe1d28b975050822.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe1d28b975050822.png"></p>
 <p>在填写信息的时候，选择Public（Private是需要付钱的，大家都懂），如果你是maven项目，仓库名最好填写maven，因为我在申请<code>Add To Jcenter</code>时，第一次失败了，要求我把项目放在maven路径下。</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe224c9096c25001.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe224c9096c25001.png"></p>
 <h1 id="创建Package"><a href="#创建Package" class="headerlink" title="创建Package"></a>创建Package</h1><p>创建完仓库，就是创建包了，没什么好说的，你的应用叫啥名，包就叫啥名就行。</p>
 <p>创建完可以看到包的基本信息：</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe238ec652b53623.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe238ec652b53623.png"></p>
 <h1 id="打包上传"><a href="#打包上传" class="headerlink" title="打包上传"></a>打包上传</h1><p>这里使用的是开源项目<a href="https://github.com/novoda/bintray-release">bintray-release</a>，官方文档<a href="%5Bhttps://github.com/novoda/bintray-release/wiki/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3HOME%5D(https://github.com/novoda/bintray-release/wiki/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3HOME)">bintray-release/wiki</a></p>
 <p>主要在<code>build.gradle</code>里添加如下信息</p>
 <figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.novoda:bintray-release:0.9.1&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">apply <span class="attr">plugin:</span> <span class="string">&#x27;com.novoda.bintray-release&#x27;</span></span><br><span class="line"></span><br><span class="line">publish &#123;</span><br><span class="line">    userOrg = <span class="string">&#x27;你的Bintray用户名&#x27;</span></span><br><span class="line">    groupId = <span class="string">&#x27;应用的groupId，例如：io.github.gcdd1993&#x27;</span></span><br><span class="line">    artifactId = <span class="string">&#x27;应用的名称，例如：ali-sms-spring-boot-starter&#x27;</span></span><br><span class="line">    publishVersion = <span class="string">&#x27;应用的版本号，例如：1.0.0.RELEASE&#x27;</span></span><br><span class="line">    desc = <span class="string">&#x27;一句话概述你的应用干啥的&#x27;</span></span><br><span class="line">    website = <span class="string">&#x27;应用链接，一般写github地址就行，例如：https://github.com/gcdd1993/ali-sms-spring-boot-starter&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 以下是我自己加的</span></span><br><span class="line"><span class="comment"> * 第一个解决Gradle Task:jar skipped的问题</span></span><br><span class="line"><span class="comment"> * 第二个解决javaDoc &#x27;UTF-8&#x27;乱码问题</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">jar &#123;</span><br><span class="line">    enabled = <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">tasks.withType(JavaCompile) &#123;</span><br><span class="line">    options.encoding = <span class="string">&quot;UTF-8&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -2867,24 +2943,24 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">./gradlew bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=BINTRAY_KEY -PdryRun=false</span><br></pre></td></tr></table></figure>
 
 <p>本地测试可以把<code>-PdryRun=false</code>改为<code>-PdryRun=true</code>，这样就不会帮你上传到Bintray，其他的都执行。</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe29fbd33a449878.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe29fbd33a449878.png"></p>
 <p>看到以上信息，证明发布成功了。</p>
 <h1 id="Add-To-Jcenter"><a href="#Add-To-Jcenter" class="headerlink" title="Add To Jcenter"></a>Add To Jcenter</h1><p>发布成功后，你应该会在Package的Files标签下看到你上传的文件</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe2aa92b4af15397.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe2aa92b4af15397.png"></p>
 <p>我们点击右上角Actions下的Add To Jcenter</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe2b006401429419.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe2b006401429419.png"></p>
 <p>填写信息，两个复选框我都勾选了，然后填写Group Id，填上应用说明（最好用英文），然后等着就行了。</p>
 <p>一般来说1~3天你将会收到一封邮件，通知你的申请通过没有，如下</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe2ba396f2386226.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe2ba396f2386226.png"></p>
 <p>👉如果没有通过，也会告诉你怎么改，所以不用担心。</p>
 <p>这时候再打开Bintray的Package页面，会发现<code>Included In Jcenter</code>，证明已经被Jcenter收录了，其他人就可以正常使用啦。</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe2c01e777524132.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe2c01e777524132.png"></p>
 <h1 id="Travis-CI持续集成"><a href="#Travis-CI持续集成" class="headerlink" title="Travis CI持续集成"></a>Travis CI持续集成</h1><p>Travis CI是什么就不介绍了，不明白的可以看下<a href="http://www.ruanyifeng.com/blog/2017/12/travis_ci_tutorial.html">阮一峰的网络日志-持续集成服务 Travis CI 教程</a>，Github公开仓库免费的持续集成工具。</p>
 <p>项目根目录添加<code>.travis.yml</code>，填入以下信息（针对Gradle搭建的Java项目适用）</p>
 <figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">language:</span> <span class="string">java</span></span><br><span class="line"><span class="attr">sudo:</span> <span class="string">required</span></span><br><span class="line"><span class="attr">dist:</span> <span class="string">xenial</span></span><br><span class="line"><span class="attr">jdk:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">openjdk8</span></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">master</span></span><br><span class="line"><span class="attr">before_cache:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rm</span> <span class="string">-f</span>  <span class="string">$HOME/.gradle/caches/modules-2/modules-2.lock</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rm</span> <span class="string">-fr</span> <span class="string">$HOME/.gradle/caches/*/plugin-resolution/</span></span><br><span class="line"><span class="attr">cache:</span></span><br><span class="line">  <span class="attr">directories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">$HOME/.gradle/caches/</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">$HOME/.gradle/wrapper/</span></span><br><span class="line"><span class="attr">before_install:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">chmod</span> <span class="string">+x</span> <span class="string">gradlew</span></span><br><span class="line"><span class="attr">install:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">./gradlew</span> <span class="string">jar</span></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">./gradlew</span> <span class="string">bintrayUpload</span> <span class="string">-PbintrayUser=$&#123;bintray_user&#125;</span> <span class="string">-PbintrayKey=$&#123;bintray_key&#125;</span> <span class="string">-PdryRun=false</span></span><br></pre></td></tr></table></figure>
 
 <p>其中变量<code>$&#123;bintray_user&#125;</code>和<code>$&#123;bintray_key&#125;</code>是Travis CI运行时环境变量，请到<a href="https://travis-ci.org/%7Byour-travis-ci-username%7D/ali-sms-spring-boot-starter/settings">Travis CI Settings</a>填写。</p>
-<p><img data-src="https://i.loli.net/2019/06/10/5cfe28657c37a76232.png"></p>
+<p><img src="https://i.loli.net/2019/06/10/5cfe28657c37a76232.png"></p>
 <h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><ul>
 <li><p><a href="https://github.com/HailouWang/bintray-release/wiki">bintray-release-wiki</a></p>
 </li>
@@ -2934,63 +3010,6 @@
       </tags>
   </entry>
   <entry>
-    <title>分布式任务调度XXL-JOB初体验</title>
-    <url>/p/29085/</url>
-    <content><![CDATA[<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p><a href="http://www.xuxueli.com/xxl-job/#/">XXL-JOB</a>是一个轻量级分布式任务调度平台，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。现已开放源代码并接入多家公司线上产品线，开箱即用。<span id="more"></span></p>
-<p>官方文档很完善，不多赘述。本文主要是搭建<code>XXL-JOB</code>和简单使用的记录。</p>
-<h1 id="搭建xxl-job-admin管理端"><a href="#搭建xxl-job-admin管理端" class="headerlink" title="搭建xxl-job-admin管理端"></a>搭建xxl-job-admin管理端</h1><h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><ul>
-<li>Ubuntu 16.04 64位</li>
-<li>Mysql 5.7</li>
-</ul>
-<h3 id="安装Mysql"><a href="#安装Mysql" class="headerlink" title="安装Mysql"></a>安装Mysql</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install mysql-server</span><br><span class="line"></span><br><span class="line"><span class="comment">## 设置mysql，主要是安全方面的，密码策略等</span></span><br><span class="line">$ mysql_secure_installation</span><br><span class="line"><span class="comment">## 配置远程访问</span></span><br><span class="line">$ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">bind-address = 0.0.0.0</span><br><span class="line">$ sudo service mysql restart</span><br><span class="line">$ sudo service mysql status</span><br><span class="line">● mysql.service - MySQL Community Server</span><br><span class="line">   Loaded: loaded (/lib/systemd/system/mysql.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Wed 2019-06-05 13:23:41 HKT; 45s ago</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
-<h3 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mysql -u root -p</span><br><span class="line">mysql&gt; CREATE database <span class="keyword">if</span> NOT EXISTS `xxl-job` default character <span class="built_in">set</span> utf8 collate utf8_general_ci;</span><br></pre></td></tr></table></figure>
-
-<h3 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mysql -u root -p</span><br><span class="line">mysql&gt; CREATE USER <span class="string">&#x27;xxl-job&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED BY <span class="string">&#x27;xxlJob2019@&#x27;</span>;</span><br><span class="line">mysql&gt; GRANT ALL PRIVILEGES ON `xxl-job`.* TO <span class="string">&#x27;xxl-job&#x27;</span>@<span class="string">&#x27;%&#x27;</span>;</span><br></pre></td></tr></table></figure>
-
-<h2 id="本地测试xxl-job-admin"><a href="#本地测试xxl-job-admin" class="headerlink" title="本地测试xxl-job-admin"></a>本地测试xxl-job-admin</h2><h3 id="拉取最新源码"><a href="#拉取最新源码" class="headerlink" title="拉取最新源码"></a>拉取最新源码</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ git <span class="built_in">clone</span> git@github.com:xuxueli/xxl-job.git</span><br><span class="line">$ <span class="built_in">cd</span> xxl-job</span><br></pre></td></tr></table></figure>
-
-<h3 id="导入项目"><a href="#导入项目" class="headerlink" title="导入项目"></a>导入项目</h3><p>我比较熟悉<code>Idea</code>开发工具，所以这里使用<code>Idea</code>的<code>Gradle</code>项目进行演示。</p>
-<p>打开<code>xxl-job</code>，项目结构如下</p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf75c6d3250b91960.png"></p>
-<h3 id="测试项目"><a href="#测试项目" class="headerlink" title="测试项目"></a>测试项目</h3><p>打开<code>xxl-job-admin/resources/application.properties</code>，修改mysql连接信息</p>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="comment">### xxl-job, datasource</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc:mysql://192.168.32.129:3306/xxl-job?Unicode=true&amp;characterEncoding=UTF-8</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">xxl-job</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">xxlJob2019@</span></span><br></pre></td></tr></table></figure>
-
-<p>使用<code>/xxl-job/doc/db/tables_xxl_job.sql</code>初始化数据库，初始化完应该如下图</p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf75ee24c52a19926.png"></p>
-<p>准备就绪后，就可以启动项目了，然后打开地址<a href="http://localhost:8080/xxl-job-admin%E5%B0%86%E4%BC%9A%E7%9C%8B%E5%88%B0%E9%A6%96%E9%A1%B5">http://localhost:8080/xxl-job-admin将会看到首页</a></p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf77d0844d8895768.png"></p>
-<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><h3 id="打包调度中心"><a href="#打包调度中心" class="headerlink" title="打包调度中心"></a>打包调度中心</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /xxl-job</span><br><span class="line">$ mvn install</span><br><span class="line">...</span><br><span class="line">[INFO] xxl-job ............................................ SUCCESS [  0.513 s]</span><br><span class="line">[INFO] xxl-job-core ....................................... SUCCESS [  4.258 s]</span><br><span class="line">[INFO] xxl-job-admin ...................................... SUCCESS [  5.525 s]</span><br><span class="line">[INFO] xxl-job-executor-samples ........................... SUCCESS [  0.016 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-spring ..................... SUCCESS [  2.188 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-springboot ................. SUCCESS [  0.892 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-jfinal ..................... SUCCESS [  1.753 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-nutz ....................... SUCCESS [  1.316 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-frameless .................. SUCCESS [  0.358 s]</span><br><span class="line">[INFO] xxl-job-executor-sample-jboot ...................... SUCCESS [  1.279 s]</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] BUILD SUCCESS</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br><span class="line">[INFO] Total time:  18.549 s</span><br><span class="line">[INFO] Finished at: 2019-06-05T14:40:25+08:00</span><br><span class="line">[INFO] ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure>
-
-<p>看到以上信息，说明我们打包成功了，在<code>/xxl-job/xxl-job-admin</code>目录下会存在jar文件：<code>xxl-job-admin-2.1.0-SNAPSHOT.jar</code></p>
-<h3 id="部署到服务器"><a href="#部署到服务器" class="headerlink" title="部署到服务器"></a>部署到服务器</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt install openjdk-8-jdk</span><br><span class="line">$ java -version</span><br><span class="line">openjdk version <span class="string">&quot;1.8.0_212&quot;</span></span><br><span class="line">OpenJDK Runtime Environment (build 1.8.0_212-8u212-b03-0ubuntu1.16.04.1-b03)</span><br><span class="line">OpenJDK 64-Bit Server VM (build 25.212-b03, mixed mode)</span><br><span class="line"></span><br><span class="line">$ sudo mkdir -p /data/xxl-job</span><br><span class="line">$ sudo <span class="built_in">cd</span> /data/xxl-job</span><br><span class="line"><span class="comment">## 上传我们打包好的jar至此目录，并添加软连接</span></span><br><span class="line">$ sudo ln -s xxl-job-admin-2.1.0-SNAPSHOT.jar current.jar</span><br><span class="line"></span><br><span class="line"><span class="comment">## 注册为system服务，可以达到异常重启，开机自启等目的</span></span><br><span class="line">$ sudo vim /etc/systemd/system/xxl-job.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=xxl-job Service Daemon</span><br><span class="line">After=mysql.service</span><br><span class="line">[Service]</span><br><span class="line">Environment=<span class="string">&quot;JAVA_OPTS= -Xmx1024m -Xms1024m -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:NewRatio=3 -Dserver.port=8081&quot;</span></span><br><span class="line"><span class="comment"># java要写绝对路径</span></span><br><span class="line">ExecStart=/usr/<span class="built_in">local</span>/jdk/bin/java -jar /data/xxl-job/current.jar</span><br><span class="line">Restart=always</span><br><span class="line">WorkingDirectory=/data/xxl-job/</span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">$ sudo systemctl <span class="built_in">enable</span> xxl-job.service</span><br><span class="line">$ sudo service xxl-job start</span><br><span class="line">$ sudo service xxl-job status</span><br><span class="line">● xxl-job.service - xxl-job Service Daemon</span><br><span class="line">   Loaded: loaded (/etc/systemd/system/xxl-job.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Thu 2019-07-18 18:19:08 CST; 2min 19s ago</span><br><span class="line"> Main PID: 27572 (java)</span><br><span class="line">   CGroup: /system.slice/xxl-job.service</span><br><span class="line">           └─27572 /usr/<span class="built_in">local</span>/jdk/bin/java -jar /data/xxl-job/current.jar</span><br></pre></td></tr></table></figure>
-
-<p>我们访问一下<a href="http://192.168.32.129:8080/xxl-job-admin%EF%BC%9A">http://192.168.32.129:8080/xxl-job-admin：</a></p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf7706901fb080448.png"></p>
-<h1 id="测试任务调度"><a href="#测试任务调度" class="headerlink" title="测试任务调度"></a>测试任务调度</h1><p>以上，我们的任务调度管理端已经搭建完成，接下来，让我们测试下任务调度。</p>
-<p>直接使用自带的<code>SpringBoot</code>测试项目<code>xxl-job-executor-sample-springboot</code>进行测试，修改配置文件</p>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">xxl-job-executor-sample-springboot</span>=<span class="string">http://192.168.32.129:8080/xxl-job-admin</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="自定义任务"><a href="#自定义任务" class="headerlink" title="自定义任务"></a>自定义任务</h2><p>编写一个简单的任务，打印100次当前序列</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.xxl.job.executor.service.jobhandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.biz.model.ReturnT;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.handler.IJobHandler;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.handler.annotation.JobHandler;</span><br><span class="line"><span class="keyword">import</span> com.xxl.job.core.log.XxlJobLogger;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * TODO</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> gaochen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2019/6/5</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@JobHandler(value=&quot;gcddJobHandler&quot;)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GcddJobHandler</span> <span class="keyword">extends</span> <span class="title">IJobHandler</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ReturnT&lt;String&gt; <span class="title">execute</span><span class="params">(String param)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">100</span>; i++) &#123;</span><br><span class="line">            XxlJobLogger.log(<span class="string">&quot;XXL-JOB, print &quot;</span> + i);</span><br><span class="line">            TimeUnit.SECONDS.sleep(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="启动执行器"><a href="#启动执行器" class="headerlink" title="启动执行器"></a>启动执行器</h2><p>然后启动执行器，启动完成后，我们会发现管理页面的执行器列表会多出我们刚才启动的执行器</p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf7737de7cad58644.png"></p>
-<h2 id="添加任务"><a href="#添加任务" class="headerlink" title="添加任务"></a>添加任务</h2><p><img data-src="https://i.loli.net/2019/06/05/5cf776088e84c40188.png"></p>
-<p><img data-src="https://i.loli.net/2019/06/05/5cf77809c3c2d16509.png"></p>
-<h2 id="查看任务执行日志"><a href="#查看任务执行日志" class="headerlink" title="查看任务执行日志"></a>查看任务执行日志</h2><p><img data-src="https://i.loli.net/2019/06/05/5cf7782580be085791.png"></p>
-<p>可以看到，任务已经按照我们的规划执行成功了，非常的方便。</p>
-<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>想要了解更详细的内容，请访问<a href="http://www.xuxueli.com/xxl-job/#/">xxl-job官网</a></p>
-]]></content>
-      <categories>
-        <category>工作</category>
-      </categories>
-      <tags>
-        <tag>xxl-job</tag>
-        <tag>分布式</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>在Dubbo中使用Kryo序列化协议</title>
     <url>/p/34460/</url>
     <content><![CDATA[<h1 id="Kryo是什么？"><a href="#Kryo是什么？" class="headerlink" title="Kryo是什么？"></a>Kryo是什么？</h1><p>Kryo是用于Java的<strong>快速高效</strong>的二进制对象图序列化框架。</p>
@@ -3022,7 +3041,7 @@
 <p>提供了一个接口方法，用于获取序列化的java类型列表，在<code>DubboProtocol#optimizeSerialization</code>中被使用</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">optimizeSerialization</span><span class="params">(URL url)</span> <span class="keyword">throws</span> RpcException </span>&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Class clazz = Thread.currentThread().getContextClassLoader().loadClass(className);</span><br><span class="line">        <span class="comment">// 判断是否为SerializationOptimizer实现类</span></span><br><span class="line">        <span class="keyword">if</span> (!SerializationOptimizer.class.isAssignableFrom(clazz)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RpcException(<span class="string">&quot;The serialization optimizer &quot;</span> + className + <span class="string">&quot; isn&#x27;t an instance of &quot;</span> + SerializationOptimizer.class.getName());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        SerializationOptimizer optimizer = (SerializationOptimizer) clazz.newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (optimizer.getSerializableClasses() == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 将SerializationOptimizer中定义的类型列表，注册到SerializableClassRegistry</span></span><br><span class="line">        <span class="keyword">for</span> (Class c : optimizer.getSerializableClasses()) &#123;</span><br><span class="line">            SerializableClassRegistry.registerClass(c);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        optimizers.add(className);</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>接着，从<code>SerializableClassRegistry</code>中拿出注册的类型，进行Kryo的类型注册，可以看到<code>SerializableClassRegistry#getRegisteredClasses</code>被FST和Kryo使用，证明FST和Kryo都需要进行序列化类的注册，当然FST也支持不注册序列化类型。<br><img data-src="https://i.loli.net/2020/12/09/OXdnskMZFKvjUHz.png"></p>
+<p>接着，从<code>SerializableClassRegistry</code>中拿出注册的类型，进行Kryo的类型注册，可以看到<code>SerializableClassRegistry#getRegisteredClasses</code>被FST和Kryo使用，证明FST和Kryo都需要进行序列化类的注册，当然FST也支持不注册序列化类型。<br><img src="https://i.loli.net/2020/12/09/OXdnskMZFKvjUHz.png"></p>
 <p>Kryo类注册的具体细节，<code>AbstractKryoFactory#create</code></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">for</span> (Class clazz : registrations) &#123;</span><br><span class="line">    kryo.register(clazz);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 遍历取出SerializableClassRegistry的注册类，依次将类注册到Kryo</span></span><br><span class="line">SerializableClassRegistry.getRegisteredClasses().forEach((clazz, ser) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (ser == <span class="keyword">null</span>) &#123;</span><br><span class="line">        kryo.register(clazz);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        kryo.register(clazz, (Serializer) ser);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
@@ -3114,23 +3133,23 @@
 <p>这些工具已经可以满足我的日常工作了，什么印象笔记，markdownPad2等等不包含于此。<br>这些都可以在我的博客下载到 -&gt; <a href="https://gcdd1993.github.io/2019/01/08/%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6%E9%9B%86%E5%90%88/#more">常用软件集合</a></p>
 <h1 id="软件配置"><a href="#软件配置" class="headerlink" title="软件配置"></a>软件配置</h1><h2 id="IntelliJ-IDEA"><a href="#IntelliJ-IDEA" class="headerlink" title="IntelliJ IDEA"></a>IntelliJ IDEA</h2><h3 id="破解"><a href="#破解" class="headerlink" title="破解"></a>破解</h3><p><a href="http://idea.lanyus.com/">IntelliJ IDEA 注册码</a></p>
 <h3 id="主题"><a href="#主题" class="headerlink" title="主题"></a>主题</h3><p>当然是选黑色主题了，毕竟提倡保护眼睛。</p>
-<p><img data-src="https://i.imgur.com/wyJ25mS.png"></p>
+<p><img src="https://i.imgur.com/wyJ25mS.png"></p>
 <h3 id="字体"><a href="#字体" class="headerlink" title="字体"></a>字体</h3><p>我一般使用默认字体+14号大小。</p>
-<p><img data-src="https://i.imgur.com/4gl570N.png"></p>
+<p><img src="https://i.imgur.com/4gl570N.png"></p>
 <h3 id="设置编辑器的快捷键，也就是keymap"><a href="#设置编辑器的快捷键，也就是keymap" class="headerlink" title="设置编辑器的快捷键，也就是keymap"></a>设置编辑器的快捷键，也就是keymap</h3><p>由于以前用惯了Eclipse,所以还得改为Eclipse的快捷键</p>
-<p><img data-src="https://i.imgur.com/GokNm9o.png"></p>
+<p><img src="https://i.imgur.com/GokNm9o.png"></p>
 <h3 id="代码自动提示不区分大小写"><a href="#代码自动提示不区分大小写" class="headerlink" title="代码自动提示不区分大小写"></a>代码自动提示不区分大小写</h3><p>这个比较重要，毕竟谁也不可能无时无刻注意大小写，到时候不快捷提示就浪费太多时间了，也影响开发体验。</p>
-<p><img data-src="https://i.loli.net/2019/01/13/5c3a2d475bb3b.png"></p>
-<h3 id="自动导入包和导入包优化的设置"><a href="#自动导入包和导入包优化的设置" class="headerlink" title="自动导入包和导入包优化的设置"></a>自动导入包和导入包优化的设置</h3><p><img data-src="https://i.loli.net/2019/01/13/5c3a2d473806d.png"></p>
+<p><img src="https://i.loli.net/2019/01/13/5c3a2d475bb3b.png"></p>
+<h3 id="自动导入包和导入包优化的设置"><a href="#自动导入包和导入包优化的设置" class="headerlink" title="自动导入包和导入包优化的设置"></a>自动导入包和导入包优化的设置</h3><p><img src="https://i.loli.net/2019/01/13/5c3a2d473806d.png"></p>
 <h3 id="Java代码默认注释"><a href="#Java代码默认注释" class="headerlink" title="Java代码默认注释"></a>Java代码默认注释</h3><p>一般创建一个java类的时候，需要指定创建者以及创建时间</p>
-<p><img data-src="https://i.loli.net/2019/01/13/5c3a2d473b94e.png"></p>
+<p><img src="https://i.loli.net/2019/01/13/5c3a2d473b94e.png"></p>
 <p>注释代码可以自己决定，这里举个例子:</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> gaochen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> $&#123;DATE&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
 
 <p> 然后创建的类是这样的:</p>
  <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> gaochen</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2019/1/31</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="IntelliJ-IDEA启动设置不默认打开前一个项目"><a href="#IntelliJ-IDEA启动设置不默认打开前一个项目" class="headerlink" title="IntelliJ IDEA启动设置不默认打开前一个项目"></a>IntelliJ IDEA启动设置不默认打开前一个项目</h3><p> <img data-src="https://i.loli.net/2019/01/14/5c3be5127420c.png"></p>
+<h3 id="IntelliJ-IDEA启动设置不默认打开前一个项目"><a href="#IntelliJ-IDEA启动设置不默认打开前一个项目" class="headerlink" title="IntelliJ IDEA启动设置不默认打开前一个项目"></a>IntelliJ IDEA启动设置不默认打开前一个项目</h3><p> <img src="https://i.loli.net/2019/01/14/5c3be5127420c.png"></p>
 <h3 id="IntelliJ-IDEA常用插件"><a href="#IntelliJ-IDEA常用插件" class="headerlink" title="IntelliJ IDEA常用插件"></a>IntelliJ IDEA常用插件</h3><ul>
 <li>.ignore:自动生成.ignore文件，并支持一键添加文件到.ignore列表</li>
 <li>Grep Console:在控制台支持筛选，类似shell命令的cat 1.txt | grep ‘11’</li>
@@ -3180,7 +3199,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Set&lt;String&gt; basePackages;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 默认构造器，默认扫描当前所在包</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ApplicationContext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(<span class="keyword">new</span> HashSet&lt;&gt;(Collections.singletonList(ApplicationContext.class.getPackage().getName())));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 全参构造器</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> basePackages 扫描的包名列表</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ApplicationContext</span><span class="params">(Set&lt;String&gt; basePackages)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.basePackages = basePackages;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="refresh方法"><a href="#refresh方法" class="headerlink" title="refresh方法"></a><code>refresh</code>方法</h3><p>refresh的过程基本按照以下流程来走</p>
-<p><img data-src="https://i.loli.net/2019/06/02/5cf3c4c4b465587417.png"></p>
+<p><img src="https://i.loli.net/2019/06/02/5cf3c4c4b465587417.png"></p>
 <ol>
 <li>扫描指定的包下所有带<code>@Bean</code>注解（Spring中是<code>@Component</code>注解）的类。</li>
 </ol>
@@ -3231,19 +3250,19 @@
     <url>/p/34461/</url>
     <content><![CDATA[<p>掘金的绑定限制为同一个第三方账号只能绑定一个掘金账号，且必须留存一个第三方绑定。</p>
 <p>比如，我只绑定了微信，想要解绑微信，对不起，不支持。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
+<p><img src="https://i.loli.net/2020/02/10/XqgsL2DYIkCoapr.png"></p>
 <span id="more"></span>
 
 <h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><p>我突然想到，既然必须留存一个第三方绑定，那我留存一个<strong>邮箱绑定</strong>不就好了吗？</p>
 <p>思路就是<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，通过绑定一个邮箱账号，来绑定邮箱，从而将我们的账号解放出来，绑定我们的大号或者其他账号。</p>
 <h2 id="获取临时电子邮件地址"><a href="#获取临时电子邮件地址" class="headerlink" title="获取临时电子邮件地址"></a>获取临时电子邮件地址</h2><p>打开<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>，你将会获取到一个临时电子邮件地址，我们将使用这个邮件绑定我们的掘金账号。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
+<p><img src="https://i.loli.net/2020/02/10/WU5CKnDcYlrwLZp.png"></p>
 <h2 id="绑定临时邮箱"><a href="#绑定临时邮箱" class="headerlink" title="绑定临时邮箱"></a>绑定临时邮箱</h2><p>点击绑定邮箱，输入我们上一步获取到的临时邮件地址，返回<a href="https://temp-mail.org/zh/">临时电子邮件地址</a>网站，耐心等待10s左右。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
+<p><img src="https://i.loli.net/2020/02/10/MCRXaSIbO2KTHfr.png"></p>
 <p>你将会受到掘金的邮箱绑定验证邮件，打开并点击，直到绑定成功。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
+<p><img src="https://i.loli.net/2020/02/10/sQpovuOjaEJwkbR.png"></p>
 <h2 id="解绑"><a href="#解绑" class="headerlink" title="解绑"></a>解绑</h2><p>接下来我们就可以开心的解绑我们自己的账号了。我要解绑的是微信，试一下吧。</p>
-<p><img data-src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
+<p><img src="https://i.loli.net/2020/02/10/GL2yaCp7AsWZQiT.png"></p>
 <h1 id="友情提醒"><a href="#友情提醒" class="headerlink" title="友情提醒"></a>友情提醒</h1><blockquote>
 <p>由于使用的是一次性邮件地址，该做法可能会导致你解绑的账号登录不上，请谨慎操作！</p>
 </blockquote>
@@ -3256,6 +3275,107 @@
       </tags>
   </entry>
   <entry>
+    <title>消息队列（一）简介</title>
+    <url>/p/27791/</url>
+    <content><![CDATA[<h1 id="消息队列-MQ-概述"><a href="#消息队列-MQ-概述" class="headerlink" title="消息队列(MQ)概述"></a>消息队列(MQ)概述</h1><p>消息队列（Message Queue），是分布式系统中重要的组件，其通用的使用场景可以简单地描述为：</p>
+<blockquote>
+<p>当不需要立即获得结果，但是并发量又需要进行控制的时候，差不多就是需要使用消息队列的时候。</p>
+</blockquote>
+<p>消息队列主要解决了应用耦合、异步处理、流量削锋等问题。</p>
+<span id="more"></span>
+
+<p>当前使用较多的消息队列有RabbitMQ、RocketMQ、ActiveMQ、Kafka、ZeroMQ、MetaMq等，而部分数据库如Redis、Mysql以及phxsql也可实现消息队列的功能。</p>
+<h1 id="消息队列使用场景"><a href="#消息队列使用场景" class="headerlink" title="消息队列使用场景"></a>消息队列使用场景</h1><p>消息队列在实际应用中包括如下四个场景：</p>
+<ul>
+<li>应用耦合：多应用间通过消息队列对同一消息进行处理，避免调用接口失败导致整个过程失败；</li>
+<li>异步处理：多应用对消息队列中同一消息进行处理，应用间并发处理消息，相比串行处理，减少处理时间；</li>
+<li>限流削峰：广泛应用于秒杀或抢购活动中，避免流量过大导致应用系统挂掉的情况；</li>
+<li>消息驱动的系统：系统分为消息队列、消息生产者、消息消费者，生产者负责产生消息，消费者(可能有多个)负责对消息进行处理；</li>
+</ul>
+<p>下面详细介绍上述四个场景以及消息队列如何在上述四个场景中使用：</p>
+<h2 id="异步处理"><a href="#异步处理" class="headerlink" title="异步处理"></a>异步处理</h2><p>具体场景：用户为了使用某个应用，进行注册，系统需要发送注册邮件并验证<a href="https://cloud.tencent.com/product/sms">短信</a>。对这两个操作的处理方式有两种：串行及并行。</p>
+<h3 id="串行方式"><a href="#串行方式" class="headerlink" title="串行方式"></a>串行方式</h3><p>新注册信息生成后，先发送注册邮件，再发送验证短信；</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e27b495ce.png"></p>
+<p>在这种方式下，需要最终发送验证短信后再返回给客户端。</p>
+<h3 id="并行处理"><a href="#并行处理" class="headerlink" title="并行处理"></a>并行处理</h3><p>新注册信息写入后，由发短信和发邮件并行处理；</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e29f4742c.png"></p>
+<p>在这种方式下，发短信和发邮件 需处理完成后再返回给客户端。</p>
+<p>假设以上三个子系统处理的时间均为50ms，且不考虑网络延迟，则总的处理时间：</p>
+<blockquote>
+<p>串行：50+50+50=150ms  并行：50+50 = 100ms</p>
+</blockquote>
+<h3 id="使用消息队列"><a href="#使用消息队列" class="headerlink" title="使用消息队列"></a>使用消息队列</h3><p><img src="https://i.loli.net/2019/04/01/5ca1e2d1891c2.png"></p>
+<p>并在写入消息队列后立即返回成功给客户端，则总的响应时间依赖于写入消息队列的时间，而写入消息队列的时间本身是可以很快的，基本可以忽略不计，因此总的处理时间相比串行提高了2倍，相比并行提高了一倍；</p>
+<h2 id="应用耦合"><a href="#应用耦合" class="headerlink" title="应用耦合"></a>应用耦合</h2><p>具体场景：用户使用QQ相册上传一张图片，<a href="https://cloud.tencent.com/product/facerecognition">人脸识别</a>系统会对该图片进行人脸识别，一般的做法是，服务器接收到图片后，图片上传系统立即调用人脸识别系统，调用完成后再返回成功，如下图所示：</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e2f60d0ce.png"></p>
+<p>该方法有如下缺点：</p>
+<ul>
+<li>人脸识别系统被调失败，导致图片上传失败；</li>
+<li>延迟高，需要人脸识别系统处理完成后，再返回给客户端，即使用户并不需要立即知道结果；</li>
+<li>图片上传系统与人脸识别系统之间互相调用，需要做耦合；</li>
+</ul>
+<p>若使用消息队列：</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e3363239e.png"></p>
+<p>客户端上传图片后，图片上传系统将图片信息如uin、批次写入消息队列，直接返回成功；而人脸识别系统则定时从消息队列中取数据，完成对新增图片的识别。 </p>
+<p>此时图片上传系统并不需要关心人脸识别系统是否对这些图片信息的处理、以及何时对这些图片信息进行处理。事实上，由于用户并不需要立即知道人脸识别结果，人脸识别系统可以选择不同的调度策略，按照闲时、忙时、正常时间，对队列中的图片信息进行处理。</p>
+<h2 id="限流削峰"><a href="#限流削峰" class="headerlink" title="限流削峰"></a>限流削峰</h2><p>具体场景：购物网站开展秒杀活动，一般由于瞬时访问量过大，服务器接收过大，会导致流量暴增，相关系统无法处理请求甚至崩溃。而加入消息队列后，系统可以从消息队列中取数据，相当于消息队列做了一次缓冲。</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e375ac957.png"></p>
+<p>该方法有如下优点： </p>
+<ol>
+<li>请求先入消息队列，而不是由业务处理系统直接处理，做了一次缓冲,极大地减少了业务处理系统的压力； </li>
+<li> 队列长度可以做限制，事实上，秒杀时，后入队列的用户无法秒杀到商品，这些请求可以直接被抛弃，返回活动已结束或商品已售完信息；</li>
+</ol>
+<h2 id="消息驱动的系统"><a href="#消息驱动的系统" class="headerlink" title="消息驱动的系统"></a>消息驱动的系统</h2><p>具体场景：用户新上传了一批照片， 人脸识别系统需要对这个用户的所有照片进行聚类，聚类完成后由对账系统重新生成用户的人脸索引(加快查询)。这三个子系统间由消息队列连接起来，前一个阶段的处理结果放入队列中，后一个阶段从队列中获取消息继续处理。</p>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e3cbaddd7.png"></p>
+<p>该方法有如下优点：</p>
+<ul>
+<li>避免了直接调用下一个系统导致当前系统失败；</li>
+<li>每个子系统对于消息的处理方式可以更为灵活，可以选择收到消息时就处理，可以选择定时处理，也可以划分时间段按不同处理速度处理；</li>
+</ul>
+<h1 id="消息队列的两种模式"><a href="#消息队列的两种模式" class="headerlink" title="消息队列的两种模式"></a>消息队列的两种模式</h1><p>消息队列包括两种模式，点对点模式（point to point， queue）和发布/订阅模式（publish/subscribe，topic）。</p>
+<h2 id="点对点模式"><a href="#点对点模式" class="headerlink" title="点对点模式"></a>点对点模式</h2><ul>
+<li>消息队列</li>
+<li>发送者 (生产者)</li>
+<li>接收者（消费者）</li>
+</ul>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e40d3695e.png"></p>
+<p>消息发送者生产消息发送到queue中，然后消息接收者从queue中取出并且消费消息。消息被消费以后，queue中不再有存储，所以消息接收者不可能消费到已经被消费的消息。</p>
+<p>点对点模式特点：</p>
+<ul>
+<li>每个消息只有一个接收者（Consumer）(即一旦被消费，消息就不再在消息队列中)；</li>
+<li>发送者和接收者间没有依赖性，发送者发送消息之后，不管有没有接收者在运行，都不会影响到发送者下次发送消息；</li>
+<li>接收者在成功接收消息之后需向队列应答成功，以便消息队列删除当前接收的消息；</li>
+</ul>
+<h2 id="发布-订阅模式"><a href="#发布-订阅模式" class="headerlink" title="发布/订阅模式"></a>发布/订阅模式</h2><p>发布/订阅模式下包括三个角色：</p>
+<ul>
+<li>角色主题（Topic）</li>
+<li>发布者(Publisher)</li>
+<li>订阅者(Subscriber)</li>
+</ul>
+<p><img src="https://i.loli.net/2019/04/01/5ca1e45320c45.png"></p>
+<p>发布者将消息发送到Topic,系统将这些消息传递给多个订阅者。</p>
+<p>发布/订阅模式特点：</p>
+<ul>
+<li>每个消息可以有多个订阅者；</li>
+<li>发布者和订阅者之间有时间上的依赖性。针对某个主题（Topic）的订阅者，它必须创建一个订阅者之后，才能消费发布者的消息；</li>
+<li>为了消费消息，订阅者需要提前订阅该角色主题，并保持在线运行；</li>
+</ul>
+<h1 id="常用消息队列"><a href="#常用消息队列" class="headerlink" title="常用消息队列"></a>常用消息队列</h1><ul>
+<li><a href="https://www.rabbitmq.com/">RabbitMQ</a></li>
+<li><a href="http://activemq.apache.org/">ActiveMQ</a></li>
+<li><a href="https://github.com/alibaba/RocketMQ">RocketMQ</a></li>
+<li><a href="http://kafka.apache.org/">Apache Kafka</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>学习</category>
+      </categories>
+      <tags>
+        <tag>mq</tag>
+        <tag>消息中间件</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>消息队列（三）Apache ActiveMQ</title>
     <url>/p/32495/</url>
     <content><![CDATA[<h1 id="在Ubuntu上安装ActiveMQ"><a href="#在Ubuntu上安装ActiveMQ" class="headerlink" title="在Ubuntu上安装ActiveMQ"></a>在Ubuntu上安装ActiveMQ</h1><h2 id="系统初始化"><a href="#系统初始化" class="headerlink" title="系统初始化"></a>系统初始化</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt dist-upgrade</span><br><span class="line">$ sudo apt autoremove</span><br><span class="line">$ sudo apt clean</span><br></pre></td></tr></table></figure>
@@ -3265,7 +3385,7 @@
 <h2 id="搭建activemq服务"><a href="#搭建activemq服务" class="headerlink" title="搭建activemq服务"></a>搭建activemq服务</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mkdir /home/active-mq</span><br><span class="line">$ <span class="built_in">cd</span> /home/active-mq</span><br><span class="line">$ wget http://www.apache.org/dist/activemq/5.15.9/apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 具体版本请查看http://www.apache.org/dist/activemq</span></span><br><span class="line">$ tar -zxvf apache-activemq-5.15.9-bin.tar.gz</span><br><span class="line"><span class="comment"># 如果未安装jdk，执行 sudo apt-get install openjdk-8-jdk</span></span><br><span class="line">$ ./activemq start</span><br><span class="line">INFO: Loading <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//bin/env&#x27;</span></span><br><span class="line">INFO: Using java <span class="string">&#x27;/usr/bin/java&#x27;</span></span><br><span class="line">INFO: Starting - inspect logfiles specified <span class="keyword">in</span> logging.properties and log4j.properties to get details</span><br><span class="line">INFO: pidfile created : <span class="string">&#x27;/home/active-mq/apache-activemq-5.15.9//data/activemq.pid&#x27;</span> (pid <span class="string">&#x27;6356&#x27;</span>)</span><br></pre></td></tr></table></figure>
 
 <h2 id="监控"><a href="#监控" class="headerlink" title="监控"></a>监控</h2><p>浏览器打开<a href="http://localhost:8161/admin/%EF%BC%8C%E8%BE%93%E5%85%A5admin%EF%BC%8Cadmin">http://localhost:8161/admin/，输入admin，admin</a></p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca2dc9f9f76c.png"></p>
 <p>至此，ActiveMQ搭建完成。</p>
 <h1 id="理解JMS-Java-Message-Service"><a href="#理解JMS-Java-Message-Service" class="headerlink" title="理解JMS( Java Message Service)"></a>理解JMS( Java Message Service)</h1><p>Java消息服务指的是两个应用程序之间进行异步通信的API，它为标准消息协议和消息服务提供了一组通用接口，包括创建、发送、读取消息等，用于支持JAVA应用程序开发。</p>
 <h2 id="JMS模型"><a href="#JMS模型" class="headerlink" title="JMS模型"></a>JMS模型</h2><ul>
@@ -3296,7 +3416,7 @@
 <li><p>MessageConsumer：由Session创建的对象，用于接收Queue或Topic中的消息</p>
 </li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca3451b03d54.jpg"></p>
 <h2 id="简化API"><a href="#简化API" class="headerlink" title="简化API"></a>简化API</h2><p>简化API与传统API提供的消息功能是一样的，但是它需要的接口更少、使用更方便。 简化API提供的主要接口如下：</p>
 <ul>
 <li>ConnectionFactory：客户端用来创建连接的受管对象。传统API也会使用此接口。</li>
@@ -3304,7 +3424,7 @@
 <li>JMSProducer：由JMSContext创建的对象，用于发送消息到Queue或Topic</li>
 <li>JMSConsumer：由JMSContext创建的对象，用于接收Queue或Topic中的消息</li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca3456dda534.png"></p>
 <p>在简化API中，一个JMSContext对象封装了传统API中Connection和Session两个对象的行为。</p>
 <h2 id="开发一个JMS客户端"><a href="#开发一个JMS客户端" class="headerlink" title="开发一个JMS客户端"></a>开发一个JMS客户端</h2><p>一个使用传统API的JMS客户端典型的使用步骤如下：</p>
 <ul>
@@ -3337,109 +3457,8 @@
         <category>学习</category>
       </categories>
       <tags>
+        <tag>消息中间件</tag>
         <tag>ActiveMQ</tag>
-        <tag>消息中间件</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>消息队列（一）简介</title>
-    <url>/p/27791/</url>
-    <content><![CDATA[<h1 id="消息队列-MQ-概述"><a href="#消息队列-MQ-概述" class="headerlink" title="消息队列(MQ)概述"></a>消息队列(MQ)概述</h1><p>消息队列（Message Queue），是分布式系统中重要的组件，其通用的使用场景可以简单地描述为：</p>
-<blockquote>
-<p>当不需要立即获得结果，但是并发量又需要进行控制的时候，差不多就是需要使用消息队列的时候。</p>
-</blockquote>
-<p>消息队列主要解决了应用耦合、异步处理、流量削锋等问题。</p>
-<span id="more"></span>
-
-<p>当前使用较多的消息队列有RabbitMQ、RocketMQ、ActiveMQ、Kafka、ZeroMQ、MetaMq等，而部分数据库如Redis、Mysql以及phxsql也可实现消息队列的功能。</p>
-<h1 id="消息队列使用场景"><a href="#消息队列使用场景" class="headerlink" title="消息队列使用场景"></a>消息队列使用场景</h1><p>消息队列在实际应用中包括如下四个场景：</p>
-<ul>
-<li>应用耦合：多应用间通过消息队列对同一消息进行处理，避免调用接口失败导致整个过程失败；</li>
-<li>异步处理：多应用对消息队列中同一消息进行处理，应用间并发处理消息，相比串行处理，减少处理时间；</li>
-<li>限流削峰：广泛应用于秒杀或抢购活动中，避免流量过大导致应用系统挂掉的情况；</li>
-<li>消息驱动的系统：系统分为消息队列、消息生产者、消息消费者，生产者负责产生消息，消费者(可能有多个)负责对消息进行处理；</li>
-</ul>
-<p>下面详细介绍上述四个场景以及消息队列如何在上述四个场景中使用：</p>
-<h2 id="异步处理"><a href="#异步处理" class="headerlink" title="异步处理"></a>异步处理</h2><p>具体场景：用户为了使用某个应用，进行注册，系统需要发送注册邮件并验证<a href="https://cloud.tencent.com/product/sms">短信</a>。对这两个操作的处理方式有两种：串行及并行。</p>
-<h3 id="串行方式"><a href="#串行方式" class="headerlink" title="串行方式"></a>串行方式</h3><p>新注册信息生成后，先发送注册邮件，再发送验证短信；</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e27b495ce.png"></p>
-<p>在这种方式下，需要最终发送验证短信后再返回给客户端。</p>
-<h3 id="并行处理"><a href="#并行处理" class="headerlink" title="并行处理"></a>并行处理</h3><p>新注册信息写入后，由发短信和发邮件并行处理；</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e29f4742c.png"></p>
-<p>在这种方式下，发短信和发邮件 需处理完成后再返回给客户端。</p>
-<p>假设以上三个子系统处理的时间均为50ms，且不考虑网络延迟，则总的处理时间：</p>
-<blockquote>
-<p>串行：50+50+50=150ms  并行：50+50 = 100ms</p>
-</blockquote>
-<h3 id="使用消息队列"><a href="#使用消息队列" class="headerlink" title="使用消息队列"></a>使用消息队列</h3><p><img data-src="https://i.loli.net/2019/04/01/5ca1e2d1891c2.png"></p>
-<p>并在写入消息队列后立即返回成功给客户端，则总的响应时间依赖于写入消息队列的时间，而写入消息队列的时间本身是可以很快的，基本可以忽略不计，因此总的处理时间相比串行提高了2倍，相比并行提高了一倍；</p>
-<h2 id="应用耦合"><a href="#应用耦合" class="headerlink" title="应用耦合"></a>应用耦合</h2><p>具体场景：用户使用QQ相册上传一张图片，<a href="https://cloud.tencent.com/product/facerecognition">人脸识别</a>系统会对该图片进行人脸识别，一般的做法是，服务器接收到图片后，图片上传系统立即调用人脸识别系统，调用完成后再返回成功，如下图所示：</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e2f60d0ce.png"></p>
-<p>该方法有如下缺点：</p>
-<ul>
-<li>人脸识别系统被调失败，导致图片上传失败；</li>
-<li>延迟高，需要人脸识别系统处理完成后，再返回给客户端，即使用户并不需要立即知道结果；</li>
-<li>图片上传系统与人脸识别系统之间互相调用，需要做耦合；</li>
-</ul>
-<p>若使用消息队列：</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e3363239e.png"></p>
-<p>客户端上传图片后，图片上传系统将图片信息如uin、批次写入消息队列，直接返回成功；而人脸识别系统则定时从消息队列中取数据，完成对新增图片的识别。 </p>
-<p>此时图片上传系统并不需要关心人脸识别系统是否对这些图片信息的处理、以及何时对这些图片信息进行处理。事实上，由于用户并不需要立即知道人脸识别结果，人脸识别系统可以选择不同的调度策略，按照闲时、忙时、正常时间，对队列中的图片信息进行处理。</p>
-<h2 id="限流削峰"><a href="#限流削峰" class="headerlink" title="限流削峰"></a>限流削峰</h2><p>具体场景：购物网站开展秒杀活动，一般由于瞬时访问量过大，服务器接收过大，会导致流量暴增，相关系统无法处理请求甚至崩溃。而加入消息队列后，系统可以从消息队列中取数据，相当于消息队列做了一次缓冲。</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e375ac957.png"></p>
-<p>该方法有如下优点： </p>
-<ol>
-<li>请求先入消息队列，而不是由业务处理系统直接处理，做了一次缓冲,极大地减少了业务处理系统的压力； </li>
-<li> 队列长度可以做限制，事实上，秒杀时，后入队列的用户无法秒杀到商品，这些请求可以直接被抛弃，返回活动已结束或商品已售完信息；</li>
-</ol>
-<h2 id="消息驱动的系统"><a href="#消息驱动的系统" class="headerlink" title="消息驱动的系统"></a>消息驱动的系统</h2><p>具体场景：用户新上传了一批照片， 人脸识别系统需要对这个用户的所有照片进行聚类，聚类完成后由对账系统重新生成用户的人脸索引(加快查询)。这三个子系统间由消息队列连接起来，前一个阶段的处理结果放入队列中，后一个阶段从队列中获取消息继续处理。</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e3cbaddd7.png"></p>
-<p>该方法有如下优点：</p>
-<ul>
-<li>避免了直接调用下一个系统导致当前系统失败；</li>
-<li>每个子系统对于消息的处理方式可以更为灵活，可以选择收到消息时就处理，可以选择定时处理，也可以划分时间段按不同处理速度处理；</li>
-</ul>
-<h1 id="消息队列的两种模式"><a href="#消息队列的两种模式" class="headerlink" title="消息队列的两种模式"></a>消息队列的两种模式</h1><p>消息队列包括两种模式，点对点模式（point to point， queue）和发布/订阅模式（publish/subscribe，topic）。</p>
-<h2 id="点对点模式"><a href="#点对点模式" class="headerlink" title="点对点模式"></a>点对点模式</h2><ul>
-<li>消息队列</li>
-<li>发送者 (生产者)</li>
-<li>接收者（消费者）</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e40d3695e.png"></p>
-<p>消息发送者生产消息发送到queue中，然后消息接收者从queue中取出并且消费消息。消息被消费以后，queue中不再有存储，所以消息接收者不可能消费到已经被消费的消息。</p>
-<p>点对点模式特点：</p>
-<ul>
-<li>每个消息只有一个接收者（Consumer）(即一旦被消费，消息就不再在消息队列中)；</li>
-<li>发送者和接收者间没有依赖性，发送者发送消息之后，不管有没有接收者在运行，都不会影响到发送者下次发送消息；</li>
-<li>接收者在成功接收消息之后需向队列应答成功，以便消息队列删除当前接收的消息；</li>
-</ul>
-<h2 id="发布-订阅模式"><a href="#发布-订阅模式" class="headerlink" title="发布/订阅模式"></a>发布/订阅模式</h2><p>发布/订阅模式下包括三个角色：</p>
-<ul>
-<li>角色主题（Topic）</li>
-<li>发布者(Publisher)</li>
-<li>订阅者(Subscriber)</li>
-</ul>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca1e45320c45.png"></p>
-<p>发布者将消息发送到Topic,系统将这些消息传递给多个订阅者。</p>
-<p>发布/订阅模式特点：</p>
-<ul>
-<li>每个消息可以有多个订阅者；</li>
-<li>发布者和订阅者之间有时间上的依赖性。针对某个主题（Topic）的订阅者，它必须创建一个订阅者之后，才能消费发布者的消息；</li>
-<li>为了消费消息，订阅者需要提前订阅该角色主题，并保持在线运行；</li>
-</ul>
-<h1 id="常用消息队列"><a href="#常用消息队列" class="headerlink" title="常用消息队列"></a>常用消息队列</h1><ul>
-<li><a href="https://www.rabbitmq.com/">RabbitMQ</a></li>
-<li><a href="http://activemq.apache.org/">ActiveMQ</a></li>
-<li><a href="https://github.com/alibaba/RocketMQ">RocketMQ</a></li>
-<li><a href="http://kafka.apache.org/">Apache Kafka</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>学习</category>
-      </categories>
-      <tags>
-        <tag>消息中间件</tag>
-        <tag>mq</tag>
       </tags>
   </entry>
   <entry>
@@ -3485,7 +3504,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/test&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">()</span> <span class="keyword">throws</span> UnknownHostException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;this is : &quot;</span> + Inet4Address.getLocalHost();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>打包并部署到服务器，我使用的是<a href="https://docs.gradle.org/current/userguide/application_plugin.html">The Application Plugin</a>，部署完毕启动</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cedfb9fdb17458291.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cedfb9fdb17458291.png"></p>
 <p>测试下：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">## node01</span></span><br><span class="line">$ curl 192.168.198.131:8080/<span class="built_in">test</span></span><br><span class="line">...</span><br><span class="line">this is : node01/192.168.198.131</span><br><span class="line"><span class="comment">## node02</span></span><br><span class="line">$ curl 192.168.198.130:8080/<span class="built_in">test</span></span><br><span class="line">...</span><br><span class="line">this is : node02/192.168.198.130</span><br><span class="line"><span class="comment">## node03</span></span><br><span class="line">$ curl 192.168.198.132:8080/<span class="built_in">test</span></span><br><span class="line">...</span><br><span class="line">this is : node03/192.168.198.132</span><br></pre></td></tr></table></figure>
 
@@ -3573,9 +3592,9 @@
 <li><p>从数据映射到的位置开始<strong>顺时针</strong>查找，将数据保存到找到的第一个服务器上。如果超过2^32仍然找不到服务器，就会保存到第一台memcached服务器上。</p>
 </li>
 </ol>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee559706c3135766.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee559706c3135766.png"></p>
 <p>从上图的状态中添加一台memcached服务器。余数分布式算法由于保存键的服务器会发生巨大变化而影响缓存的命中率，但Consistent Hashing中，只有在圆（continuum）上增加服务器的地点逆时针方向的第一台服务器上的键会受到影响，如下图所示：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee508b7cfab34733.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee508b7cfab34733.png"></p>
 <h1 id="一致性Hash性质"><a href="#一致性Hash性质" class="headerlink" title="一致性Hash性质"></a>一致性Hash性质</h1><blockquote>
 <p>考虑到分布式系统每个节点都有可能<strong>失效</strong>，并且<strong>新的节点</strong>很可能动态的增加进来，如何保证当系统的节点数目发生变化时仍然能够对外提供良好的服务，这是值得考虑的。</p>
 <p>尤其是在设计分布式缓存系统时，如果某台服务器失效，对于整个系统来说如果不采用合适的算法来保证一致性，那么缓存于系统中的所有数据都可能会失效（即由于系统节点数目变少，客户端在请求某一对象时需要重新计算其hash值（通常与系统中的节点数目有关），由于hash值已经改变，所以很可能找不到保存该对象的服务器节点），因此一致性hash就显得至关重要。</p>
@@ -3619,27 +3638,27 @@
 </blockquote>
 <h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>一致性哈希算法（Consistent Hashing）最早在论文《<a href="https://link.juejin.im/?target=http://dl.acm.org/citation.cfm?id=258660">Consistent Hashing and Random Trees: Distributed Caching Protocols for Relieving Hot Spots on the World Wide Web</a>》中被提出。</p>
 <p>简单来说，一致性哈希将整个哈希值空间组织成一个<strong>虚拟的圆环</strong>，如假设某哈希函数H的值空间为0-2^32-1（即哈希值是一个32位无符号整形），整个哈希空间环如下：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee54431b19c11690.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee54431b19c11690.png"></p>
 <p>整个空间按顺时针方向组织。0和2^32-1在零点中方向重合。</p>
 <p>下一步将各个服务器使用Hash进行一个哈希，具体可以选择<strong>服务器的ip或主机名</strong>作为关键字进行哈希，这样每台机器就能确定其在哈希环上的位置，这里假设将上文中四台服务器使用ip地址哈希后在环空间的位置如下：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee5564c55f998409.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee5564c55f998409.png"></p>
 <p>接下来使用如下算法定位数据访问到相应服务器：将数据key使用相同的函数Hash计算出哈希值，并确定此数据在环上的位置，从此位置沿环<strong>顺时针</strong>“行走”，第一台遇到的服务器就是其应该定位到的服务器。</p>
 <p>例如我们有Object A、Object B、Object C、Object D四个数据对象，经过哈希计算后，在环空间上的位置如下：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee55cfac53c21054.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee55cfac53c21054.png"></p>
 <p>根据一致性哈希算法，数据A会被定为到Node A上，B被定为到Node B上，C被定为到Node C上，D被定为到Node D上。</p>
 <h2 id="容错性"><a href="#容错性" class="headerlink" title="容错性"></a>容错性</h2><p>现假设Node C不幸宕机，可以看到此时对象A、B、D不会受到影响，只有C对象被重定位到Node D。</p>
 <p>一般的，在一致性哈希算法中，<strong>如果一台服务器不可用，则受影响的数据仅仅是此服务器到其环空间中前一台服务器（即沿着逆时针方向行走遇到的第一台服务器）之间数据，其它不会受到影响。</strong></p>
 <h2 id="可扩展性"><a href="#可扩展性" class="headerlink" title="可扩展性"></a>可扩展性</h2><p>如果在系统中增加一台服务器Node X，如下图所示：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee566ef2a4232874.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee566ef2a4232874.png"></p>
 <p>此时对象Object A、B、D不受影响，只有对象C需要重定位到新的Node X 。</p>
 <p>一般的，在一致性哈希算法中，<strong>如果增加一台服务器，则受影响的数据仅仅是新服务器到其环空间中前一台服务器（即沿着逆时针方向行走遇到的第一台服务器）之间数据，其它数据也不会受到影响。</strong></p>
 <p>综上所述，一致性哈希算法对于节点的增减都只需重定位环空间中的一小部分数据，具有较好的容错性和可扩展性。</p>
 <h2 id="数据倾斜问题"><a href="#数据倾斜问题" class="headerlink" title="数据倾斜问题"></a>数据倾斜问题</h2><p>另外，一致性哈希算法在服务节点太少时，容易因为节点分部不均匀而造成数据倾斜问题。例如系统中只有两台服务器，其环分布如下：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee56cb65e7138601.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee56cb65e7138601.png"></p>
 <p>此时必然造成大量数据集中到Node A上，而只有极少量会定位到Node B上。</p>
 <p>为了解决这种数据倾斜问题，一致性哈希算法引入了<strong>虚拟节点机制</strong>，即对每一个服务节点计算多个哈希，每个计算结果位置都放置一个此服务节点，称为虚拟节点。</p>
 <p>具体做法可以在服务器ip或主机名的后面增加编号来实现。例如上面的情况，可以为每台服务器计算三个虚拟节点，于是可以分别计算 “Node A#1”、“Node A#2”、“Node A#3”、“Node B#1”、“Node B#2”、“Node B#3”的哈希值，于是形成六个虚拟节点：</p>
-<p><img data-src="https://i.loli.net/2019/05/29/5cee56f99435a20863.png"></p>
+<p><img src="https://i.loli.net/2019/05/29/5cee56f99435a20863.png"></p>
 <p>同时数据定位算法不变，只是多了一步虚拟节点到实际节点的映射，例如定位到“Node A#1”、“Node A#2”、“Node A#3”三个虚拟节点的数据均定位到Node A上。这样就解决了服务节点少时数据倾斜的问题。</p>
 <p>在实际应用中，通常将虚拟节点数设置为32甚至更大，因此即使很少的服务节点也能做到相对均匀的数据分布。</p>
 <h1 id="代码测试"><a href="#代码测试" class="headerlink" title="代码测试"></a>代码测试</h1><p>一致性Hash模拟类：</p>
@@ -3747,7 +3766,7 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSecurity</span></span><br><span class="line"><span class="meta">@EnableGlobalMethodSecurity(prePostEnabled = true)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfig</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...省略</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> JwtAuthenticationTokenFilter <span class="title">authenticationTokenFilterBean</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> JwtAuthenticationTokenFilter();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity httpSecurity)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//...省略</span></span><br><span class="line">        <span class="comment">//把JwtAuthenticationTokenFilter加入到RememberMeAuthenticationFilter之前</span></span><br><span class="line">        httpSecurity.addFilterBefore(authenticationTokenFilterBean(), RememberMeAuthenticationFilter.class);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//...省略</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>请求日志如下:</p>
-<p><img data-src="https://i.loli.net/2019/01/14/5c3c75bd6e40b.png"></p>
+<p><img src="https://i.loli.net/2019/01/14/5c3c75bd6e40b.png"></p>
 <h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>把自定义Filter<code>JwtAuthenticationTokenFilter</code>的<code>@Component</code>取消掉就可以了，不让它被Spring容器管理。</p>
 <h1 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h1><p>在spring容器托管的OncePerRequestFilter的bean，都会自动加入到servlet的filter chain，而上面的定义，还额外把filter加入到了spring security的<br>ememberMeAuthenticationFilter之前。而spring security也是一系列的filter，在mvc的filter之前执行。因此在鉴权通过的情况下，就会先后各执行一次。</p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://segmentfault.com/a/1190000012173419">解决spring security自定义filter重复执行问题</a></p>
@@ -3771,7 +3790,7 @@
 <ul>
 <li><code>top</code></li>
 </ul>
-<p><img data-src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
+<p><img src="https://i.loli.net/2019/05/10/5cd50e714a69f.png"></p>
 <h2 id="数据库占用CPU过高"><a href="#数据库占用CPU过高" class="headerlink" title="数据库占用CPU过高"></a>数据库占用CPU过高</h2><h3 id="连接数过多"><a href="#连接数过多" class="headerlink" title="连接数过多"></a>连接数过多</h3><blockquote>
 <p>业务高峰活跃连接陡增，活跃的连接数是否比平时多很多</p>
 </blockquote>
@@ -3783,7 +3802,7 @@
 </blockquote>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select </span><br><span class="line">  datname, </span><br><span class="line">  usename, </span><br><span class="line">  client_addr, </span><br><span class="line">  application_name, </span><br><span class="line">  state, </span><br><span class="line">  backend_start, </span><br><span class="line">  xact_start, </span><br><span class="line">  xact_stay, </span><br><span class="line">  query_start, </span><br><span class="line">  query_stay, </span><br><span class="line">  replace(</span><br><span class="line">    query, </span><br><span class="line">    chr(10), </span><br><span class="line">    &#x27; &#x27;</span><br><span class="line">  ) as query </span><br><span class="line">from </span><br><span class="line">  (</span><br><span class="line">    select </span><br><span class="line">      pgsa.datname as datname, </span><br><span class="line">      pgsa.usename as usename, </span><br><span class="line">      pgsa.client_addr client_addr, </span><br><span class="line">      pgsa.application_name as application_name, </span><br><span class="line">      pgsa.state as state, </span><br><span class="line">      pgsa.backend_start as backend_start, </span><br><span class="line">      pgsa.xact_start as xact_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.xact_start)</span><br><span class="line">      ) as xact_stay, </span><br><span class="line">      pgsa.query_start as query_start, </span><br><span class="line">      extract(</span><br><span class="line">        epoch </span><br><span class="line">        from </span><br><span class="line">          (now() - pgsa.query_start)</span><br><span class="line">      ) as query_stay, </span><br><span class="line">      pgsa.query as query </span><br><span class="line">    from </span><br><span class="line">      pg_stat_activity as pgsa </span><br><span class="line">    where </span><br><span class="line">      pgsa.state != &#x27;idle&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction&#x27; </span><br><span class="line">      and pgsa.state != &#x27;idle in transaction (aborted)&#x27;</span><br><span class="line">  ) idleconnections </span><br><span class="line">order by </span><br><span class="line">  query_stay desc </span><br><span class="line">limit </span><br><span class="line">  5;</span><br></pre></td></tr></table></figure>
 
-<p><img data-src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
+<p><img src="https://i.loli.net/2019/05/10/5cd513b65c46f.png"></p>
 <p>可以看到，确实有一条慢SQL，而且属于奇慢无比，执行了接近1分钟还没执行完毕，基本可以定位，是慢SQL导致的CPU占用陡增。</p>
 <h1 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h1><p>对于上面的方法查出来的慢SQL，首先需要做的是Kill掉他们，使业务先恢复。</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">select pg_cancel_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br><span class="line">select pg_terminate_backend(pid) from pg_stat_activity where  query like &#x27;%&lt;query text&gt;%&#x27; and pid != pg_backend_pid();</span><br></pre></td></tr></table></figure>
@@ -5392,7 +5411,7 @@
 </blockquote>
 <!-- more -->
 
-<p>Spring工作原理的高级视图<br><img data-src="https://i.loli.net/2019/03/21/5c9278544811e.png"></p>
+<p>Spring工作原理的高级视图<br><img src="https://i.loli.net/2019/03/21/5c9278544811e.png"></p>
 <p>1.配置元数据<br>创建SimpleBean</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleBean</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">send</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Hello Spring Bean!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -5482,13 +5501,13 @@
 <h1 id="Bean-作用域"><a href="#Bean-作用域" class="headerlink" title="Bean 作用域"></a>Bean 作用域</h1><h2 id="singleton"><a href="#singleton" class="headerlink" title="singleton"></a>singleton</h2><blockquote>
 <p>Spring IoC容器只创建该bean定义的对象的一个实例。此单个实例存储在此类单例bean的缓存中，并且该Bean的所有后续请求和引用都将返回缓存对象。</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2019/03/21/5c9278545f51f.png"></p>
+<p><img src="https://i.loli.net/2019/03/21/5c9278545f51f.png"></p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;accountService&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.foo.DefaultAccountService&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- the following is equivalent, though redundant (singleton scope is the default) --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;accountService&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.foo.DefaultAccountService&quot;</span> <span class="attr">scope</span>=<span class="string">&quot;singleton&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="prototype"><a href="#prototype" class="headerlink" title="prototype"></a>prototype</h2><blockquote>
 <p>和单例对立，通常，对所有有状态bean使用原型范围，对无状态bean使用单例范围。</p>
 </blockquote>
-<p><img data-src="https://i.loli.net/2019/03/21/5c92785478899.png"></p>
+<p><img src="https://i.loli.net/2019/03/21/5c92785478899.png"></p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">&quot;accountService&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.foo.DefaultAccountService&quot;</span> <span class="attr">scope</span>=<span class="string">&quot;prototype&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
 
 <h2 id="Request-session-global-session-application-and-WebSocket"><a href="#Request-session-global-session-application-and-WebSocket" class="headerlink" title="Request, session, global session, application, and WebSocket"></a>Request, session, global session, application, and WebSocket</h2><blockquote>
@@ -5708,7 +5727,7 @@
 <h2 id="消息代理和他们所扮演的角色"><a href="#消息代理和他们所扮演的角色" class="headerlink" title="消息代理和他们所扮演的角色"></a>消息代理和他们所扮演的角色</h2><p>消息代理（message brokers）从发布者（publishers）亦称生产者（producers）那儿接收消息，并根据既定的路由规则把接收到的消息发送给处理消息的消费者（consumers）。</p>
 <p>由于AMQP是一个网络协议，所以这个过程中的发布者，消费者，消息代理 可以存在于不同的设备上。</p>
 <h2 id="AMQP-0-9-1-模型简介"><a href="#AMQP-0-9-1-模型简介" class="headerlink" title="AMQP 0-9-1 模型简介"></a>AMQP 0-9-1 模型简介</h2><p>AMQP 0-9-1的工作过程如下图：消息（message）被发布者（publisher）发送给交换机（exchange），交换机常常被比喻成邮局或者邮箱。然后交换机将收到的消息根据路由规则分发给绑定的队列（queue）。最后AMQP代理会将消息投递给订阅了此队列的消费者，或者消费者按照需求自行获取。</p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca2b9fc49b65.png"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca2b9fc49b65.png"></p>
 <blockquote>
 <p>队列，交换机和绑定统称为AMQP实体（AMQP entities）。</p>
 </blockquote>
@@ -5771,9 +5790,9 @@
 </ul>
 <p>当此队列只有一个消费者时，请确认不要由于拒绝消息并且选择了重新放入队列的行为而引起消息在同一个消费者身上无限循环的情况发生。</p>
 <h1 id="Hello-World"><a href="#Hello-World" class="headerlink" title="Hello World"></a>Hello World</h1><ul>
-<li>生产(Producing)的意思就是发送。发送消息的程序就是一个生产者(producer)。我们一般用”P”来表示:<br><img data-src="https://i.loli.net/2019/04/02/5ca23898ea5b0.png"></li>
-<li>队列(queue)就是存在于RabbitMQ中邮箱的名称。虽然消息的传输经过了RabbitMQ和你的应用程序，但是它只能被存储于队列当中。实质上队列就是个巨大的消息缓冲区，它的大小只受主机内存和硬盘限制。多个生产者（producers）可以把消息发送给同一个队列，同样，多个消费者（consumers）也能够从同一个队列（queue）中获取数据。队列可以绘制成这样（图上是队列的名称）：<br><img data-src="https://i.loli.net/2019/04/02/5ca238ab81f7c.png"></li>
-<li>在这里，消费（Consuming）和接收(receiving)是同一个意思。一个消费者（consumer）就是一个等待获取消息的程序。我们把它绘制为”C”：<br><img data-src="https://i.loli.net/2019/04/02/5ca238bd84a4a.png"></li>
+<li>生产(Producing)的意思就是发送。发送消息的程序就是一个生产者(producer)。我们一般用”P”来表示:<br><img src="https://i.loli.net/2019/04/02/5ca23898ea5b0.png"></li>
+<li>队列(queue)就是存在于RabbitMQ中邮箱的名称。虽然消息的传输经过了RabbitMQ和你的应用程序，但是它只能被存储于队列当中。实质上队列就是个巨大的消息缓冲区，它的大小只受主机内存和硬盘限制。多个生产者（producers）可以把消息发送给同一个队列，同样，多个消费者（consumers）也能够从同一个队列（queue）中获取数据。队列可以绘制成这样（图上是队列的名称）：<br><img src="https://i.loli.net/2019/04/02/5ca238ab81f7c.png"></li>
+<li>在这里，消费（Consuming）和接收(receiving)是同一个意思。一个消费者（consumer）就是一个等待获取消息的程序。我们把它绘制为”C”：<br><img src="https://i.loli.net/2019/04/02/5ca238bd84a4a.png"></li>
 </ul>
 <p>需要指出的是生产者、消费者、代理需不要待在同一个设备上；事实上大多数应用也确实不在会将他们放在一台机器上。</p>
 <p>创建gradle项目，并配置build.gradle：</p>
@@ -5790,7 +5809,7 @@
 <p>然后执行Recv.main，控制台将打印：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[*] Waiting for messages. To exit press CTRL+C</span><br><span class="line">[x] Received &#x27;Hello World!&#x27;</span><br></pre></td></tr></table></figure>
 
-<h1 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h1><p><img data-src="https://i.loli.net/2019/04/01/5ca21485049c7.png"></p>
+<h1 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h1><p><img src="https://i.loli.net/2019/04/01/5ca21485049c7.png"></p>
 <p>工作队列（又称：任务队列——Task Queues）是为了避免等待一些占用大量资源、时间的操作。当我们把任务（Task）当作消息发送到队列中，一个运行在后台的工作者（worker）进程就会取出任务然后处理。当你运行多个工作者（workers），任务就会在它们之间共享。</p>
 <p>这个概念在网络应用中是非常有用的，它可以在短暂的HTTP请求中处理一些复杂的任务。</p>
 <p>修改<a href="#%E5%88%9B%E5%BB%BA%E7%94%9F%E4%BA%A7%E8%80%85">Send.java</a>代码，来间隔10秒发送一个消息：</p>
@@ -5840,7 +5859,7 @@
 
 <h2 id="公平调度"><a href="#公平调度" class="headerlink" title="公平调度"></a>公平调度</h2><p>你应该已经发现，它仍旧没有按照我们期望的那样进行分发。比如有两个工作者（workers），处理奇数消息的比较繁忙，处理偶数消息的比较轻松。然而RabbitMQ并不知道这些，它仍然一如既往的派发消息。</p>
 <p>这时因为RabbitMQ只管分发进入队列的消息，不会关心有多少消费者（consumer）没有作出响应。它盲目的把第n-th条消息发给第n-th个消费者。</p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca238f761f47.png"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca238f761f47.png"></p>
 <p>我们可以使用basicQos方法，并设置<code>prefetchCount = 1</code>。这样是告诉RabbitMQ，再同一时刻，不要发送超过1条消息给一个工作者（worker），直到它已经处理了上一条消息并且作出了响应。这样，RabbitMQ就会把消息分发给下一个空闲的工作者（worker）。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> prefetchCount = <span class="number">1</span>;</span><br><span class="line">channel.basicQos(prefetchCount);</span><br></pre></td></tr></table></figure>
 
@@ -5854,7 +5873,7 @@
 </ul>
 <p>RabbitMQ消息模型的核心理念是：发布者（producer）不会直接发送任何消息给队列。事实上，发布者（producer）甚至不知道消息是否已经被投递到队列。</p>
 <p>发布者（producer）只需要把消息发送给一个交换机（exchange）。交换机非常简单，它一边从发布者方接收消息，一边把消息推送到队列。交换机必须知道如何处理它接收到的消息，是应该推送到指定的队列还是是多个队列，或者是直接忽略消息。这些规则是通过交换机类型（exchange type）来定义的。</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca22e6de6cab.png"></p>
+<p><img src="https://i.loli.net/2019/04/01/5ca22e6de6cab.png"></p>
 <p>有几个可供选择的交换机类型：直连交换机（direct）, 主题交换机（topic）, （头交换机）headers和 扇型交换机（fanout）。我们在这里主要说明最后一个 —— 扇型交换机（fanout）。先创建一个fanout类型的交换机，命名为logs：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">channel.exchangeDeclare(<span class="string">&quot;logs&quot;</span>, <span class="string">&quot;fanout&quot;</span>);</span><br></pre></td></tr></table></figure>
 
@@ -5872,7 +5891,7 @@
 <p>在Java客户端中，当我们没有向queueDeclare（）提供参数时，我们使用生成的名称创建一个非持久的，独占的自动删除队列：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 服务器分配的随机队列名，可能像这样 amq.gen-U0srCoW8TsaXjNh73pnVAw==</span></span><br><span class="line">String queueName = channel.queueDeclare().getQueue();</span><br></pre></td></tr></table></figure>
 
-<h2 id="绑定（Bindings）"><a href="#绑定（Bindings）" class="headerlink" title="绑定（Bindings）"></a>绑定（Bindings）</h2><p><img data-src="https://i.loli.net/2019/04/01/5ca230f4266fc.png"></p>
+<h2 id="绑定（Bindings）"><a href="#绑定（Bindings）" class="headerlink" title="绑定（Bindings）"></a>绑定（Bindings）</h2><p><img src="https://i.loli.net/2019/04/01/5ca230f4266fc.png"></p>
 <p>我们已经创建了一个扇型交换机（fanout）和一个队列。现在我们需要告诉交换机如何发送消息给我们的队列。交换器和队列之间的联系我们称之为绑定（binding）。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">channel.queueBind(queueName, <span class="string">&quot;logs&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br></pre></td></tr></table></figure>
 
@@ -5888,10 +5907,10 @@
 <p>我们使用的扇型交换机（fanout exchange）没有足够的灵活性 —— 它能做的仅仅是广播。</p>
 <p>我们将会使用直连交换机（direct exchange）来代替。路由的算法很简单 —— 交换机将会对绑定键（binding key）和路由键（routing key）进行精确匹配，从而确定消息该分发到哪个队列。</p>
 <p>下图能够很好的描述这个场景：</p>
-<p><img data-src="https://i.loli.net/2019/04/01/5ca23254e4784.png"></p>
+<p><img src="https://i.loli.net/2019/04/01/5ca23254e4784.png"></p>
 <p>在这个场景中，我们可以看到直连交换机 X和两个队列进行了绑定。第一个队列使用orange作为绑定键，第二个队列有两个绑定，一个使用black作为绑定键，另外一个使用green。</p>
 <p>这样以来，当路由键为orange的消息发布到交换机，就会被路由到队列Q1。路由键为black或者green的消息就会路由到Q2。其他的所有消息都将会被丢弃。</p>
-<h2 id="多个绑定（Multiple-bindings）"><a href="#多个绑定（Multiple-bindings）" class="headerlink" title="多个绑定（Multiple bindings）"></a>多个绑定（Multiple bindings）</h2><p><img data-src="https://i.loli.net/2019/04/01/5ca2330e8a92f.png"></p>
+<h2 id="多个绑定（Multiple-bindings）"><a href="#多个绑定（Multiple-bindings）" class="headerlink" title="多个绑定（Multiple bindings）"></a>多个绑定（Multiple bindings）</h2><p><img src="https://i.loli.net/2019/04/01/5ca2330e8a92f.png"></p>
 <p>多个队列使用相同的绑定键是合法的。这个例子中，我们可以添加一个X和Q1之间的绑定，使用black绑定键。这样一来，直连交换机就和扇型交换机的行为一样，会将消息广播到所有匹配的队列。带有black路由键的消息会同时发送到Q1和Q2。</p>
 <h2 id="发送日志"><a href="#发送日志" class="headerlink" title="发送日志"></a>发送日志</h2><p>我们将会发送消息到一个直连交换机，把日志级别作为路由键。这样接收日志的脚本就可以根据严重级别来选择它想要处理的日志。我们先看看发送日志。</p>
 <p>我们需要创建一个交换机（exchange）：</p>
@@ -5903,7 +5922,7 @@
 <h2 id="订阅"><a href="#订阅" class="headerlink" title="订阅"></a>订阅</h2><p>处理接收消息的方式和之前差不多，只有一个例外，我们将会为我们感兴趣的每个严重级别分别创建一个新的绑定。</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String queueName = channel.queueDeclare().getQueue();</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(String severity : argv)&#123;</span><br><span class="line">  channel.queueBind(queueName, EXCHANGE_NAME, severity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p><img data-src="https://i.loli.net/2019/04/01/5ca2339a9dd56.png"></p>
+<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p><img src="https://i.loli.net/2019/04/01/5ca2339a9dd56.png"></p>
 <p><a href="">Routing</a></p>
 <h1 id="主题交换机"><a href="#主题交换机" class="headerlink" title="主题交换机"></a>主题交换机</h1><p>直连交换机的限制 —— 没办法基于多个标准执行路由操作。</p>
 <p>发送到主题交换机（topic exchange）的消息不可以携带随意什么样子的路由键（routing_key），它的路由键必须是一个由<code>.</code>分隔开的词语列表。这些单词随便是什么都可以，但是最好是跟携带它们的消息有关系的词汇。以下是几个推荐的例子：”stock.usd.nyse”, “nyse.vmw”, “quick.orange.rabbit”。词语的个数可以随意，但是不要超过255字节。</p>
@@ -5913,7 +5932,7 @@
 <li><code>#</code> (井号) 用来表示任意数量（零个或多个）单词。</li>
 </ul>
 <p>下边用图说明：</p>
-<p><img data-src="https://i.loli.net/2019/04/02/5ca23915b99b2.png"></p>
+<p><img src="https://i.loli.net/2019/04/02/5ca23915b99b2.png"></p>
 <p>我们创建了三个绑定：Q1的绑定键为 <code>*.orange.*</code>，Q2的绑定键为 <code>*.*.rabbit</code> 和 <code>lazy.#</code> 。</p>
 <p>这三个绑定键被可以总结为：</p>
 <ul>
@@ -5945,7 +5964,7 @@
 <h3 id="关联标识"><a href="#关联标识" class="headerlink" title="关联标识"></a>关联标识</h3><p>上边介绍的方法中，我们建议给每一个RPC请求新建一个回调队列。这不是一个高效的做法，幸好这儿有一个更好的办法 —— 我们可以为每个客户端只建立一个独立的回调队列。</p>
 <p>这就带来一个新问题，当此队列接收到一个响应的时候它无法辨别出这个响应是属于哪个请求的。<strong>correlation_id</strong> 就是为了解决这个问题而来的。我们给每个请求设置一个独一无二的值。稍后，当我们从回调队列中接收到一个消息的时候，我们就可以查看这条属性从而将响应和请求匹配起来。如果我们接手到的消息的correlation_id是未知的，那就直接销毁掉它，因为它不属于我们的任何一条请求。</p>
 <p>为什么我们接收到未知消息的时候不抛出一个错误，而是要将它忽略掉？这是为了解决服务器端有可能发生的竞争情况。尽管可能性不大，但RPC服务器还是有可能在已将应答发送给我们但还未将确认消息发送给请求的情况下死掉。如果这种情况发生，RPC在重启后会重新处理请求。这就是为什么我们必须在客户端优雅的处理重复响应，同时RPC也需要尽可能保持幂等性。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img data-src="https://i.loli.net/2019/04/02/5ca236b2abcea.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://i.loli.net/2019/04/02/5ca236b2abcea.png"></p>
 <p>我们的RPC如此工作:</p>
 <ul>
 <li>当客户端启动的时候，它创建一个匿名独享的回调队列。</li>

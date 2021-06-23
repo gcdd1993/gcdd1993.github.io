@@ -21,29 +21,29 @@
   <script src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js" integrity="sha256-a5YRB27CcBwBFcT5EF/f3E4vzIqyHrSR878nseNYw64=" crossorigin="anonymous"></script>
 
 <script class="next-config" data-name="main" type="application/json">{&quot;hostname&quot;:&quot;gcdd1993.github.io&quot;,&quot;root&quot;:&quot;&#x2F;&quot;,&quot;images&quot;:&quot;&#x2F;images&quot;,&quot;scheme&quot;:&quot;Gemini&quot;,&quot;version&quot;:&quot;8.5.0&quot;,&quot;exturl&quot;:false,&quot;sidebar&quot;:{&quot;position&quot;:&quot;left&quot;,&quot;display&quot;:&quot;post&quot;,&quot;padding&quot;:18,&quot;offset&quot;:12},&quot;copycode&quot;:true,&quot;bookmark&quot;:{&quot;enable&quot;:false,&quot;color&quot;:&quot;#222&quot;,&quot;save&quot;:&quot;auto&quot;},&quot;fancybox&quot;:false,&quot;mediumzoom&quot;:true,&quot;lazyload&quot;:false,&quot;pangu&quot;:true,&quot;comments&quot;:{&quot;style&quot;:&quot;tabs&quot;,&quot;active&quot;:null,&quot;storage&quot;:true,&quot;lazyload&quot;:false,&quot;nav&quot;:null},&quot;motion&quot;:{&quot;enable&quot;:false,&quot;async&quot;:false,&quot;transition&quot;:{&quot;post_block&quot;:&quot;fadeIn&quot;,&quot;post_header&quot;:&quot;fadeInDown&quot;,&quot;post_body&quot;:&quot;fadeInDown&quot;,&quot;coll_header&quot;:&quot;fadeInLeft&quot;,&quot;sidebar&quot;:&quot;fadeInUp&quot;}},&quot;prism&quot;:false,&quot;i18n&quot;:{&quot;placeholder&quot;:&quot;搜索...&quot;,&quot;empty&quot;:&quot;没有找到任何搜索结果：${query}&quot;,&quot;hits_time&quot;:&quot;找到 ${hits} 个搜索结果（用时 ${time} 毫秒）&quot;,&quot;hits&quot;:&quot;找到 ${hits} 个搜索结果&quot;},&quot;path&quot;:&quot;&#x2F;search.xml&quot;,&quot;localsearch&quot;:{&quot;enable&quot;:true,&quot;trigger&quot;:&quot;auto&quot;,&quot;top_n_per_article&quot;:1,&quot;unescape&quot;:false,&quot;preload&quot;:false}}</script><script src="/js/config.js"></script>
-<meta name="description" content="一寸光阴一寸金">
-<meta property="og:type" content="website">
-<meta property="og:title" content="标签">
-<meta property="og:url" content="https://gcdd1993.github.io/tags/index.html">
+<meta name="description" content="本文整理了单点登录系统 CAS 提供的Rest API，并给出了示例。  本文基于CAS 6.3.4，并基于cas-overlay-template搭建的cas项目">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apereo CAS | Rest API实践">
+<meta property="og:url" content="https://gcdd1993.github.io/p/2526/index.html">
 <meta property="og:site_name" content="寸土">
-<meta property="og:description" content="一寸光阴一寸金">
+<meta property="og:description" content="本文整理了单点登录系统 CAS 提供的Rest API，并给出了示例。  本文基于CAS 6.3.4，并基于cas-overlay-template搭建的cas项目">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2014-12-22T04:39:04.000Z">
-<meta property="article:modified_time" content="2021-06-19T15:18:16.386Z">
+<meta property="article:published_time" content="2021-06-23T08:03:24.000Z">
+<meta property="article:modified_time" content="2021-06-23T08:28:10.725Z">
 <meta property="article:author" content="Gcdd1993">
-<meta property="article:tag" content="IT,Java,Scala,Kotlin">
+<meta property="article:tag" content="SSO">
+<meta property="article:tag" content="CAS">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://gcdd1993.github.io/tags/">
+<link rel="canonical" href="https://gcdd1993.github.io/p/2526/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:false,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:&quot;&quot;,&quot;permalink&quot;:&quot;https:&#x2F;&#x2F;gcdd1993.github.io&#x2F;tags&#x2F;index.html&quot;,&quot;path&quot;:&quot;tags&#x2F;index.html&quot;,&quot;title&quot;:&quot;标签&quot;}</script>
+<script class="next-config" data-name="page" type="application/json">{&quot;sidebar&quot;:&quot;&quot;,&quot;isHome&quot;:false,&quot;isPost&quot;:true,&quot;lang&quot;:&quot;zh-CN&quot;,&quot;comments&quot;:true,&quot;permalink&quot;:&quot;https:&#x2F;&#x2F;gcdd1993.github.io&#x2F;p&#x2F;2526&#x2F;&quot;,&quot;path&quot;:&quot;p&#x2F;2526&#x2F;&quot;,&quot;title&quot;:&quot;Apereo CAS | Rest API实践&quot;}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">&quot;&quot;</script>
-<title>标签 | 寸土
-</title>
+<title>Apereo CAS | Rest API实践 | 寸土</title>
   
 
 
@@ -216,45 +216,153 @@
 </noscript>
 
 
-    <div class="main-inner page posts-expand">
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
   
   
 
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://gcdd1993.github.io/p/2526/">
 
-    
-    
-    
-    <div class="post-block" lang="zh-CN"><header class="post-header">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/asserts/images/avatar.jpg">
+      <meta itemprop="name" content="Gcdd1993">
+      <meta itemprop="description" content="一寸光阴一寸金">
+    </span>
 
-<h1 class="post-title" itemprop="name headline">标签
-</h1>
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="寸土">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Apereo CAS | Rest API实践
+        </h1>
 
-<div class="post-meta-container">
-</div>
-
-</header>
-
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
       
-      
-      <div class="post-body"><div class="tag-cloud">
-  <div class="tag-cloud-title">
-    目前共计 48 个标签
-  </div>
-  <div class="tag-cloud-tags">
-    <a href="/tags/ActiveMQ/" style="font-size: 12px;" class="tag-cloud-0">ActiveMQ</a> <a href="/tags/CAS/" style="font-size: 15.6px;" class="tag-cloud-2">CAS</a> <a href="/tags/Cassandra/" style="font-size: 12px;" class="tag-cloud-0">Cassandra</a> <a href="/tags/Chrome/" style="font-size: 12px;" class="tag-cloud-0">Chrome</a> <a href="/tags/Docker/" style="font-size: 12px;" class="tag-cloud-0">Docker</a> <a href="/tags/Dubbo/" style="font-size: 12px;" class="tag-cloud-0">Dubbo</a> <a href="/tags/FastDFS/" style="font-size: 12px;" class="tag-cloud-0">FastDFS</a> <a href="/tags/Gradle/" style="font-size: 12px;" class="tag-cloud-0">Gradle</a> <a href="/tags/Hyper-V/" style="font-size: 12px;" class="tag-cloud-0">Hyper-V</a> <a href="/tags/JAVA/" style="font-size: 12px;" class="tag-cloud-0">JAVA</a> <a href="/tags/Java/" style="font-size: 26.4px;" class="tag-cloud-8">Java</a> <a href="/tags/Jcenter/" style="font-size: 12px;" class="tag-cloud-0">Jcenter</a> <a href="/tags/Kubernetes/" style="font-size: 12px;" class="tag-cloud-0">Kubernetes</a> <a href="/tags/Lombok/" style="font-size: 12px;" class="tag-cloud-0">Lombok</a> <a href="/tags/MongoDB/" style="font-size: 12px;" class="tag-cloud-0">MongoDB</a> <a href="/tags/Nginx/" style="font-size: 15.6px;" class="tag-cloud-2">Nginx</a> <a href="/tags/NoSql/" style="font-size: 19.2px;" class="tag-cloud-4">NoSql</a> <a href="/tags/RabbitMQ/" style="font-size: 12px;" class="tag-cloud-0">RabbitMQ</a> <a href="/tags/Redis/" style="font-size: 15.6px;" class="tag-cloud-2">Redis</a> <a href="/tags/SSO/" style="font-size: 15.6px;" class="tag-cloud-2">SSO</a> <a href="/tags/Scala/" style="font-size: 12px;" class="tag-cloud-0">Scala</a> <a href="/tags/Spring/" style="font-size: 30px;" class="tag-cloud-10">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 15.6px;" class="tag-cloud-2">Spring Boot</a> <a href="/tags/Spring-Cloud/" style="font-size: 15.6px;" class="tag-cloud-2">Spring-Cloud</a> <a href="/tags/Spring-Security/" style="font-size: 15.6px;" class="tag-cloud-2">Spring-Security</a> <a href="/tags/Tesseract-Ocr/" style="font-size: 12px;" class="tag-cloud-0">Tesseract-Ocr</a> <a href="/tags/UML/" style="font-size: 15.6px;" class="tag-cloud-2">UML</a> <a href="/tags/Ubuntu/" style="font-size: 19.2px;" class="tag-cloud-4">Ubuntu</a> <a href="/tags/algorithm/" style="font-size: 12px;" class="tag-cloud-0">algorithm</a> <a href="/tags/jackson/" style="font-size: 12px;" class="tag-cloud-0">jackson</a> <a href="/tags/macOs/" style="font-size: 12px;" class="tag-cloud-0">macOs</a> <a href="/tags/mq/" style="font-size: 12px;" class="tag-cloud-0">mq</a> <a href="/tags/phpcms/" style="font-size: 12px;" class="tag-cloud-0">phpcms</a> <a href="/tags/xxl-job/" style="font-size: 12px;" class="tag-cloud-0">xxl-job</a> <a href="/tags/%E4%B8%80%E8%87%B4%E6%80%A7Hash/" style="font-size: 12px;" class="tag-cloud-0">一致性Hash</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 12px;" class="tag-cloud-0">分布式</a> <a href="/tags/%E5%AE%89%E5%85%A8/" style="font-size: 12px;" class="tag-cloud-0">安全</a> <a href="/tags/%E5%B7%A5%E5%85%B7%E6%8A%80%E5%B7%A7/" style="font-size: 12px;" class="tag-cloud-0">工具技巧</a> <a href="/tags/%E6%8A%80%E5%B7%A7/" style="font-size: 12px;" class="tag-cloud-0">技巧</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" style="font-size: 15.6px;" class="tag-cloud-2">数据库</a> <a href="/tags/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6/" style="font-size: 19.2px;" class="tag-cloud-4">消息中间件</a> <a href="/tags/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/" style="font-size: 12px;" class="tag-cloud-0">科学上网</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 22.8px;" class="tag-cloud-6">设计模式</a> <a href="/tags/%E8%B7%A8%E5%9F%9F/" style="font-size: 12px;" class="tag-cloud-0">跨域</a> <a href="/tags/%E8%BD%AF%E4%BB%B6/" style="font-size: 12px;" class="tag-cloud-0">软件</a> <a href="/tags/%E8%BF%90%E7%BB%B4/" style="font-size: 15.6px;" class="tag-cloud-2">运维</a> <a href="/tags/%E9%BB%91%E8%8B%B9%E6%9E%9C/" style="font-size: 12px;" class="tag-cloud-0">黑苹果</a> <a href="/tags/%E9%BB%98%E8%AE%A4/" style="font-size: 15.6px;" class="tag-cloud-2">默认</a>
-  </div>
-</div>
 
+      <time title="创建时间：2021-06-23 16:03:24 / 修改时间：16:28:10" itemprop="dateCreated datePublished" datetime="2021-06-23T16:03:24+08:00">2021-06-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">学习</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/p/2526/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="p/2526/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
       </div>
-      
-      
-      
+      <div class="post-meta">
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>76</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>本文整理了单点登录系统 <a target="_blank" rel="noopener" href="https://apereo.github.io/cas">CAS</a> 提供的<code>Rest API</code>，并给出了示例。</p>
+<blockquote>
+<p>本文基于<code>CAS 6.3.4</code>，并基于<a target="_blank" rel="noopener" href="https://github.com/apereo/cas-overlay-template">cas-overlay-template</a>搭建的<code>cas</code>项目</p>
+</blockquote>
+<span id="more"></span>
+
+
     </div>
 
     
     
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\p\63354\" rel="bookmark">Apereo CAS | 修改登录页样式</a></div>
+    </li>
+  </ul>
 
 
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SSO/" rel="tag"># SSO</a>
+              <a href="/tags/CAS/" rel="tag"># CAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/p/63354/" rel="prev" title="Apereo CAS | 修改登录页样式">
+                  <i class="fa fa-chevron-left"></i> Apereo CAS | 修改登录页样式
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    
+  <div class="comments" id="disqus_thread">
+    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+  </div>
+  
 </div>
   </main>
 
@@ -331,7 +439,7 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/quicklink@2.1.0/dist/quicklink.umd.js" integrity="sha256-KK3rvmDcW72MSl9jzzNZWlQjZNrRzAuGhAQ+0SFOg7Q=" crossorigin="anonymous"></script>
-  <script class="next-config" data-name="quicklink" type="application/json">{&quot;enable&quot;:true,&quot;home&quot;:true,&quot;archive&quot;:true,&quot;delay&quot;:true,&quot;timeout&quot;:3000,&quot;priority&quot;:true,&quot;ignores&quot;:null,&quot;url&quot;:&quot;https:&#x2F;&#x2F;gcdd1993.github.io&#x2F;tags&#x2F;&quot;}</script>
+  <script class="next-config" data-name="quicklink" type="application/json">{&quot;enable&quot;:true,&quot;home&quot;:true,&quot;archive&quot;:true,&quot;delay&quot;:true,&quot;timeout&quot;:3000,&quot;priority&quot;:true,&quot;ignores&quot;:null,&quot;url&quot;:&quot;https:&#x2F;&#x2F;gcdd1993.github.io&#x2F;p&#x2F;2526&#x2F;&quot;}</script>
   <script src="/js/third-party/quicklink.js"></script>
 <script class="next-config" data-name="disqus" type="application/json">{&quot;enable&quot;:true,&quot;shortname&quot;:&quot;gcdd1993&quot;,&quot;count&quot;:true,&quot;i18n&quot;:{&quot;disqus&quot;:&quot;disqus&quot;}}</script>
 <script src="/js/third-party/comments/disqus.js"></script>
