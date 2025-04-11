@@ -1,1 +1,313 @@
-"use strict";function _slicedToArray(t,e){return _arrayWithHoles(t)||_iterableToArrayLimit(t,e)||_unsupportedIterableToArray(t,e)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(t,e){var n;if(t)return"string"==typeof t?_arrayLikeToArray(t,e):"Map"===(n="Object"===(n=Object.prototype.toString.call(t).slice(8,-1))&&t.constructor?t.constructor.name:n)||"Set"===n?Array.from(t):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?_arrayLikeToArray(t,e):void 0}function _arrayLikeToArray(t,e){(null==e||e>t.length)&&(e=t.length);for(var n=0,o=new Array(e);n<e;n++)o[n]=t[n];return o}function _iterableToArrayLimit(t,e){var n=null==t?null:"undefined"!=typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(null!=n){var o,r,a,i,l=[],c=!0,d=!1;try{if(a=(n=n.call(t)).next,0===e){if(Object(n)!==n)return;c=!1}else for(;!(c=(o=a.call(n)).done)&&(l.push(o.value),l.length!==e);c=!0);}catch(t){d=!0,r=t}finally{try{if(!c&&null!=n.return&&(i=n.return(),Object(i)!==i))return}finally{if(d)throw r}}return l}}function _arrayWithHoles(t){if(Array.isArray(t))return t}var btf={debounce:function(r){var a,i=1<arguments.length&&void 0!==arguments[1]?arguments[1]:0,l=2<arguments.length&&void 0!==arguments[2]&&arguments[2];return function(){for(var t=arguments.length,e=new Array(t),n=0;n<t;n++)e[n]=arguments[n];var o=l&&!a;clearTimeout(a),a=setTimeout(function(){a=null,l||r.apply(void 0,e)},i),o&&r.apply(void 0,e)}},throttle:function(a,i){function l(){m=!1===f.leading?0:(new Date).getTime(),c=null,a.apply(d,s),c||(d=s=null)}var c,d,s,u=this,f=2<arguments.length&&void 0!==arguments[2]?arguments[2]:{},m=0;return function(){var t=(new Date).getTime(),e=(m||!1!==f.leading||(m=t),i-(t-m));d=u;for(var n=arguments.length,o=new Array(n),r=0;r<n;r++)o[r]=arguments[r];s=o,e<=0||i<e?(c&&(clearTimeout(c),c=null),m=t,a.apply(d,s),c||(d=s=null)):c||!1===f.trailing||(c=setTimeout(l,e))}},sidebarPaddingR:function(){var t=window.innerWidth,e=document.body.clientWidth;t!==e&&(document.body.style.paddingRight=t-e+"px")},snackbarShow:function(t){var e=1<arguments.length&&void 0!==arguments[1]&&arguments[1],n=2<arguments.length&&void 0!==arguments[2]?arguments[2]:2e3,o=GLOBAL_CONFIG.Snackbar,r=o.position,a=o.bgLight,o=o.bgDark,a="light"===document.documentElement.getAttribute("data-theme")?a:o;Snackbar.show({text:t,backgroundColor:a,showAction:e,duration:n,pos:r,customClass:"snackbar-css"})},diffDate:function(t){var e,n,o,r=1<arguments.length&&void 0!==arguments[1]&&arguments[1],a=new Date,t=new Date(t),a=a.getTime()-t.getTime(),i=GLOBAL_CONFIG.dateSuffix;return r?(r=a/864e5,n=a/36e5,o=a/6e4,12<(e=a/2592e6)?t.toISOString().slice(0,10):1<=e?"".concat(parseInt(e)," ").concat(i.month):1<=r?"".concat(parseInt(r)," ").concat(i.day):1<=n?"".concat(parseInt(n)," ").concat(i.hour):1<=o?"".concat(parseInt(o)," ").concat(i.min):i.just):parseInt(a/864e5)},loadComment:function(t,e){var n;"IntersectionObserver"in window?(n=new IntersectionObserver(function(t){t[0].isIntersecting&&(e(),n.disconnect())},{threshold:[0]})).observe(t):e()},scrollToDest:function(n){var o,r=1<arguments.length&&void 0!==arguments[1]?arguments[1]:500,a=window.pageYOffset,t=document.getElementById("page-header").classList.contains("fixed");(n<a||t)&&(n-=70),"scrollBehavior"in document.documentElement.style?window.scrollTo({top:n,behavior:"smooth"}):(o=null,n=+n,window.requestAnimationFrame(function t(e){e-=o=o||e;a<n?window.scrollTo(0,(n-a)*e/r+a):window.scrollTo(0,a-(a-n)*e/r),e<r?window.requestAnimationFrame(t):window.scrollTo(0,n)}))},animateIn:function(t,e){t.style.display="block",t.style.animation=e},animateOut:function(e,t){e.addEventListener("animationend",function t(){e.style.display="",e.style.animation="",e.removeEventListener("animationend",t)}),e.style.animation=t},wrap:function(t,e,n){for(var o=document.createElement(e),r=0,a=Object.entries(n);r<a.length;r++){var i=_slicedToArray(a[r],2),l=i[0],i=i[1];o.setAttribute(l,i)}t.parentNode.insertBefore(o,t),o.appendChild(t)},isHidden:function(t){return 0===t.offsetHeight&&0===t.offsetWidth},getEleTop:function(t){for(var e=t.offsetTop,n=t.offsetParent;null!==n;)e+=n.offsetTop,n=n.offsetParent;return e},loadLightbox:function(t){var e=GLOBAL_CONFIG.lightbox;"mediumZoom"===e&&mediumZoom(t,{background:"var(--zoom-bg)"}),"fancybox"===e&&(Array.from(t).forEach(function(t){var e,n;"A"!==t.parentNode.tagName&&(e=t.dataset.lazySrc||t.src,n=t.title||t.alt||"",btf.wrap(t,"a",{href:e,"data-fancybox":"gallery","data-caption":n,"data-thumb":e}))}),window.fancyboxRun||(Fancybox.bind("[data-fancybox]",{Hash:!1,Thumbs:{showOnStart:!1},Images:{Panzoom:{maxScale:4}},Carousel:{transition:"slide"},Toolbar:{display:{left:["infobar"],middle:["zoomIn","zoomOut","toggle1to1","rotateCCW","rotateCW","flipX","flipY"],right:["slideshow","thumbs","close"]}}}),window.fancyboxRun=!0))},setLoading:{add:function(t){t.insertAdjacentHTML("afterend",'\n        <div class="loading-container">\n          <div class="loading-item">\n            <div></div><div></div><div></div><div></div><div></div>\n          </div>\n        </div>\n      ')},remove:function(t){t.nextElementSibling.remove()}},updateAnchor:function(t){var e;t!==window.location.hash&&(t=t||location.pathname,e=GLOBAL_CONFIG_SITE.title,window.history.replaceState({url:location.href,title:e},e,t))},getScrollPercent:function(t,e){var n=e.clientHeight,o=document.documentElement.clientHeight,e=e.offsetTop,n=o<n?n-o:document.documentElement.scrollHeight-o,o=Math.round(100*((t-e)/n));return 100<o?100:o<=0?0:o},addGlobalFn:function(t,e){var n=2<arguments.length&&void 0!==arguments[2]&&arguments[2],o=3<arguments.length&&void 0!==arguments[3]?arguments[3]:window,r=o.globalFn||{},a=r[t]||{};n&&a[n]||(a[n||Object.keys(a).length]=e,r[t]=a,o.globalFn=r)},addEventListenerPjax:function(t,e,n){var o=3<arguments.length&&void 0!==arguments[3]&&arguments[3];t.addEventListener(e,n,o),btf.addGlobalFn("pjax",function(){t.removeEventListener(e,n,o)})},removeGlobalFnEvent:function(t){var e=1<arguments.length&&void 0!==arguments[1]?arguments[1]:window,n=e.globalFn,o=(void 0===n?{}:n)[t]||{},n=Object.keys(o);n.length&&(n.forEach(function(t){o[t]()}),delete e.globalFn[t])}};
+(() => {
+  const btfFn = {
+    debounce: (func, wait = 0, immediate = false) => {
+      let timeout
+      return (...args) => {
+        const later = () => {
+          timeout = null
+          if (!immediate) func(...args)
+        }
+        const callNow = immediate && !timeout
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+        if (callNow) func(...args)
+      }
+    },
+
+    throttle: function (func, wait, options = {}) {
+      let timeout, context, args
+      let previous = 0
+
+      const later = () => {
+        previous = options.leading === false ? 0 : new Date().getTime()
+        timeout = null
+        func.apply(context, args)
+        if (!timeout) context = args = null
+      }
+
+      const throttled = (...params) => {
+        const now = new Date().getTime()
+        if (!previous && options.leading === false) previous = now
+        const remaining = wait - (now - previous)
+        context = this
+        args = params
+        if (remaining <= 0 || remaining > wait) {
+          if (timeout) {
+            clearTimeout(timeout)
+            timeout = null
+          }
+          previous = now
+          func.apply(context, args)
+          if (!timeout) context = args = null
+        } else if (!timeout && options.trailing !== false) {
+          timeout = setTimeout(later, remaining)
+        }
+      }
+
+      return throttled
+    },
+
+    overflowPaddingR: {
+      add: () => {
+        const paddingRight = window.innerWidth - document.body.clientWidth
+
+        if (paddingRight > 0) {
+          document.body.style.paddingRight = `${paddingRight}px`
+          document.body.style.overflow = 'hidden'
+          const menuElement = document.querySelector('#page-header.nav-fixed #menus')
+          if (menuElement) {
+            menuElement.style.paddingRight = `${paddingRight}px`
+          }
+        }
+      },
+      remove: () => {
+        document.body.style.paddingRight = ''
+        document.body.style.overflow = ''
+        const menuElement = document.querySelector('#page-header.nav-fixed #menus')
+        if (menuElement) {
+          menuElement.style.paddingRight = ''
+        }
+      }
+    },
+
+    snackbarShow: (text, showAction = false, duration = 2000) => {
+      const { position, bgLight, bgDark } = GLOBAL_CONFIG.Snackbar
+      const bg = document.documentElement.getAttribute('data-theme') === 'light' ? bgLight : bgDark
+      Snackbar.show({
+        text,
+        backgroundColor: bg,
+        showAction,
+        duration,
+        pos: position,
+        customClass: 'snackbar-css'
+      })
+    },
+
+    diffDate: (inputDate, more = false) => {
+      const dateNow = new Date()
+      const datePost = new Date(inputDate)
+      const diffMs = dateNow - datePost
+      const diffSec = diffMs / 1000
+      const diffMin = diffSec / 60
+      const diffHour = diffMin / 60
+      const diffDay = diffHour / 24
+      const diffMonth = diffDay / 30
+      const { dateSuffix } = GLOBAL_CONFIG
+
+      if (!more) return Math.floor(diffDay)
+
+      if (diffMonth > 12) return datePost.toISOString().slice(0, 10)
+      if (diffMonth >= 1) return `${Math.floor(diffMonth)} ${dateSuffix.month}`
+      if (diffDay >= 1) return `${Math.floor(diffDay)} ${dateSuffix.day}`
+      if (diffHour >= 1) return `${Math.floor(diffHour)} ${dateSuffix.hour}`
+      if (diffMin >= 1) return `${Math.floor(diffMin)} ${dateSuffix.min}`
+      return dateSuffix.just
+    },
+
+    loadComment: (dom, callback) => {
+      if ('IntersectionObserver' in window) {
+        const observerItem = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            callback()
+            observerItem.disconnect()
+          }
+        }, { threshold: [0] })
+        observerItem.observe(dom)
+      } else {
+        callback()
+      }
+    },
+
+    scrollToDest: (pos, time = 500) => {
+      const currentPos = window.scrollY
+      const isNavFixed = document.getElementById('page-header').classList.contains('fixed')
+      if (currentPos > pos || isNavFixed) pos = pos - 70
+
+      if ('scrollBehavior' in document.documentElement.style) {
+        window.scrollTo({
+          top: pos,
+          behavior: 'smooth'
+        })
+        return
+      }
+
+      const startTime = performance.now()
+      const animate = currentTime => {
+        const timeElapsed = currentTime - startTime
+        const progress = Math.min(timeElapsed / time, 1)
+        window.scrollTo(0, currentPos + (pos - currentPos) * progress)
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        }
+      }
+      requestAnimationFrame(animate)
+    },
+
+    animateIn: (ele, animation) => {
+      ele.style.display = 'block'
+      ele.style.animation = animation
+    },
+
+    animateOut: (ele, animation) => {
+      const handleAnimationEnd = () => {
+        ele.style.display = ''
+        ele.style.animation = ''
+        ele.removeEventListener('animationend', handleAnimationEnd)
+      }
+      ele.addEventListener('animationend', handleAnimationEnd)
+      ele.style.animation = animation
+    },
+
+    wrap: (selector, eleType, options) => {
+      const createEle = document.createElement(eleType)
+      for (const [key, value] of Object.entries(options)) {
+        createEle.setAttribute(key, value)
+      }
+      selector.parentNode.insertBefore(createEle, selector)
+      createEle.appendChild(selector)
+    },
+
+    isHidden: ele => ele.offsetHeight === 0 && ele.offsetWidth === 0,
+
+    getEleTop: ele => {
+      let actualTop = ele.offsetTop
+      let current = ele.offsetParent
+
+      while (current !== null) {
+        actualTop += current.offsetTop
+        current = current.offsetParent
+      }
+
+      return actualTop
+    },
+
+    loadLightbox: ele => {
+      const service = GLOBAL_CONFIG.lightbox
+
+      if (service === 'medium_zoom') {
+        mediumZoom(ele, { background: 'var(--zoom-bg)' })
+      }
+
+      if (service === 'fancybox') {
+        Array.from(ele).forEach(i => {
+          if (i.parentNode.tagName !== 'A') {
+            const dataSrc = i.dataset.lazySrc || i.src
+            const dataCaption = i.title || i.alt || ''
+            btf.wrap(i, 'a', { href: dataSrc, 'data-fancybox': 'gallery', 'data-caption': dataCaption, 'data-thumb': dataSrc })
+          }
+        })
+
+        if (!window.fancyboxRun) {
+          Fancybox.bind('[data-fancybox]', {
+            Hash: false,
+            Thumbs: {
+              showOnStart: false
+            },
+            Images: {
+              Panzoom: {
+                maxScale: 4
+              }
+            },
+            Carousel: {
+              transition: 'slide'
+            },
+            Toolbar: {
+              display: {
+                left: ['infobar'],
+                middle: [
+                  'zoomIn',
+                  'zoomOut',
+                  'toggle1to1',
+                  'rotateCCW',
+                  'rotateCW',
+                  'flipX',
+                  'flipY'
+                ],
+                right: ['slideshow', 'thumbs', 'close']
+              }
+            }
+          })
+          window.fancyboxRun = true
+        }
+      }
+    },
+
+    setLoading: {
+      add: ele => {
+        const html = `
+        <div class="loading-container">
+          <div class="loading-item">
+            <div></div><div></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      `
+        ele.insertAdjacentHTML('afterend', html)
+      },
+      remove: ele => {
+        ele.nextElementSibling.remove()
+      }
+    },
+
+    updateAnchor: anchor => {
+      if (anchor !== window.location.hash) {
+        if (!anchor) anchor = location.pathname
+        const title = GLOBAL_CONFIG_SITE.title
+        window.history.replaceState({
+          url: location.href,
+          title
+        }, title, anchor)
+      }
+    },
+
+    getScrollPercent: (() => {
+      let docHeight, winHeight, headerHeight, contentMath
+
+      return (currentTop, ele) => {
+        if (!docHeight || ele.clientHeight !== docHeight) {
+          docHeight = ele.clientHeight
+          winHeight = window.innerHeight
+          headerHeight = ele.offsetTop
+          contentMath = Math.max(docHeight - winHeight, document.documentElement.scrollHeight - winHeight)
+        }
+
+        const scrollPercent = (currentTop - headerHeight) / contentMath
+        return Math.max(0, Math.min(100, Math.round(scrollPercent * 100)))
+      }
+    })(),
+
+    addEventListenerPjax: (ele, event, fn, option = false) => {
+      ele.addEventListener(event, fn, option)
+      btf.addGlobalFn('pjaxSendOnce', () => {
+        ele.removeEventListener(event, fn, option)
+      })
+    },
+
+    removeGlobalFnEvent: (key, parent = window) => {
+      const globalFn = parent.globalFn || {}
+      const keyObj = globalFn[key]
+      if (!keyObj) return
+
+      Object.keys(keyObj).forEach(i => keyObj[i]())
+
+      delete globalFn[key]
+    },
+
+    switchComments: (el = document, path) => {
+      const switchBtn = el.querySelector('#switch-btn')
+      if (!switchBtn) return
+
+      let switchDone = false
+      const postComment = el.querySelector('#post-comment')
+      const handleSwitchBtn = () => {
+        postComment.classList.toggle('move')
+        if (!switchDone && typeof loadOtherComment === 'function') {
+          switchDone = true
+          loadOtherComment(el, path)
+        }
+      }
+      btf.addEventListenerPjax(switchBtn, 'click', handleSwitchBtn)
+    }
+  }
+
+  window.btf = { ...window.btf, ...btfFn }
+})()
