@@ -11,24 +11,6 @@
   </url>
   
   <url>
-    <loc>https://blog.gcdd.top/p/c57e1929/</loc>
-    
-    <lastmod>2025-04-11</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.gcdd.top/p/49a5df80/</loc>
-    
-    <lastmod>2025-04-11</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://blog.gcdd.top/p/819b5aed/</loc>
     
     <lastmod>2025-04-11</lastmod>
@@ -38,7 +20,7 @@
   </url>
   
   <url>
-    <loc>https://blog.gcdd.top/p/f8e95114/</loc>
+    <loc>https://blog.gcdd.top/p/8216761c/</loc>
     
     <lastmod>2025-04-11</lastmod>
     
@@ -47,7 +29,7 @@
   </url>
   
   <url>
-    <loc>https://blog.gcdd.top/p/8216761c/</loc>
+    <loc>https://blog.gcdd.top/p/f8e95114/</loc>
     
     <lastmod>2025-04-11</lastmod>
     
@@ -127,6 +109,24 @@
     <priority>0.6</priority>
   </url>
   
+  <url>
+    <loc>https://blog.gcdd.top/p/c57e1929/</loc>
+    
+    <lastmod>2025-04-11</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.gcdd.top/p/49a5df80/</loc>
+    
+    <lastmod>2025-04-11</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
 
   <url>
     <loc>https://blog.gcdd.top/</loc>
@@ -145,6 +145,27 @@
   
   <url>
     <loc>https://blog.gcdd.top/tags/AIGC/</loc>
+    <lastmod>2025-04-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.gcdd.top/tags/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/</loc>
+    <lastmod>2025-04-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.gcdd.top/tags/JVM/</loc>
+    <lastmod>2025-04-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.gcdd.top/tags/Java/</loc>
     <lastmod>2025-04-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -242,20 +263,6 @@
   </url>
   
   <url>
-    <loc>https://blog.gcdd.top/tags/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/</loc>
-    <lastmod>2025-04-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.gcdd.top/tags/%E5%AE%9E%E6%88%98%E9%A1%B9%E7%9B%AE/</loc>
-    <lastmod>2025-04-11</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://blog.gcdd.top/tags/%E8%87%AA%E5%AA%92%E4%BD%93%E5%8F%98%E7%8E%B0/</loc>
     <lastmod>2025-04-11</lastmod>
     <changefreq>weekly</changefreq>
@@ -264,6 +271,13 @@
   
   <url>
     <loc>https://blog.gcdd.top/tags/%E5%89%AF%E4%B8%9A%E6%95%99%E7%A8%8B/</loc>
+    <lastmod>2025-04-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.gcdd.top/tags/%E5%AE%9E%E6%88%98%E9%A1%B9%E7%9B%AE/</loc>
     <lastmod>2025-04-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

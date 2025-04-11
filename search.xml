@@ -18,7 +18,7 @@
       </tags>
   </entry>
   <entry>
-    <title>JVM 精讲与 GC 调优 精华版课程（完整资料） | 夸克网盘</title>
+    <title>JVM 精讲与 GC 调优 精华版课程（完整资料） | 百度网盘</title>
     <url>/p/9439bfb7/</url>
     <content><![CDATA[<h1 id="课程信息"><a href="#课程信息" class="headerlink" title="课程信息"></a>课程信息</h1><p>JVM 故障诊断与性能优化，是中高级程序员、架构师等的必备技能，更是入职大厂的敲门砖。JVM 作为 Java 生态的核心价值体现，垃圾回收算法、JIT、底层原理值得每个程序员去探索，而且 JVM 是跨语言的平台，对于深入理解 Scala、Kotlin、JavaScript、Jython、Groovy 等语言非常有帮助。</p>
 <h1 id="课程大纲"><a href="#课程大纲" class="headerlink" title="课程大纲"></a>课程大纲</h1><p><img src="https://cdn.jsdelivr.net/gh/gcdd1993/gcdd1993.github.io@feature/imageRepo/img/20250411185404225.png"><br><img src="https://cdn.jsdelivr.net/gh/gcdd1993/gcdd1993.github.io@feature/imageRepo/img/20250411185433361.png"></p>
@@ -28,7 +28,9 @@
         <category>教程资源</category>
       </categories>
       <tags>
-        <tag>夸克网盘</tag>
+        <tag>百度网盘</tag>
+        <tag>JVM</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -91,24 +93,6 @@
       </tags>
   </entry>
   <entry>
-    <title>基于 Spring Boot 架构实战《保险在线服务平台》资料完整 | 百度网盘</title>
-    <url>/p/f8e95114/</url>
-    <content><![CDATA[<h1 id="课程信息"><a href="#课程信息" class="headerlink" title="课程信息"></a>课程信息</h1><p>互联网保险平台，是一种在线服务平台，通过互联网技术和数据分析等手段为用户提供方便快捷的保险服务。这些平台通常涵盖了整个保险业务流程，从产品购买、保单管理到理赔服务，旨在提高用户体验、降低交易成本、加强风险管理。</p>
-<p>项目中功能介绍：</p>
-<p>在线购买和投保： 用户可以通过互联网平台方便地浏览、比较和购买各类保险产品，完成投保流程。<br>个性化定制产品： 平台可能提供根据用户需求定制的保险产品，满足个性化的保险需求。<br>数字化保单管理： 用户可以在平台上轻松管理和查看自己的保单信息，包括保单状态、保费支付等。<br>在线理赔服务： 提供在线理赔服务，用户可以通过平台提交理赔申请、上传必要的文件和信息，加速理赔流程。<br>风险评估和数据分析： 利用大数据和规则引擎技术对用户进行风险评估，提供更精准的保险方案。<br>移动端应用支持： 提供移动端应用，方便用户随时随地进行保险业务的管理和操作。、<br>数字化营销和推广： 利用数字化营销手段，通过社交媒体、搜索引擎等渠道推广保险产品，吸引更多用户。<br>合作伙伴关系： 与其他互联网平台、金融机构等建立合作伙伴关系，拓展渠道，提供更全面的保险服务。</p>
-<h1 id="课程大纲"><a href="#课程大纲" class="headerlink" title="课程大纲"></a>课程大纲</h1><p><img src="https://cdn.jsdelivr.net/gh/gcdd1993/gcdd1993.github.io@feature/imageRepo/img/20250411183545072.png"></p>
-<h1 id="下载地址"><a href="#下载地址" class="headerlink" title="下载地址"></a>下载地址</h1><p><a href="https://pan.baidu.com/s/1Vnwxk--6aW4vex-wDOSX1w?pwd=icit">百度网盘 | 带提取码</a></p>
-]]></content>
-      <categories>
-        <category>教程资源</category>
-      </categories>
-      <tags>
-        <tag>SpringBoot</tag>
-        <tag>百度网盘</tag>
-        <tag>实战项目</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>图书达人 0-1 实操实现达人蜕变 | 夸克网盘</title>
     <url>/p/8216761c/</url>
     <content><![CDATA[<h1 id="课程信息"><a href="#课程信息" class="headerlink" title="课程信息"></a>课程信息</h1><p>这门课程面向追求在图书领域打造个人品牌的创作者，提供从零开始的全链条实操经验。</p>
@@ -123,6 +107,24 @@
         <tag>夸克网盘</tag>
         <tag>自媒体变现</tag>
         <tag>副业教程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于 Spring Boot 架构实战《保险在线服务平台》资料完整 | 百度网盘</title>
+    <url>/p/f8e95114/</url>
+    <content><![CDATA[<h1 id="课程信息"><a href="#课程信息" class="headerlink" title="课程信息"></a>课程信息</h1><p>互联网保险平台，是一种在线服务平台，通过互联网技术和数据分析等手段为用户提供方便快捷的保险服务。这些平台通常涵盖了整个保险业务流程，从产品购买、保单管理到理赔服务，旨在提高用户体验、降低交易成本、加强风险管理。</p>
+<p>项目中功能介绍：</p>
+<p>在线购买和投保： 用户可以通过互联网平台方便地浏览、比较和购买各类保险产品，完成投保流程。<br>个性化定制产品： 平台可能提供根据用户需求定制的保险产品，满足个性化的保险需求。<br>数字化保单管理： 用户可以在平台上轻松管理和查看自己的保单信息，包括保单状态、保费支付等。<br>在线理赔服务： 提供在线理赔服务，用户可以通过平台提交理赔申请、上传必要的文件和信息，加速理赔流程。<br>风险评估和数据分析： 利用大数据和规则引擎技术对用户进行风险评估，提供更精准的保险方案。<br>移动端应用支持： 提供移动端应用，方便用户随时随地进行保险业务的管理和操作。、<br>数字化营销和推广： 利用数字化营销手段，通过社交媒体、搜索引擎等渠道推广保险产品，吸引更多用户。<br>合作伙伴关系： 与其他互联网平台、金融机构等建立合作伙伴关系，拓展渠道，提供更全面的保险服务。</p>
+<h1 id="课程大纲"><a href="#课程大纲" class="headerlink" title="课程大纲"></a>课程大纲</h1><p><img src="https://cdn.jsdelivr.net/gh/gcdd1993/gcdd1993.github.io@feature/imageRepo/img/20250411183545072.png"></p>
+<h1 id="下载地址"><a href="#下载地址" class="headerlink" title="下载地址"></a>下载地址</h1><p><a href="https://pan.baidu.com/s/1Vnwxk--6aW4vex-wDOSX1w?pwd=icit">百度网盘 | 带提取码</a></p>
+]]></content>
+      <categories>
+        <category>教程资源</category>
+      </categories>
+      <tags>
+        <tag>百度网盘</tag>
+        <tag>SpringBoot</tag>
+        <tag>实战项目</tag>
       </tags>
   </entry>
   <entry>
@@ -144,9 +146,9 @@
         <category>实战项目</category>
       </categories>
       <tags>
+        <tag>百度网盘</tag>
         <tag>SpringBoot</tag>
         <tag>SpringCloud</tag>
-        <tag>百度网盘</tag>
         <tag>OAuth2</tag>
       </tags>
   </entry>
@@ -163,8 +165,8 @@
         <category>实战项目</category>
       </categories>
       <tags>
-        <tag>SpringCloud</tag>
         <tag>百度网盘</tag>
+        <tag>SpringCloud</tag>
         <tag>某学堂</tag>
       </tags>
   </entry>
@@ -180,9 +182,9 @@
         <category>实战项目</category>
       </categories>
       <tags>
+        <tag>百度网盘</tag>
         <tag>SpringBoot</tag>
         <tag>Vue</tag>
-        <tag>百度网盘</tag>
       </tags>
   </entry>
   <entry>
@@ -197,8 +199,8 @@
         <category>教程资源</category>
       </categories>
       <tags>
-        <tag>SpringCloud</tag>
         <tag>百度网盘</tag>
+        <tag>SpringCloud</tag>
       </tags>
   </entry>
   <entry>
@@ -216,9 +218,9 @@
         <category>实战项目</category>
       </categories>
       <tags>
+        <tag>百度网盘</tag>
         <tag>SpringBoot</tag>
         <tag>SpringCloud</tag>
-        <tag>百度网盘</tag>
         <tag>某硅谷</tag>
       </tags>
   </entry>
